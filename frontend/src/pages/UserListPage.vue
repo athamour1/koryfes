@@ -16,11 +16,11 @@
         <q-card>
           <q-card-section class="row items-center no-wrap">
             <q-avatar size="50px" class="q-mr-md">
-               <img :src="user.profileImage ? `http://localhost:3000${user.profileImage}` : 'https://cdn.quasar.dev/img/boy-avatar.png'" style="object-fit: cover" />
+               <img :src="getAvatarUrl(user.username, user.profileImage)" style="object-fit: cover" />
             </q-avatar>
             <div>
                 <div class="text-h6">{{ user.username }}</div>
-                <div class="text-subtitle2">{{ user.location }}</div>
+                <div class="text-caption text-grey">{{ user.location || 'No location' }}</div>
             </div>
           </q-card-section>
 
@@ -30,10 +30,11 @@
             <div class="text-subtitle2 q-mb-sm">Badges:</div>
             <div v-if="user.badges && user.badges.length > 0" class="row q-gutter-sm">
               <div v-for="badge in user.badges" :key="badge.id" class="text-center">
-                 <q-avatar size="40px" v-if="badge.image">
-                    <img :src="`http://localhost:3000${badge.image}`" style="object-fit: cover" />
-                 </q-avatar>
-                 <q-badge v-else color="primary">{{ badge.name }}</q-badge>
+                  <q-avatar size="30px" v-if="badge.image" style="border-radius: 8px">
+                    <img :src="`${config.apiUrl}${badge.image}`" style="object-fit: cover" />
+                    <q-tooltip>{{ badge.name }}</q-tooltip>
+                  </q-avatar>
+                  <q-badge v-else color="primary" :label="badge.name" />
                  <div class="text-caption" style="font-size: 0.7rem">{{ badge.name }}</div>
                  <q-tooltip>{{ badge.description }}</q-tooltip>
               </div>
@@ -49,6 +50,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useUserStore } from '../stores/user';
+import { config } from '../config';
+import { getAvatarUrl } from '../utils/avatar';
 
 const userStore = useUserStore();
 const filterName = ref('');

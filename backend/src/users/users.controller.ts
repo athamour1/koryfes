@@ -32,6 +32,15 @@ export class UsersController {
     }
 
     @UseGuards(AuthGuard('jwt'))
+    @Patch(':id')
+    updateUser(@Param('id') id: string, @Body() updateData: any, @Request() req) {
+        if (!req.user.isAdmin) {
+            throw new UnauthorizedException('Only admins can update users');
+        }
+        return this.usersService.update(+id, updateData);
+    }
+
+    @UseGuards(AuthGuard('jwt'))
     @Post(':id/badges')
     async assignBadge(@Param('id') id: string, @Body('badgeId') badgeId: number, @Request() req) {
         if (!req.user.isAdmin) {
@@ -39,6 +48,16 @@ export class UsersController {
         }
         return this.usersService.assignBadge(+id, badgeId);
     }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Delete(':id/badges/:badgeId')
+    async removeBadge(@Param('id') id: string, @Param('badgeId') badgeId: string, @Request() req) {
+        if (!req.user.isAdmin) {
+            throw new UnauthorizedException('Only admins can remove badges');
+        }
+        return this.usersService.removeBadge(+id, +badgeId);
+    }
+
     @UseGuards(AuthGuard('jwt'))
     @Post('profile/image')
     @UseInterceptors(FileInterceptor('file', {
@@ -52,5 +71,23 @@ export class UsersController {
     }))
     uploadProfileImage(@Request() req, @UploadedFile() file: any) {
         return this.usersService.updateProfileImage(req.user.userId, `/uploads/profile-images/${file.filename}`);
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Post(':id/image')
+    @UseInterceptors(FileInterceptor('file', {
+        storage: diskStorage({
+            destination: './uploads/profile-images',
+            filename: (req, file, cb) => {
+                const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('');
+                return cb(null, `${randomName}${extname(file.originalname)}`);
+            }
+        })
+    }))
+    uploadUserImage(@Param('id') id: string, @Request() req, @UploadedFile() file: any) {
+        if (!req.user.isAdmin) {
+            throw new UnauthorizedException('Only admins can upload user images');
+        }
+        return this.usersService.updateProfileImage(+id, `/uploads/profile-images/${file.filename}`);
     }
 }

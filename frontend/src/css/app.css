@@ -1,0 +1,73 @@
+/* Global Styles for Rounded Corners and Polish */
+
+/* Cards */
+.q-card {
+  border-radius: 12px !important;
+}
+
+/* Tables */
+.q-table {
+  border-radius: 12px !important;
+}
+
+.q-table__card {
+  border-radius: 12px !important;
+}
+
+/* Buttons */
+.q-btn {
+  border-radius: 8px !important;
+  text-transform: none !important;
+}
+
+.q-btn .q-btn__content {
+  text-transform: capitalize !important;
+}
+
+/* Inputs */
+.q-field__control {
+  border-radius: 8px !important;
+}
+
+/* Dialogs */
+.q-dialog__inner--minimized>div {
+  border-radius: 12px !important;
+}
+
+/* Badges and Avatars */
+.q-badge {
+  border-radius: 6px !important;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .q-page {
+    padding: 12px !important;
+  }
+
+  .q-table {
+    font-size: 0.875rem;
+  }
+
+  .q-card {
+    margin-bottom: 12px;
+  }
+}
+
+/* Smooth transitions */
+.q-card,
+.q-btn,
+.q-table {
+  transition: all 0.3s ease;
+}
+
+/* Card hover effect */
+.q-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Dark mode specific adjustments */
+body.body--dark .q-card:hover {
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}

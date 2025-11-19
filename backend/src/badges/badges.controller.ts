@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Request, UnauthorizedException, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, UseGuards, Request, UnauthorizedException, UseInterceptors, UploadedFile, Patch } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
@@ -36,5 +36,26 @@ export class BadgesController {
     @Get(':id')
     findOne(@Param('id') id: string) {
         return this.badgesService.findOne(+id);
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Patch(':id')
+    @UseInterceptors(FileInterceptor('file', {
+        storage: diskStorage({
+            destination: './uploads/badge-images',
+            filename: (req, file, cb) => {
+                const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('');
+                return cb(null, `${randomName}${extname(file.originalname)}`);
+            }
+        })
+    }))
+    update(@Param('id') id: string, @Body() updateData: any, @UploadedFile() file: any, @Request() req) {
+        if (!req.user.isAdmin) {
+            throw new UnauthorizedException('Only admins can update badges');
+        }
+        if (file) {
+            updateData.image = `/uploads/badge-images/${file.filename}`;
+        }
+        return this.badgesService.update(+id, updateData);
     }
 }

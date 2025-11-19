@@ -41,6 +41,32 @@ export const useBadgeStore = defineStore('badge', {
                 console.error('Create badge failed', error);
                 return false;
             }
+        },
+        async updateBadge(badgeId, updateData) {
+            try {
+                await api.patch(`/badges/${badgeId}`, updateData);
+                await this.fetchBadges();
+                return true;
+            } catch (error) {
+                console.error('Update badge failed', error);
+                return false;
+            }
+        },
+        async uploadBadgeImage(badgeId, imageFile) {
+            const formData = new FormData();
+            formData.append('file', imageFile);
+            try {
+                await api.patch(`/badges/${badgeId}`, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                });
+                await this.fetchBadges();
+                return true;
+            } catch (error) {
+                console.error('Upload badge image failed', error);
+                return false;
+            }
         }
     },
 });

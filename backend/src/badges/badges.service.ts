@@ -19,7 +19,12 @@ export class BadgesService {
         return this.badgesRepository.find();
     }
 
-    findOne(id: number) {
+    async findOne(id: number): Promise<Badge> {
         return this.badgesRepository.findOne({ where: { id } });
+    }
+
+    async update(id: number, updateData: Partial<Badge>): Promise<Badge> {
+        await this.badgesRepository.update(id, updateData);
+        return this.findOne(id);
     }
 }

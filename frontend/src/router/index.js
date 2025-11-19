@@ -6,12 +6,21 @@ const routes = [
         path: '/',
         component: () => import('../layouts/MainLayout.vue'),
         children: [
-            { path: '', redirect: '/login' },
+            {
+                path: '',
+                redirect: (to) => {
+                    const authStore = useAuthStore();
+                    if (authStore.isAuthenticated) {
+                        return authStore.isAdmin ? '/admin/dashboard' : '/my-badges';
+                    }
+                    return '/login';
+                }
+            },
             { path: 'login', component: () => import('../pages/LoginPage.vue') },
-            { path: 'register', component: () => import('../pages/RegisterPage.vue') },
             { path: 'profile', component: () => import('../pages/ProfilePage.vue'), meta: { requiresAuth: true } },
             { path: 'my-badges', component: () => import('../pages/MyBadgesPage.vue'), meta: { requiresAuth: true } },
             { path: 'users', component: () => import('../pages/UserListPage.vue'), meta: { requiresAuth: true } },
+            { path: 'admin/dashboard', component: () => import('../pages/admin/AdminDashboardPage.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
             { path: 'admin/users', component: () => import('../pages/admin/AdminUsersPage.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
             { path: 'admin/badges', component: () => import('../pages/admin/AdminBadgesPage.vue'), meta: { requiresAuth: true, requiresAdmin: true } },
         ],

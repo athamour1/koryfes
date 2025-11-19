@@ -6,11 +6,11 @@ export const useUserStore = defineStore('user', {
         users: [],
     }),
     actions: {
-        async fetchUsers(location = '', name = '') {
+        async fetchUsers() {
             try {
-                const response = await api.get('/users', { params: { location, name } });
+                const response = await api.get('/users');
                 this.users = response.data;
-                return this.users;
+                return response.data;
             } catch (error) {
                 console.error('Fetch users failed', error);
                 return [];
@@ -25,6 +25,15 @@ export const useUserStore = defineStore('user', {
                 return false;
             }
         },
+        async updateUser(userId, data) {
+            try {
+                await api.patch(`/users/${userId}`, data);
+                return true;
+            } catch (error) {
+                console.error('Update user failed', error);
+                return false;
+            }
+        },
         async assignBadge(userId, badgeId) {
             try {
                 await api.post(`/users/${userId}/badges`, { badgeId });
@@ -34,20 +43,40 @@ export const useUserStore = defineStore('user', {
                 return false;
             }
         },
-        async uploadProfileImage(file) {
-            const formData = new FormData();
-            formData.append('file', file);
+        async removeBadge(userId, badgeId) {
             try {
+                await api.delete(`/users/${userId}/badges/${badgeId}`);
+                return true;
+            } catch (error) {
+                console.error('Remove badge failed', error);
+                return false;
+            }
+        },
+        async uploadProfileImage(file) {
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
                 await api.post('/users/profile/image', formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data'
-                    }
+                    headers: { 'Content-Type': 'multipart/form-data' }
                 });
                 return true;
             } catch (error) {
                 console.error('Upload profile image failed', error);
                 return false;
             }
-        }
+        },
+        async uploadUserImage(userId, file) {
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                await api.post(`/users/${userId}/image`, formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+                return true;
+            } catch (error) {
+                console.error('Upload user image failed', error);
+                return false;
+            }
+        },
     },
 });

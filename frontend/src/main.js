@@ -3,6 +3,7 @@ import { createPinia } from 'pinia'
 import { Quasar, Notify } from 'quasar'
 import '@quasar/extras/material-icons/material-icons.css'
 import 'quasar/src/css/index.sass'
+import './css/app.css'
 import App from './App.vue'
 import router from './router'
 

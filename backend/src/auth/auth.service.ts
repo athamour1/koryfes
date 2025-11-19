@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -32,13 +32,36 @@ export class AuthService {
         };
     }
 
-    async register(user: any) {
-        const hashedPassword = await bcrypt.hash(user.password, 10);
-        const newUser = await this.usersService.create({
-            ...user,
+    async register(createUserDto: any) {
+        const isProd = process.env.NODE_ENV === 'production';
+
+        // Production password validation
+        if (isProd) {
+            const password = createUserDto.password;
+            if (password.length < 8) {
+                throw new Error('Password must be at least 8 characters long');
+            }
+            if (!/[A-Z]/.test(password)) {
+                throw new Error('Password must contain at least one uppercase letter');
+            }
+            if (!/[a-z]/.test(password)) {
+                throw new Error('Password must contain at least one lowercase letter');
+            }
+            if (!/[0-9]/.test(password)) {
+                throw new Error('Password must contain at least one number');
+            }
+        }
+
+        const existingUser = await this.usersService.findByUsername(createUserDto.username);
+        if (existingUser) {
+            throw new ConflictException('Username already exists');
+        }
+
+        const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+        const user = await this.usersService.create({
+            ...createUserDto,
             password: hashedPassword,
         });
-        const { password, ...result } = newUser;
-        return result;
+        return { message: 'User created successfully', userId: user.id };
     }
 }

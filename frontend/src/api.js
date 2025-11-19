@@ -1,7 +1,9 @@
 import axios from 'axios';
 
-const api = axios.create({
-    baseURL: 'http://localhost:3000', // In Docker, browser still hits localhost:3000. If SSR, would need service name.
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
+export const api = axios.create({
+    baseURL: API_URL,
 });
 
 api.interceptors.request.use((config) => {
@@ -12,4 +14,4 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-export { api };
+export default api;

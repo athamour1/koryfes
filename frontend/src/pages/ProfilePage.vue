@@ -41,6 +41,8 @@ import { ref, onMounted, computed } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { useUserStore } from '../stores/user';
 import { useQuasar } from 'quasar';
+import { config } from '../config';
+import { getAvatarUrl } from '../utils/avatar';
 
 const authStore = useAuthStore();
 const userStore = useUserStore();
@@ -49,10 +51,7 @@ const imageFile = ref(null);
 const $q = useQuasar();
 
 const profileImage = computed(() => {
-  if (authStore.user && authStore.user.profileImage) {
-    return `http://localhost:3000${authStore.user.profileImage}`;
-  }
-  return 'https://cdn.quasar.dev/img/boy-avatar.png';
+  return getAvatarUrl(authStore.user?.username, authStore.user?.profileImage);
 });
 
 onMounted(async () => {

@@ -64,14 +64,28 @@ export class UsersService implements OnModuleInit {
         return this.usersRepository.find({ where, relations: ['badges'] });
     }
 
+    async getAllIncludingAdmins(): Promise<User[]> {
+        return this.usersRepository.find({ relations: ['badges'] });
+    }
+
     async assignBadge(userId: number, badgeId: number): Promise<User> {
-        const user = await this.findOne(userId);
+        const user = await this.usersRepository.findOne({ where: { id: userId }, relations: ['badges'] });
         const badge = await this.badgesService.findOne(badgeId);
-        if (user && badge) {
-            user.badges = [...user.badges, badge];
-            return this.usersRepository.save(user);
+        if (!user.badges) {
+            user.badges = [];
         }
-        return null;
+        user.badges.push(badge);
+        await this.usersRepository.save(user);
+        return this.findOne(userId);
+    }
+
+    async removeBadge(userId: number, badgeId: number): Promise<User> {
+        const user = await this.usersRepository.findOne({ where: { id: userId }, relations: ['badges'] });
+        if (user.badges) {
+            user.badges = user.badges.filter(badge => badge.id !== badgeId);
+            await this.usersRepository.save(user);
+        }
+        return this.findOne(userId);
     }
 
     async update(id: number, updateData: Partial<User>): Promise<User> {
