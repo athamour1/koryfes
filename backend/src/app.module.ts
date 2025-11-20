@@ -9,6 +9,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { BadgesModule } from './badges/badges.module';
 import { AdminModule } from './admin/admin.module';
+import { LocationsModule } from './locations/locations.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { AdminModule } from './admin/admin.module';
     AuthModule,
     BadgesModule,
     AdminModule,
+    LocationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -20,14 +20,15 @@ export class AuthService {
     }
 
     async login(user: any) {
-        const payload = { username: user.username, sub: user.id, isAdmin: user.isAdmin };
+        const payload = { username: user.username, sub: user.id, role: user.role, locationId: user.location?.id };
         return {
             access_token: this.jwtService.sign(payload),
             user: {
                 id: user.id,
                 username: user.username,
                 location: user.location,
-                isAdmin: user.isAdmin
+                role: user.role,
+                isAdmin: user.isAdmin // Keep for legacy frontend compat if needed
             }
         };
     }
@@ -57,11 +58,56 @@ export class AuthService {
             throw new ConflictException('Username already exists');
         }
 
-        const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
         const user = await this.usersService.create({
             ...createUserDto,
-            password: hashedPassword,
         });
         return { message: 'User created successfully', userId: user.id };
     }
+
+    async forgotPassword(email: string) {
+        // In this app, username is treated as email or we assume username is unique.
+        // The prompt asks for "forgot password methods".
+        // Let's assume username IS the email or we look up by username.
+        // Given the User entity has 'username' and no 'email', we'll use username.
+        const user = await this.usersService.findByUsername(email);
+        if (!user) {
+            // Return success even if user not found to prevent enumeration
+            return { message: 'If a user with this username exists, a password reset link has been sent.' };
+        }
+
+        const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        const expires = new Date();
+        expires.setHours(expires.getHours() + 1); // 1 hour expiration
+
+        await this.usersService.update(user.id, {
+            resetPasswordToken: token,
+            resetPasswordExpires: expires
+        });
+
+        // Mock email sending
+        console.log(`[MOCK EMAIL] Password reset token for ${user.username}: ${token}`);
+        // In a real app, we would send an email here.
+
+        return { message: 'If a user with this username exists, a password reset link has been sent.' };
+    }
+
+    async resetPassword(token: string, newPassword: string) {
+        const user = await this.usersService.findByResetToken(token);
+        if (!user) {
+            throw new UnauthorizedException('Invalid or expired token');
+        }
+
+        if (user.resetPasswordExpires && user.resetPasswordExpires < new Date()) {
+            throw new UnauthorizedException('Token expired');
+        }
+
+        await this.usersService.update(user.id, {
+            password: newPassword,
+            resetPasswordToken: null,
+            resetPasswordExpires: null
+        });
+
+        return { message: 'Password reset successfully' };
+    }
 }
+

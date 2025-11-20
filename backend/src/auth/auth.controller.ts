@@ -29,4 +29,13 @@ export class AuthController {
     async getProfile(@Request() req) {
         return this.usersService.findOne(req.user.userId);
     }
+    @Post('forgot-password')
+    async forgotPassword(@Body('email') email: string) {
+        return this.authService.forgotPassword(email);
+    }
+
+    @Post('reset-password')
+    async resetPassword(@Body() body: any) {
+        return this.authService.resetPassword(body.token, body.password);
+    }
 }

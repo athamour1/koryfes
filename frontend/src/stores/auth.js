@@ -5,10 +5,13 @@ export const useAuthStore = defineStore('auth', {
     state: () => ({
         user: null,
         token: localStorage.getItem('token') || null,
-        isAdmin: false,
+        isAdmin: false, // Legacy, keep for now or derive from role
     }),
     getters: {
         isAuthenticated: (state) => !!state.token,
+        userRole: (state) => state.user?.role,
+        isSuperAdmin: (state) => state.user?.role === 'super_admin',
+        isCaptain: (state) => state.user?.role === 'admin',
     },
     actions: {
         async login(username, password) {
@@ -16,7 +19,7 @@ export const useAuthStore = defineStore('auth', {
                 const response = await api.post('/auth/login', { username, password });
                 this.token = response.data.access_token;
                 this.user = response.data.user;
-                this.isAdmin = response.data.user.isAdmin;
+                this.isAdmin = response.data.user.isAdmin; // Legacy
                 localStorage.setItem('token', this.token);
                 return true;
             } catch (error) {
@@ -34,6 +37,24 @@ export const useAuthStore = defineStore('auth', {
                     return { success: false, message: 'Username already exists' };
                 }
                 return { success: false, message: 'Registration failed' };
+            }
+        },
+        async forgotPassword(email) {
+            try {
+                await api.post('/auth/forgot-password', { email });
+                return { success: true };
+            } catch (error) {
+                console.error('Forgot password failed', error);
+                return { success: false, message: 'Request failed' };
+            }
+        },
+        async resetPassword(token, password) {
+            try {
+                await api.post('/auth/reset-password', { token, password });
+                return { success: true };
+            } catch (error) {
+                console.error('Reset password failed', error);
+                return { success: false, message: 'Reset failed' };
             }
         },
         async fetchProfile() {

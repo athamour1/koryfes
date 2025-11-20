@@ -9,27 +9,13 @@
           icon="menu"
           aria-label="Menu"
           @click="drawer = !drawer"
-          class="q-mr-sm lt-md"
+          class="q-mr-sm"
           v-if="authStore.isAuthenticated"
         />
 
         <q-toolbar-title>
           Scout Badges
         </q-toolbar-title>
-
-        <!-- Desktop Navigation -->
-        <div v-if="authStore.isAuthenticated" class="gt-sm">
-          <q-btn v-if="authStore.isAdmin" flat label="Dashboard" to="/admin/dashboard" />
-          <q-btn v-if="!authStore.isAdmin" flat label="My Badges" to="/my-badges" />
-          <q-btn flat label="Users" to="/users" />
-          <q-btn v-if="authStore.isAdmin" flat label="Admin Users" to="/admin/users" />
-          <q-btn v-if="authStore.isAdmin" flat label="Admin Badges" to="/admin/badges" />
-          <q-btn flat label="Profile" to="/profile" />
-        </div>
-        <div v-else class="gt-sm">
-          <q-btn flat label="Login" to="/login" />
-          <q-btn flat label="Register" to="/register" />
-        </div>
 
         <!-- Dark Mode Toggle -->
         <q-btn
@@ -43,19 +29,37 @@
           <q-tooltip>Toggle {{ $q.dark.isActive ? 'Light' : 'Dark' }} Mode</q-tooltip>
         </q-btn>
 
-        <!-- Logout Button -->
-        <q-btn v-if="authStore.isAuthenticated" flat label="Logout" @click="logout" class="gt-sm" />
+        <!-- User Menu -->
+        <q-btn v-if="authStore.isAuthenticated" flat round dense icon="account_circle" class="q-ml-sm">
+          <q-menu>
+            <q-list style="min-width: 200px">
+              <q-item-label header>{{ authStore.user?.username || 'User' }}</q-item-label>
+              <q-item clickable v-ripple v-close-popup :to="'/profile'">
+                <q-item-section avatar>
+                  <q-icon name="person" />
+                </q-item-section>
+                <q-item-section>Profile</q-item-section>
+              </q-item>
+              <q-separator />
+              <q-item clickable v-ripple @click="logout" class="text-negative">
+                <q-item-section avatar>
+                  <q-icon name="logout" color="negative" />
+                </q-item-section>
+                <q-item-section>Logout</q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </q-btn>
       </q-toolbar>
     </q-header>
 
-    <!-- Mobile Drawer -->
+    <!-- Side Drawer -->
     <q-drawer
       v-model="drawer"
       :width="250"
       :breakpoint="768"
       bordered
-      class="lt-md"
-      v-if="!isAuthPage"
+      v-if="authStore.isAuthenticated"
     >
       <q-list>
         <q-item-label header>Navigation</q-item-label>
@@ -96,6 +100,13 @@
             <q-item-section>Admin Badges</q-item-section>
           </q-item>
 
+          <q-item clickable v-ripple to="/admin/locations" v-if="authStore.isSuperAdmin">
+            <q-item-section avatar>
+              <q-icon name="location_on" />
+            </q-item-section>
+            <q-item-section>Locations</q-item-section>
+          </q-item>
+
           <q-item clickable v-ripple to="/profile">
             <q-item-section avatar>
               <q-icon name="person" />
@@ -105,9 +116,12 @@
 
           <q-separator />
 
-          <q-item clickable v-ripple @click="logout">
+          <!-- User Info Header -->
+          <q-item-label header class="text-weight-bold">{{ authStore.user?.username || 'User' }}</q-item-label>
+
+          <q-item clickable v-ripple @click="logout" class="text-negative">
             <q-item-section avatar>
-              <q-icon name="logout" />
+              <q-icon name="logout" color="negative" />
             </q-item-section>
             <q-item-section>Logout</q-item-section>
           </q-item>
@@ -147,7 +161,8 @@ const authStore = useAuthStore();
 const router = useRouter();
 const route = useRoute();
 const $q = useQuasar();
-const drawer = ref(false); // Default closed
+// Open drawer by default on desktop (>768px), closed on mobile
+const drawer = ref($q.screen.gt.sm);
 
 // Check if current route is login or register
 const isAuthPage = computed(() => {

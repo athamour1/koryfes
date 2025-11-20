@@ -78,5 +78,30 @@ export const useUserStore = defineStore('user', {
                 return false;
             }
         },
+        async createUser(userData) {
+            try {
+                const response = await api.post('/users', userData);
+                // Refresh users list after creation
+                await this.fetchUsers();
+                return true;
+            } catch (error) {
+                console.error('Create user failed', error);
+                if (error.response && error.response.status === 409) {
+                    throw new Error('Username already exists');
+                }
+                throw new Error(error.response?.data?.message || 'Failed to create user');
+            }
+        },
+        async deleteUser(userId) {
+            try {
+                await api.delete(`/users/${userId}`);
+                // Refresh users list after deletion
+                await this.fetchUsers();
+                return true;
+            } catch (error) {
+                console.error('Delete user failed', error);
+                throw new Error(error.response?.data?.message || 'Failed to delete user');
+            }
+        },
     },
 });

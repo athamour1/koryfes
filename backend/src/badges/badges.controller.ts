@@ -21,7 +21,7 @@ export class BadgesController {
         })
     }))
     create(@Body() createBadgeDto: any, @UploadedFile() file: any, @Request() req) {
-        if (!req.user.isAdmin) {
+        if (req.user.role !== 'super_admin' && req.user.role !== 'admin') {
             throw new UnauthorizedException('Only admins can create badges');
         }
         const imagePath = file ? `/uploads/badge-images/${file.filename}` : '';
@@ -50,7 +50,7 @@ export class BadgesController {
         })
     }))
     update(@Param('id') id: string, @Body() updateData: any, @UploadedFile() file: any, @Request() req) {
-        if (!req.user.isAdmin) {
+        if (req.user.role !== 'super_admin' && req.user.role !== 'admin') {
             throw new UnauthorizedException('Only admins can update badges');
         }
         if (file) {

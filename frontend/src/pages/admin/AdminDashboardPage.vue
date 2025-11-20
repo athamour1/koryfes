@@ -41,6 +41,21 @@
       </div>
     </div>
 
+    <!-- Super Admin Actions -->
+    <div v-if="authStore.isSuperAdmin" class="row q-col-gutter-md q-mb-lg">
+      <div class="col-12">
+        <q-card>
+          <q-card-section>
+            <div class="text-h6">Super Admin Controls</div>
+          </q-card-section>
+          <q-card-actions>
+            <q-btn color="primary" label="Manage Locations" to="/admin/locations" icon="place" />
+            <q-btn color="secondary" label="Manage Users & Admins" to="/admin/users" icon="people" />
+          </q-card-actions>
+        </q-card>
+      </div>
+    </div>
+
     <!-- Top Users and Recent Activity -->
     <div class="row q-col-gutter-md">
       <!-- Top Users by Badges -->
@@ -114,7 +129,9 @@ import { ref, onMounted } from 'vue';
 import { api } from '../../api';
 import { config } from '../../config';
 import { getAvatarUrl } from '../../utils/avatar';
+import { useAuthStore } from '../../stores/auth';
 
+const authStore = useAuthStore();
 const stats = ref({
   totalUsers: 0,
   totalBadges: 0,
