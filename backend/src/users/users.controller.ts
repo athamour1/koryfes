@@ -108,7 +108,12 @@ export class UsersController {
 
     @UseGuards(AuthGuard('jwt'))
     @Post(':id/badges')
-    async assignBadge(@Param('id') id: string, @Body('badgeId') badgeId: number, @Request() req) {
+    async assignBadge(
+        @Param('id') id: string,
+        @Body('badgeId') badgeId: number,
+        @Body('acquiredAt') acquiredAt: string,
+        @Request() req
+    ) {
         if (!req.user.isAdmin && req.user.role !== 'super_admin' && req.user.role !== 'admin') {
             throw new UnauthorizedException('Only admins can assign badges');
         }
@@ -125,7 +130,35 @@ export class UsersController {
             }
         }
 
-        return this.usersService.assignBadge(+id, badgeId);
+        const date = acquiredAt ? new Date(acquiredAt) : new Date();
+        return this.usersService.assignBadge(+id, badgeId, date);
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Patch(':id/badges/:badgeId')
+    async updateBadgeDate(
+        @Param('id') id: string,
+        @Param('badgeId') badgeId: string,
+        @Body('acquiredAt') acquiredAt: string,
+        @Request() req
+    ) {
+        if (!req.user.isAdmin && req.user.role !== 'super_admin' && req.user.role !== 'admin') {
+            throw new UnauthorizedException('Only admins can update badges');
+        }
+
+        // If Admin (not Super Admin), verify user is in same location
+        if (req.user.role === 'admin') {
+            const targetUser = await this.usersService.findOne(+id);
+            if (!targetUser) {
+                throw new UnauthorizedException('User not found');
+            }
+            if (targetUser.location?.id != req.user.locationId) {
+                throw new UnauthorizedException('You can only update badges for users in your location');
+            }
+        }
+
+        const date = new Date(acquiredAt);
+        return this.usersService.updateBadgeDate(+id, +badgeId, date);
     }
 
     @UseGuards(AuthGuard('jwt'))

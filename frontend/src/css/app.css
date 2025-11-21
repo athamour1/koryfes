@@ -1,4 +1,6 @@
-/* Global Styles for Rounded Corners and Polish */
+@import './admin-pages.css';
+
+/* Global Quasar overrides for rounded corners and polish */
 
 /* Cards */
 .q-card {
@@ -61,13 +63,43 @@
   transition: all 0.3s ease;
 }
 
-/* Card hover effect */
+/* Card hover effect - Light mode */
 .q-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* Dark mode specific adjustments */
+body.body--dark .q-card {
+  background-color: var(--q-dark);
+}
+
 body.body--dark .q-card:hover {
   box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}
+
+body.body--dark .q-page {
+  background-color: var(--q-dark-page);
+}
+
+/* Ensure text readability in dark mode */
+body.body--dark {
+  color: rgba(255, 255, 255, 0.87);
+}
+
+/* Custom gradient backgrounds that work in both modes */
+.gradient-purple {
+  background: linear-gradient(135deg, var(--q-primary) 0%, var(--q-secondary) 100%);
+}
+
+.gradient-pink {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.gradient-blue {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.gradient-green {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
 }

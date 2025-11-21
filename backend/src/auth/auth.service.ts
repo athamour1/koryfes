@@ -20,7 +20,14 @@ export class AuthService {
     }
 
     async login(user: any) {
-        const payload = { username: user.username, sub: user.id, role: user.role, locationId: user.location?.id };
+        const payload = {
+            username: user.username,
+            sub: user.id,
+            role: user.role,
+            locationId: user.location?.id,
+            unitId: user.unit?.id,
+            unitRole: user.unitRole
+        };
         return {
             access_token: this.jwtService.sign(payload),
             user: {
@@ -28,7 +35,9 @@ export class AuthService {
                 username: user.username,
                 location: user.location,
                 role: user.role,
-                isAdmin: user.isAdmin // Keep for legacy frontend compat if needed
+                isAdmin: user.isAdmin, // Keep for legacy frontend compat if needed
+                unitId: user.unit?.id,
+                unitRole: user.unitRole
             }
         };
     }

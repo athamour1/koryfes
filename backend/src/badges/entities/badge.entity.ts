@@ -1,5 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { UserBadge } from '../../users/entities/user-badge.entity';
 
 @Entity()
 export class Badge {
@@ -15,6 +15,6 @@ export class Badge {
     @Column()
     image: string; // URL or path to image
 
-    @ManyToMany(() => User, (user) => user.badges)
-    users: User[];
+    @OneToMany(() => UserBadge, (userBadge) => userBadge.badge)
+    userBadges: UserBadge[];
 }

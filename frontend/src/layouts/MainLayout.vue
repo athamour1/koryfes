@@ -1,6 +1,6 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header elevated class="bg-primary">
+    <q-header elevated class="bg-primary" v-if="!isAuthPage">
       <q-toolbar>
         <q-btn
           flat
@@ -27,28 +27,6 @@
           class="q-ml-sm"
         >
           <q-tooltip>Toggle {{ $q.dark.isActive ? 'Light' : 'Dark' }} Mode</q-tooltip>
-        </q-btn>
-
-        <!-- User Menu -->
-        <q-btn v-if="authStore.isAuthenticated" flat round dense icon="account_circle" class="q-ml-sm">
-          <q-menu>
-            <q-list style="min-width: 200px">
-              <q-item-label header>{{ authStore.user?.username || 'User' }}</q-item-label>
-              <q-item clickable v-ripple v-close-popup :to="'/profile'">
-                <q-item-section avatar>
-                  <q-icon name="person" />
-                </q-item-section>
-                <q-item-section>Profile</q-item-section>
-              </q-item>
-              <q-separator />
-              <q-item clickable v-ripple @click="logout" class="text-negative">
-                <q-item-section avatar>
-                  <q-icon name="logout" color="negative" />
-                </q-item-section>
-                <q-item-section>Logout</q-item-section>
-              </q-item>
-            </q-list>
-          </q-menu>
         </q-btn>
       </q-toolbar>
     </q-header>
@@ -86,14 +64,35 @@
             <q-item-section>Users</q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple to="/admin/users" v-if="authStore.isAdmin">
+          <q-item 
+            clickable 
+            v-ripple 
+            to="/my-unit" 
+            v-if="authStore.user?.role === 'user' && authStore.user?.unitRole === 'leader'"
+          >
+            <q-item-section avatar>
+              <q-icon name="groups" />
+            </q-item-section>
+            <q-item-section>My Unit</q-item-section>
+          </q-item>
+
+            <q-item clickable v-ripple to="/admin/units" active-class="text-accent" v-if="authStore.isAdmin">
+              <q-item-section avatar>
+                <q-icon name="groups" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>Units</q-item-label>
+              </q-item-section>
+            </q-item>
+
+          <q-item clickable v-ripple to="/admin/users" v-if="authStore.isAdmin" active-class="text-accent">
             <q-item-section avatar>
               <q-icon name="admin_panel_settings" />
             </q-item-section>
             <q-item-section>Admin Users</q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple to="/admin/badges" v-if="authStore.isAdmin">
+          <q-item clickable v-ripple to="/admin/badges" v-if="authStore.isSuperAdmin">
             <q-item-section avatar>
               <q-icon name="stars" />
             </q-item-section>

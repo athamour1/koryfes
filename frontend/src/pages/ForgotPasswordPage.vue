@@ -1,6 +1,6 @@
 <template>
-  <q-page class="flex flex-center bg-grey-2">
-    <q-card class="auth-card">
+  <q-page class="flex flex-center gradient-purple">
+    <q-card class="auth-card" flat bordered>
       <q-card-section>
         <div class="text-h6 text-center">Forgot Password</div>
       </q-card-section>

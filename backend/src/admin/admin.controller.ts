@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Request, UnauthorizedException } from '@nestjs/common';
+import { Controller, Get, Post, UseGuards, Request, UnauthorizedException } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { UsersService } from '../users/users.service';
 import { BadgesService } from '../badges/badges.service';
@@ -24,7 +24,7 @@ export class AdminController {
         const regularUsers = users.filter(u => !u.isAdmin);
 
         // Calculate total badges awarded
-        const totalBadgesAwarded = regularUsers.reduce((sum, user) => sum + (user.badges?.length || 0), 0);
+        const totalBadgesAwarded = regularUsers.reduce((sum, user: any) => sum + (user.badges?.length || 0), 0);
 
         // Calculate average badges per user
         const avgBadgesPerUser = regularUsers.length > 0
@@ -33,7 +33,7 @@ export class AdminController {
 
         // Get top users by badge count
         const topUsers = regularUsers
-            .map(user => ({
+            .map((user: any) => ({
                 id: user.id,
                 username: user.username,
                 location: user.location,
@@ -45,7 +45,7 @@ export class AdminController {
 
         // Get badge distribution (how many times each badge was awarded)
         const badgeDistribution = badges.map(badge => {
-            const awardedCount = regularUsers.filter(user =>
+            const awardedCount = regularUsers.filter((user: any) =>
                 user.badges?.some(b => b.id === badge.id)
             ).length;
 

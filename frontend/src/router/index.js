@@ -24,6 +24,8 @@ const routes = [
             { path: 'profile', component: () => import('../pages/ProfilePage.vue'), meta: { requiresAuth: true } },
             { path: 'my-badges', component: () => import('../pages/MyBadgesPage.vue'), meta: { requiresAuth: true } },
             { path: 'users', component: () => import('../pages/UserListPage.vue'), meta: { requiresAuth: true } },
+            { path: 'user/:id', component: () => import('../pages/UserProfilePage.vue'), meta: { requiresAuth: true } },
+            { path: 'my-unit', component: () => import('../pages/MyUnitPage.vue'), meta: { requiresAuth: true } },
 
 
             // Admin Routes
@@ -31,6 +33,16 @@ const routes = [
                 path: 'admin/dashboard',
                 component: () => import('../pages/admin/AdminDashboardPage.vue'),
                 meta: { requiresAuth: true, requiresAdmin: true }
+            },
+            {
+                path: 'admin/units',
+                component: () => import('../pages/admin/AdminUnitsPage.vue'),
+                meta: { requiresAuth: true, requiresAdmin: true }
+            },
+            {
+                path: 'units/:id',
+                component: () => import('../pages/UnitPage.vue'),
+                meta: { requiresAuth: true }
             },
             {
                 path: 'admin/users',
@@ -61,16 +73,28 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
     const authStore = useAuthStore();
 
-    if (to.meta.requiresAuth && !authStore.token) {
-        next('/login');
-        return;
-    }
-
-    if (to.meta.requiresAdmin || to.meta.requiresSuperAdmin) {
-        if (!authStore.user) {
-            await authStore.fetchProfile();
+    // Check if route requires auth
+    if (to.meta.requiresAuth) {
+        // If no token, redirect to login
+        if (!authStore.token) {
+            next('/login');
+            return;
         }
 
+        // If we have a token but no user data, fetch it
+        if (!authStore.user) {
+            try {
+                await authStore.fetchProfile();
+            } catch (error) {
+                // If fetching profile fails (e.g. invalid token), redirect to login
+                next('/login');
+                return;
+            }
+        }
+    }
+
+    // Role-based checks
+    if (to.meta.requiresAdmin || to.meta.requiresSuperAdmin) {
         if (to.meta.requiresSuperAdmin) {
             if (authStore.isSuperAdmin) {
                 next();
@@ -84,6 +108,16 @@ router.beforeEach(async (to, from, next) => {
             next();
         } else {
             next('/my-badges'); // Redirect non-admins
+        }
+        return;
+    }
+
+    // Unit Leader check for My Unit page
+    if (to.path === '/my-unit') {
+        if (authStore.user?.unitRole === 'leader') {
+            next();
+        } else {
+            next('/my-badges'); // Redirect non-leaders
         }
         return;
     }

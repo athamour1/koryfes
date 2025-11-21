@@ -1,38 +1,81 @@
 <template>
-  <q-page class="q-pa-md">
-    <div class="text-h4 q-mb-md">Profile Settings</div>
-    <q-card style="max-width: 400px">
+  <q-page class="profile-page">
+    <!-- Hero Header -->
+    <div class="gradient-purple text-white q-pa-lg">
+      <div class="text-center" style="max-width: 600px; margin: 0 auto;">
+        <q-icon name="person" size="48px" class="q-mb-sm" />
+        <div class="text-h4 text-weight-bold">Profile Settings</div>
+        <div class="text-body1" style="opacity: 0.9;">Manage your profile information</div>
+      </div>
+    </div>
+
+    <!-- Profile Content -->
+    <div class="q-pa-lg" style="max-width: 600px; margin: 0 auto;">
+      <q-card class="q-mt-lg" flat bordered>
         <q-card-section>
-          <div class="text-h6">Profile Settings</div>
+          <div class="text-h6 q-mb-md">
+            <q-icon name="account_circle" class="q-mr-sm" />
+            Profile Information
+          </div>
         </q-card-section>
 
-        <q-card-section class="text-center">
-          <q-avatar size="100px" class="q-mb-md">
-            <img :src="profileImage" style="object-fit: cover" />
-          </q-avatar>
-          <q-file
-            v-model="imageFile"
-            label="Upload Profile Image"
-            outlined
-            dense
-            accept=".jpg, .png, .jpeg"
-            @update:model-value="uploadImage"
+        <!-- Profile Image Section -->
+        <q-card-section class="text-center bg-grey-1">
+          <q-avatar 
+            size="120px" 
             class="q-mb-md"
           >
-            <template v-slot:prepend>
-              <q-icon name="cloud_upload" />
-            </template>
-          </q-file>
+            <img :src="profileImage" style="object-fit: cover" />
+          </q-avatar>
+          
+          <div>
+            <q-file
+              v-model="imageFile"
+              label="Upload Profile Image"
+              filled
+              dense
+              accept=".jpg, .png, .jpeg"
+              @update:model-value="uploadImage"
+              class="q-mt-md"
+              style="max-width: 300px; margin: 0 auto;"
+            >
+              <template v-slot:prepend>
+                <q-icon name="cloud_upload" />
+              </template>
+            </q-file>
+          </div>
         </q-card-section>
 
+        <q-separator />
+
+        <!-- Location Section -->
         <q-card-section>
-          <q-input v-model="location" label="Location" outlined dense />
+          <q-input 
+            v-model="location" 
+            label="Location" 
+            filled 
+            dense
+            hint="Your assigned location"
+          >
+            <template v-slot:prepend>
+              <q-icon name="location_on" />
+            </template>
+          </q-input>
         </q-card-section>
 
-        <q-card-actions align="right">
-          <q-btn label="Save Location" color="primary" @click="updateProfile" />
+        <!-- Actions -->
+        <q-card-actions align="right" class="q-pa-md">
+          <q-btn 
+            label="Save Changes" 
+            color="primary" 
+            unelevated
+            @click="updateProfile"
+            icon="save"
+            class="q-px-lg"
+          />
         </q-card-actions>
-    </q-card>
+      </q-card>
+    </div>
   </q-page>
 </template>
 
@@ -84,3 +127,13 @@ const uploadImage = async (file) => {
   }
 };
 </script>
+
+<style scoped>
+.profile-page {
+  min-height: 100vh;
+}
+
+body.body--dark .bg-grey-1 {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+</style>

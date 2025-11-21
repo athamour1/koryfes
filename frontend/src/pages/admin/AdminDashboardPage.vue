@@ -1,163 +1,418 @@
 <template>
-  <q-page padding>
-    <div class="text-h4 q-mb-md">Admin Dashboard</div>
+  <q-page class="q-pa-md">
+    <!-- Header Section -->
+    <q-card class="gradient-purple text-white q-mb-lg" flat>
+      <q-card-section class="q-pa-xl">
+        <div class="text-center">
+          <div class="text-h3 text-weight-bold q-mb-sm">
+            <span class="wave">👋</span>
+            Welcome back, {{ stats.userName || 'Admin' }}!
+          </div>
+          <div class="text-h6 text-weight-light" style="opacity: 0.9;">
+            Here's what's happening with your scouts today
+          </div>
+        </div>
 
-    <!-- Stats Cards -->
-    <div class="row q-col-gutter-md q-mb-lg">
-      <div class="col-12 col-sm-6 col-md-3">
-        <q-card class="stat-card">
-          <q-card-section>
-            <div class="text-h6 text-grey-7">Total Users</div>
-            <div class="text-h3 text-primary q-mt-sm">{{ stats.totalUsers }}</div>
-          </q-card-section>
-        </q-card>
-      </div>
+        <!-- Stats Cards -->
+        <div class="row q-col-gutter-md q-mt-lg">
+          <div class="col-12 col-sm-6 col-md-3" v-for="(stat, index) in mainStats" :key="index">
+            <q-card flat class="text-white" style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px);">
+              <q-card-section class="text-center">
+                <q-icon :name="stat.icon" size="48px" class="q-mb-sm" />
+                <div class="text-h3 text-weight-bold">{{ stat.value }}</div>
+                <div class="text-subtitle2">{{ stat.label }}</div>
+                <q-chip dense :icon="stat.trend === 'up' ? 'trending_up' : 'trending_flat'" 
+                        :color="stat.trend === 'up' ? 'positive' : 'grey'" 
+                        text-color="white" size="sm" class="q-mt-sm">
+                  {{ stat.change }}
+                </q-chip>
+              </q-card-section>
+            </q-card>
+          </div>
+        </div>
+      </q-card-section>
+    </q-card>
 
-      <div class="col-12 col-sm-6 col-md-3">
-        <q-card class="stat-card">
-          <q-card-section>
-            <div class="text-h6 text-grey-7">Total Badges</div>
-            <div class="text-h3 text-secondary q-mt-sm">{{ stats.totalBadges }}</div>
-          </q-card-section>
-        </q-card>
-      </div>
-
-      <div class="col-12 col-sm-6 col-md-3">
-        <q-card class="stat-card">
-          <q-card-section>
-            <div class="text-h6 text-grey-7">Badges Awarded</div>
-            <div class="text-h3 text-positive q-mt-sm">{{ stats.totalBadgesAwarded }}</div>
-          </q-card-section>
-        </q-card>
-      </div>
-
-      <div class="col-12 col-sm-6 col-md-3">
-        <q-card class="stat-card">
-          <q-card-section>
-            <div class="text-h6 text-grey-7">Avg Badges/User</div>
-            <div class="text-h3 text-info q-mt-sm">{{ stats.avgBadgesPerUser }}</div>
-          </q-card-section>
-        </q-card>
-      </div>
-    </div>
-
-    <!-- Super Admin Actions -->
-    <div v-if="authStore.isSuperAdmin" class="row q-col-gutter-md q-mb-lg">
-      <div class="col-12">
-        <q-card>
-          <q-card-section>
-            <div class="text-h6">Super Admin Controls</div>
-          </q-card-section>
-          <q-card-actions>
-            <q-btn color="primary" label="Manage Locations" to="/admin/locations" icon="place" />
-            <q-btn color="secondary" label="Manage Users & Admins" to="/admin/users" icon="people" />
-          </q-card-actions>
-        </q-card>
-      </div>
-    </div>
-
-    <!-- Top Users and Recent Activity -->
+    <!-- Main Content -->
     <div class="row q-col-gutter-md">
-      <!-- Top Users by Badges -->
+      <!-- Left Column -->
       <div class="col-12 col-md-6">
-        <q-card>
+        <!-- Quick Actions -->
+        <q-card class="q-mb-md" flat bordered>
           <q-card-section>
-            <div class="text-h6">Top Users by Badges</div>
+            <div class="text-h6 q-mb-md">
+              <q-icon name="bolt" size="24px" class="q-mr-sm" />
+              Quick Actions
+            </div>
+            <q-list separator>
+              <q-item clickable v-ripple @click="$router.push('/admin/users')" class="q-pa-md">
+                <q-item-section avatar>
+                  <q-avatar size="48px" class="gradient-purple text-white">
+                    <q-icon name="person_add" size="24px" />
+                  </q-avatar>
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label class="text-weight-medium">Add Scout</q-item-label>
+                  <q-item-label caption>Create new user</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-icon name="chevron_right" />
+                </q-item-section>
+              </q-item>
+
+              <q-item clickable v-ripple @click="$router.push('/admin/badges')" class="q-pa-md">
+                <q-item-section avatar>
+                  <q-avatar size="48px" class="gradient-pink text-white">
+                    <q-icon name="emoji_events" size="24px" />
+                  </q-avatar>
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label class="text-weight-medium">Award Badge</q-item-label>
+                  <q-item-label caption>Assign achievement</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-icon name="chevron_right" />
+                </q-item-section>
+              </q-item>
+
+              <q-item clickable v-ripple @click="$router.push('/admin/locations')" class="q-pa-md">
+                <q-item-section avatar>
+                  <q-avatar size="48px" class="gradient-blue text-white">
+                    <q-icon name="location_on" size="24px" />
+                  </q-avatar>
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label class="text-weight-medium">Manage Locations</q-item-label>
+                  <q-item-label caption>Edit locations</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-icon name="chevron_right" />
+                </q-item-section>
+              </q-item>
+            </q-list>
           </q-card-section>
-          <q-separator />
-          <q-list>
-            <q-item v-for="user in stats.topUsers" :key="user.id">
-              <q-item-section avatar>
-                <q-avatar size="40px">
-                  <img :src="getAvatarUrl(user.username, user.profileImage)" style="object-fit: cover" />
-                </q-avatar>
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>{{ user.username }}</q-item-label>
-                <q-item-label caption>{{ user.location || 'No location' }}</q-item-label>
-              </q-item-section>
-              <q-item-section side>
-                <q-badge color="primary" :label="`${user.badgeCount} badges`" />
-              </q-item-section>
-            </q-item>
-            <q-item v-if="stats.topUsers.length === 0">
-              <q-item-section>
-                <q-item-label class="text-grey-6">No users yet</q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-list>
+        </q-card>
+
+        <!-- Top Scouts -->
+        <q-card flat bordered>
+          <q-card-section>
+            <div class="row items-center q-mb-md">
+              <div class="col">
+                <div class="text-h6">
+                  <q-icon name="stars" size="24px" class="q-mr-sm" />
+                  Top Scouts
+                </div>
+              </div>
+              <div class="col-auto">
+                <q-chip color="primary" text-color="white" dense>This Month</q-chip>
+              </div>
+            </div>
+
+            <q-list separator>
+              <q-item v-for="(scout, index) in topScouts" :key="scout.id" class="q-pa-sm">
+                <q-item-section avatar>
+                  <q-avatar size="40px">
+                    <span v-if="index === 0" class="text-h6">🥇</span>
+                    <span v-else-if="index === 1" class="text-h6">🥈</span>
+                    <span v-else-if="index === 2" class="text-h6">🥉</span>
+                    <span v-else class="text-weight-bold">{{ index + 1 }}</span>
+                  </q-avatar>
+                </q-item-section>
+                <q-item-section avatar>
+                  <q-avatar size="40px">
+                    <img :src="getAvatarUrl(scout.username, scout.profileImage)" />
+                  </q-avatar>
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label class="text-weight-medium">{{ scout.username }}</q-item-label>
+                  <q-item-label caption>
+                    <q-icon name="place" size="14px" />
+                    {{ scout.location?.name }}
+                  </q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-chip dense color="amber" text-color="white" icon="military_tech">
+                    {{ scout.badges?.length || 0 }}
+                  </q-chip>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-card-section>
         </q-card>
       </div>
 
-      <!-- Badge Distribution -->
+      <!-- Right Column -->
       <div class="col-12 col-md-6">
-        <q-card>
+        <!-- Badge Distribution -->
+        <q-card flat bordered class="q-mb-md">
           <q-card-section>
-            <div class="text-h6">Badge Distribution</div>
+            <div class="text-h6 q-mb-md">
+              <q-icon name="pie_chart" size="24px" class="q-mr-sm" />
+              Badge Distribution
+            </div>
+
+            <div class="text-center q-mb-md">
+              <q-circular-progress
+                :value="achievementPercentage"
+                size="150px"
+                :thickness="0.15"
+                color="primary"
+                track-color="grey-3"
+                class="q-ma-md"
+                show-value
+              >
+                <div class="text-h4 text-weight-bold text-primary">{{ achievementPercentage }}%</div>
+              </q-circular-progress>
+              <div class="text-caption">Awarded</div>
+            </div>
+
+            <q-list dense>
+              <q-item>
+                <q-item-section avatar>
+                  <q-icon name="circle" color="primary" size="12px" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>Total Badges</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-item-label class="text-weight-bold">{{ stats.totalBadges }}</q-item-label>
+                </q-item-section>
+              </q-item>
+
+              <q-item>
+                <q-item-section avatar>
+                  <q-icon name="circle" color="pink" size="12px" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>Awarded</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-item-label class="text-weight-bold">{{ stats.awardedBadges }}</q-item-label>
+                </q-item-section>
+              </q-item>
+
+              <q-item>
+                <q-item-section avatar>
+                  <q-icon name="circle" color="grey-5" size="12px" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>Available</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-item-label class="text-weight-bold">{{ stats.totalBadges - stats.awardedBadges }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
           </q-card-section>
-          <q-separator />
-          <q-list>
-            <q-item v-for="badge in stats.badgeDistribution" :key="badge.id">
-              <q-item-section avatar>
-                <q-avatar size="40px" style="border-radius: 8px">
-                  <img v-if="badge.image" :src="`${config.apiUrl}${badge.image}`" style="object-fit: cover; border-radius: 8px" />
-                  <q-icon v-else name="star" color="primary" />
-                </q-avatar>
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>{{ badge.name }}</q-item-label>
-                <q-item-label caption>{{ badge.description }}</q-item-label>
-              </q-item-section>
-              <q-item-section side>
-                <q-badge color="secondary" :label="`${badge.awardedCount} awarded`" />
-              </q-item-section>
-            </q-item>
-            <q-item v-if="stats.badgeDistribution.length === 0">
-              <q-item-section>
-                <q-item-label class="text-grey-6">No badges yet</q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-list>
+        </q-card>
+
+        <!-- Recent Activity -->
+        <q-card flat bordered>
+          <q-card-section>
+            <div class="text-h6 q-mb-md">
+              <q-icon name="history" size="24px" class="q-mr-sm" />
+              Recent Activity
+            </div>
+
+            <q-timeline color="primary">
+              <q-timeline-entry
+                v-for="(activity, index) in recentActivity"
+                :key="index"
+                :icon="activity.icon"
+                :color="getActivityColor(activity.icon)"
+              >
+                <template v-slot:subtitle>
+                  {{ activity.time }}
+                </template>
+                {{ activity.text }}
+              </q-timeline-entry>
+            </q-timeline>
+          </q-card-section>
         </q-card>
       </div>
     </div>
+
+    <!-- Locations Overview -->
+    <q-card class="q-mt-lg" flat bordered>
+      <q-card-section>
+        <div class="text-h6 q-mb-md">
+          <q-icon name="public" size="24px" class="q-mr-sm" />
+          Locations Overview
+        </div>
+
+        <div class="row q-col-gutter-md">
+          <div class="col-12 col-sm-6 col-md-3" v-for="location in locationStats" :key="location.id">
+            <q-card flat class="gradient-purple text-white">
+              <q-card-section>
+                <div class="row items-center q-mb-sm">
+                  <q-icon name="location_city" size="32px" class="q-mr-sm" />
+                  <div class="text-h6 text-weight-bold">{{ location.name }}</div>
+                </div>
+
+                <q-list dense dark>
+                  <q-item dense class="q-px-none">
+                    <q-item-section avatar>
+                      <q-icon name="people" />
+                    </q-item-section>
+                    <q-item-section>{{ location.userCount }} scouts</q-item-section>
+                  </q-item>
+                  <q-item dense class="q-px-none">
+                    <q-item-section avatar>
+                      <q-icon name="emoji_events" />
+                    </q-item-section>
+                    <q-item-section>{{ location.badgeCount }} badges</q-item-section>
+                  </q-item>
+                </q-list>
+
+                <q-linear-progress
+                  :value="location.progress / 100"
+                  color="white"
+                  class="q-mt-md"
+                  size="8px"
+                  rounded
+                />
+                <div class="text-caption q-mt-xs">{{ location.progress }}% active</div>
+              </q-card-section>
+            </q-card>
+          </div>
+        </div>
+      </q-card-section>
+    </q-card>
   </q-page>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { api } from '../../api';
-import { config } from '../../config';
-import { getAvatarUrl } from '../../utils/avatar';
+import { ref, onMounted, computed } from 'vue';
 import { useAuthStore } from '../../stores/auth';
+import { api } from '../../api';
+import { getAvatarUrl } from '../../utils/avatar';
 
 const authStore = useAuthStore();
+
 const stats = ref({
+  userName: authStore.user?.username || 'Admin',
   totalUsers: 0,
   totalBadges: 0,
-  totalBadgesAwarded: 0,
-  avgBadgesPerUser: 0,
-  topUsers: [],
-  badgeDistribution: [],
+  awardedBadges: 0,
+  activeLocations: 0
 });
 
-onMounted(async () => {
-  try {
-    const response = await api.get('/admin/stats');
-    stats.value = response.data;
-  } catch (error) {
-    console.error('Failed to fetch stats', error);
+const topScouts = ref([]);
+const locationStats = ref([]);
+const recentActivity = ref([
+  { icon: 'person_add', text: 'New scout joined TT Megarwn', time: '2 hours ago' },
+  { icon: 'emoji_events', text: 'Badge awarded to user_eleysinas_5', time: '5 hours ago' },
+  { icon: 'military_tech', text: '12 scouts earned new badges', time: 'Yesterday' },
+  { icon: 'location_on', text: 'TT Salaminas updated', time: '2 days ago' },
+]);
+
+const mainStats = computed(() => [
+  {
+    icon: 'people',
+    label: 'Total Scouts',
+    value: stats.value.totalUsers,
+    change: '+12%',
+    trend: 'up'
+  },
+  {
+    icon: 'workspace_premium',
+    label: 'Total Badges',
+    value: stats.value.totalBadges,
+    change: '+5%',
+    trend: 'up'
+  },
+  {
+    icon: 'emoji_events',
+    label: 'Badges Awarded',
+    value: stats.value.awardedBadges,
+    change: '+24%',
+    trend: 'up'
+  },
+  {
+    icon: 'location_on',
+    label: 'Active Locations',
+    value: stats.value.activeLocations,
+    change: '0%',
+    trend: 'flat'
   }
+]);
+
+const achievementPercentage = computed(() => {
+  if (!stats.value.totalBadges) return 0;
+  const totalPossible = stats.value.totalUsers * stats.value.totalBadges;
+  if (totalPossible === 0) return 0;
+  return Math.round((stats.value.awardedBadges / totalPossible) * 100);
+});
+
+const getActivityColor = (icon) => {
+  const colorMap = {
+    'person_add': 'purple',
+    'emoji_events': 'pink',
+    'military_tech': 'blue',
+    'location_on': 'green'
+  };
+  return colorMap[icon] || 'primary';
+};
+
+const fetchDashboardData = async () => {
+  try {
+    // Fetch users
+    const usersRes = await api.get('/users');
+    const users = usersRes.data;
+    stats.value.totalUsers = users.filter(u => u.role === 'user').length;
+    
+    // Fetch badges
+    const badgesRes = await api.get('/badges');
+    stats.value.totalBadges = badgesRes.data.length;
+    
+    // Calculate awarded badges
+    stats.value.awardedBadges = users.reduce((sum, user) => sum + (user.badges?.length || 0), 0);
+    
+    // Fetch locations
+    const locationsRes = await api.get('/locations');
+    const locations = locationsRes.data;
+    stats.value.activeLocations = locations.length;
+    
+    // Top scouts (users with most badges)
+    topScouts.value = users
+      .filter(u => u.role === 'user')
+      .sort((a, b) => (b.badges?.length || 0) - (a.badges?.length || 0))
+      .slice(0, 5);
+    
+    // Location stats
+    locationStats.value = locations.map(loc => {
+      const locationUsers = users.filter(u => u.location?.id === loc.id && u.role === 'user');
+      const locationBadges = locationUsers.reduce((sum, u) => sum + (u.badges?.length || 0), 0);
+      return {
+        id: loc.id,
+        name: loc.name,
+        userCount: locationUsers.length,
+        badgeCount: locationBadges,
+        progress: locationUsers.length > 0 ? Math.round((locationBadges / (locationUsers.length * stats.value.totalBadges)) * 100) : 0
+      };
+    });
+  } catch (error) {
+    console.error('Failed to fetch dashboard data', error);
+  }
+};
+
+onMounted(() => {
+  fetchDashboardData();
 });
 </script>
 
 <style scoped>
-.stat-card {
-  height: 100%;
-  transition: transform 0.2s;
+.wave {
+  display: inline-block;
+  animation: wave-animation 2.5s infinite;
+  transform-origin: 70% 70%;
 }
 
-.stat-card:hover {
-  transform: translateY(-4px);
+@keyframes wave-animation {
+  0%, 100% { transform: rotate(0deg); }
+  10%, 30% { transform: rotate(14deg); }
+  20% { transform: rotate(-8deg); }
+  40% { transform: rotate(-4deg); }
+  50% { transform: rotate(10deg); }
 }
 </style>

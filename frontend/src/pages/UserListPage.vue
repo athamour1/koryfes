@@ -5,7 +5,7 @@
       <div class="container">
         <h1 class="feed-title">Scouts Community</h1>
         <p class="feed-subtitle">Discover fellow scouts and their achievements</p>
-        
+
         <!-- Search Bar -->
         <div class="search-section">
           <q-input
@@ -23,21 +23,8 @@
               <q-icon name="close" class="cursor-pointer" @click="filterName = ''; fetchUsers()" />
             </template>
           </q-input>
-          
-          <q-select
-            v-model="filterLocation"
-            :options="locationOptions"
-            outlined
-            rounded
-            placeholder="Filter by location"
-            class="location-filter"
-            clearable
-            @update:model-value="fetchUsers"
-          >
-            <template v-slot:prepend>
-              <q-icon name="place" />
-            </template>
-          </q-select>
+
+
         </div>
       </div>
     </div>
@@ -54,7 +41,7 @@
             <q-avatar size="80px" class="user-avatar">
               <img :src="getAvatarUrl(user.username, user.profileImage)" style="border-radius: 50%; object-fit: cover;" />
             </q-avatar>
-            
+
             <div class="user-info">
               <h3 class="user-name">{{ user.username }}</h3>
               <div class="user-location">
@@ -85,10 +72,10 @@
               <q-icon name="military_tech" size="18px" />
               Achievements
             </h4>
-            
+
             <div v-if="user.badges && user.badges.length > 0" class="badges-grid">
               <div
-                v-for="badge in user.badges.slice(0, 6)"
+                v-for="badge in user.badges.slice(0, 3)"
                 :key="badge.id"
                 class="badge-item"
               >
@@ -106,16 +93,16 @@
                   </div>
                 </q-tooltip>
               </div>
-              
+
               <!-- More Badges Indicator -->
-              <div v-if="user.badges.length > 6" class="more-badges">
+              <div v-if="user.badges.length > 3" class="more-badges">
                 <q-avatar size="50px" class="more-avatar">
-                  <div class="more-count">+{{ user.badges.length - 6 }}</div>
+                  <div class="more-count">+{{ user.badges.length - 3 }}</div>
                 </q-avatar>
-                <q-tooltip>{{ user.badges.length - 6 }} more badges</q-tooltip>
+                <q-tooltip>{{ user.badges.length - 3 }} more badges</q-tooltip>
               </div>
             </div>
-            
+
             <div v-else class="no-badges">
               <q-icon name="emoji_events" size="40px" color="grey-5" />
               <p>No badges yet</p>
@@ -131,6 +118,7 @@
               label="View Profile"
               icon-right="arrow_forward"
               class="view-profile-btn"
+              @click="$router.push(`/user/${user.id}`)"
             />
           </div>
         </div>
@@ -149,35 +137,29 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useUserStore } from '../stores/user';
+import { useAuthStore } from '../stores/auth';
 import { config } from '../config';
 import { getAvatarUrl } from '../utils/avatar';
 
 const userStore = useUserStore();
+const authStore = useAuthStore();
 const filterName = ref('');
-const filterLocation = ref('');
 
-const locationOptions = ref([
-  'TT Megarwn',
-  'TT Eleysinas',
-  'TT Salaminas',
-  'Admin HQ'
-]);
-
-// Filter to show only regular users (scouts), not admins or super admins
+// Filter to show only regular users (scouts) from the same location
 const filteredUsers = computed(() => {
   let users = userStore.users.filter(u => u.role === 'user');
-  
+
+  // Filter by current user's location (unless super admin)
+  if (!authStore.isSuperAdmin && authStore.user?.location?.id) {
+    users = users.filter(u => u.location?.id === authStore.user.location.id);
+  }
+
   // Apply name filter
   if (filterName.value) {
     const search = filterName.value.toLowerCase();
     users = users.filter(u => u.username.toLowerCase().includes(search));
   }
-  
-  // Apply location filter
-  if (filterLocation.value) {
-    users = users.filter(u => u.location?.name === filterLocation.value);
-  }
-  
+
   return users;
 });
 
@@ -192,8 +174,8 @@ onMounted(async () => {
 
 <style scoped>
 .social-feed-page {
-  background: linear-gradient(180deg, #f8f9fa 0%, #ffffff 100%);
   min-height: 100vh;
+  padding: 20px;
   padding-bottom: 40px;
 }
 
@@ -205,10 +187,11 @@ onMounted(async () => {
 
 /* Header */
 .feed-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--q-primary) 0%, var(--q-secondary) 100%);
   padding: 60px 20px 80px;
   margin-bottom: -40px;
   position: relative;
+  border-radius: 24px;
 }
 
 .feed-title {
@@ -246,8 +229,13 @@ onMounted(async () => {
 
 .search-input :deep(.q-field__control),
 .location-filter :deep(.q-field__control) {
-  background: white;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  background: white;
+}
+
+body.body--dark .search-input :deep(.q-field__control),
+body.body--dark .location-filter :deep(.q-field__control) {
+  background: var(--q-dark);
 }
 
 /* Cards Grid */
@@ -259,7 +247,6 @@ onMounted(async () => {
 }
 
 .user-card {
-  background: white;
   border-radius: 20px;
   padding: 24px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -275,7 +262,7 @@ onMounted(async () => {
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(90deg, var(--q-primary) 0%, var(--q-secondary) 100%);
   opacity: 0;
   transition: opacity 0.3s;
 }
@@ -298,7 +285,6 @@ onMounted(async () => {
 }
 
 .user-avatar {
-  /* border: 3px solid #667eea; */
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
@@ -314,14 +300,13 @@ onMounted(async () => {
   font-size: 1.3rem;
   font-weight: 600;
   margin: 0 0 4px;
-  color: #2c3e50;
 }
 
 .user-location {
   display: flex;
   align-items: center;
   gap: 4px;
-  color: #7f8c8d;
+  opacity: 0.7;
   font-size: 0.95rem;
 }
 
@@ -341,20 +326,20 @@ onMounted(async () => {
 .stat-value {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #667eea;
+  color: var(--q-primary);
   margin-bottom: 4px;
 }
 
 .stat-label {
   font-size: 0.85rem;
-  color: #95a5a6;
+  opacity: 0.6;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .stat-divider {
   width: 1px;
-  background: #ecf0f1;
+  opacity: 0.1;
   margin: 0 16px;
 }
 
@@ -370,7 +355,6 @@ onMounted(async () => {
 .badges-title {
   font-size: 1rem;
   font-weight: 600;
-  color: #2c3e50;
   margin: 0 0 16px;
   display: flex;
   align-items: center;
@@ -394,10 +378,15 @@ onMounted(async () => {
 }
 
 .badge-avatar {
-  background: #f8f9fa;
-  border: 2px solid #e9ecef;
+  background: transparent;
+  border: none;
   border-radius: 12px;
   padding: 4px;
+}
+
+body.body--dark .badge-avatar {
+  background: transparent;
+  border: none;
 }
 
 .badge-avatar img {
@@ -410,7 +399,7 @@ onMounted(async () => {
 }
 
 .more-avatar {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--q-primary) 0%, var(--q-secondary) 100%);
   color: white;
   font-weight: 700;
   font-size: 0.9rem;
@@ -426,7 +415,7 @@ onMounted(async () => {
 .no-badges {
   text-align: center;
   padding: 40px 20px;
-  color: #95a5a6;
+  opacity: 0.5;
 }
 
 .no-badges p {
@@ -439,7 +428,11 @@ onMounted(async () => {
   display: flex;
   justify-content: center;
   padding-top: 12px;
-  border-top: 1px solid #ecf0f1;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+body.body--dark .card-footer {
+  border-top-color: rgba(255, 255, 255, 0.1);
 }
 
 .view-profile-btn {
@@ -464,12 +457,11 @@ onMounted(async () => {
 .empty-state {
   text-align: center;
   padding: 80px 20px;
-  color: #95a5a6;
+  opacity: 0.6;
 }
 
 .empty-state h3 {
   margin: 16px 0 8px;
-  color: #7f8c8d;
 }
 
 .empty-state p {
@@ -481,25 +473,25 @@ onMounted(async () => {
   .feed-title {
     font-size: 2rem;
   }
-  
+
   .feed-subtitle {
     font-size: 1rem;
   }
-  
+
   .search-section {
     flex-direction: column;
   }
-  
+
   .search-input,
   .location-filter {
     width: 100%;
   }
-  
+
   .cards-grid {
     grid-template-columns: 1fr;
     gap: 16px;
   }
-  
+
   .user-card {
     padding: 20px;
   }

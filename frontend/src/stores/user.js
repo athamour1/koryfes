@@ -27,16 +27,16 @@ export const useUserStore = defineStore('user', {
         },
         async updateUser(userId, data) {
             try {
-                await api.patch(`/users/${userId}`, data);
-                return true;
+                const response = await api.patch(`/users/${userId}`, data);
+                return response.data;
             } catch (error) {
                 console.error('Update user failed', error);
-                return false;
+                return null;
             }
         },
-        async assignBadge(userId, badgeId) {
+        async assignBadge(userId, badgeId, acquiredAt) {
             try {
-                await api.post(`/users/${userId}/badges`, { badgeId });
+                await api.post(`/users/${userId}/badges`, { badgeId, acquiredAt });
                 return true;
             } catch (error) {
                 console.error('Assign badge failed', error);
@@ -49,6 +49,15 @@ export const useUserStore = defineStore('user', {
                 return true;
             } catch (error) {
                 console.error('Remove badge failed', error);
+                return false;
+            }
+        },
+        async updateBadgeDate(userId, badgeId, date) {
+            try {
+                await api.patch(`/users/${userId}/badges/${badgeId}`, { acquiredAt: date });
+                return true;
+            } catch (error) {
+                console.error('Update badge date failed', error);
                 return false;
             }
         },
@@ -83,7 +92,7 @@ export const useUserStore = defineStore('user', {
                 const response = await api.post('/users', userData);
                 // Refresh users list after creation
                 await this.fetchUsers();
-                return true;
+                return response.data;
             } catch (error) {
                 console.error('Create user failed', error);
                 if (error.response && error.response.status === 409) {

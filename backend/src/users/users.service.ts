@@ -1,7 +1,8 @@
 import { Injectable, ConflictException, InternalServerErrorException, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
-import { User, UserRole } from './entities/user.entity';
+import { User, UserRole, UnitRole } from './entities/user.entity';
+import { UserBadge } from './entities/user-badge.entity';
 import { BadgesService } from '../badges/badges.service';
 import { LocationsService } from '../locations/locations.service';
 import * as bcrypt from 'bcrypt';
@@ -11,6 +12,8 @@ export class UsersService implements OnModuleInit {
     constructor(
         @InjectRepository(User)
         private usersRepository: Repository<User>,
+        @InjectRepository(UserBadge)
+        private userBadgeRepository: Repository<UserBadge>,
         private badgesService: BadgesService,
         private locationsService: LocationsService,
     ) { }
@@ -42,18 +45,16 @@ export class UsersService implements OnModuleInit {
         }
     }
 
-    async create(userData: Partial<User> & { locationName?: string }): Promise<User> {
+    async create(userData: Partial<User> & { locationName?: string }): Promise<any> {
         // Handle location lookup if provided as string name
         let locationEntity = userData.location;
         if (userData.locationName) {
             // Find or create location
             let location = await this.locationsService.findByName(userData.locationName);
             if (!location) {
-                // Only Super Admin can create new locations implicitly? Or maybe just allow it for now.
-                // Ideally, locations should be pre-created. But for flexibility let's allow create.
                 location = await this.locationsService.create({ name: userData.locationName });
             }
-            locationEntity = location; // Assign to locationEntity, not user.location yet
+            locationEntity = location;
         }
 
         const hashedPassword = await bcrypt.hash(userData.password, 10);
@@ -66,8 +67,18 @@ export class UsersService implements OnModuleInit {
             isAdmin: userData.role === UserRole.SUPER_ADMIN || userData.role === UserRole.ADMIN
         });
 
+        // Enforce unique Leader/Deputy Leader per unit
+        let demotedUser = null;
+        if (user.unit && user.unitRole) {
+            demotedUser = await this.ensureUniqueUnitRole(user.unit.id, user.unitRole);
+        }
+
         try {
-            return await this.usersRepository.save(user);
+            const savedUser = await this.usersRepository.save(user);
+            return {
+                user: savedUser,
+                demotedUser
+            };
         } catch (error) {
             if (error.code === 'SQLITE_CONSTRAINT') {
                 throw new ConflictException('Username already exists');
@@ -77,50 +88,78 @@ export class UsersService implements OnModuleInit {
     }
 
     async findByUsername(username: string): Promise<User | undefined> {
-        return this.usersRepository.findOne({ where: { username }, relations: ['badges', 'location'] });
+        const user = await this.usersRepository.findOne({
+            where: { username },
+            relations: ['userBadges', 'userBadges.badge', 'location', 'unit']
+        });
+        return this.transformUser(user);
     }
 
     async findOne(id: number): Promise<User | undefined> {
-        return this.usersRepository.findOne({ where: { id }, relations: ['badges', 'location'] });
+        const user = await this.usersRepository.findOne({
+            where: { id },
+            relations: ['userBadges', 'userBadges.badge', 'location', 'unit']
+        });
+        return this.transformUser(user);
     }
 
     async findAll(locationId?: number, name?: string): Promise<User[]> {
         const where: any = {};
-        // If we want to filter by location
         if (locationId) {
             where.location = { id: locationId };
         }
         if (name) {
             where.username = Like(`%${name}%`);
         }
-        return this.usersRepository.find({ where, relations: ['badges', 'location'] });
+        const users = await this.usersRepository.find({
+            where,
+            relations: ['userBadges', 'userBadges.badge', 'location', 'unit']
+        });
+        return users.map(user => this.transformUser(user));
     }
 
     async getAllIncludingAdmins(): Promise<User[]> {
-        return this.usersRepository.find({ relations: ['badges', 'location'] });
+        const users = await this.usersRepository.find({
+            relations: ['userBadges', 'userBadges.badge', 'location']
+        });
+        return users.map(user => this.transformUser(user));
     }
 
-    async assignBadge(userId: number, badgeId: number): Promise<User> {
-        const user = await this.usersRepository.findOne({ where: { id: userId }, relations: ['badges', 'location'] });
+    async assignBadge(userId: number, badgeId: number, acquiredAt?: Date): Promise<User> {
+        const user = await this.usersRepository.findOne({ where: { id: userId } });
         const badge = await this.badgesService.findOne(badgeId);
-        if (!user.badges) {
-            user.badges = [];
+
+        // Check if already assigned
+        const existing = await this.userBadgeRepository.findOne({
+            where: { user: { id: userId }, badge: { id: badgeId } }
+        });
+
+        if (!existing) {
+            const userBadge = this.userBadgeRepository.create({
+                user,
+                badge,
+                acquiredAt: acquiredAt || new Date()
+            });
+            await this.userBadgeRepository.save(userBadge);
         }
-        user.badges.push(badge);
-        await this.usersRepository.save(user);
+
         return this.findOne(userId);
     }
 
     async removeBadge(userId: number, badgeId: number): Promise<User> {
-        const user = await this.usersRepository.findOne({ where: { id: userId }, relations: ['badges', 'location'] });
-        if (user.badges) {
-            user.badges = user.badges.filter(badge => badge.id !== badgeId);
-            await this.usersRepository.save(user);
-        }
+        await this.userBadgeRepository.delete({ user: { id: userId }, badge: { id: badgeId } });
         return this.findOne(userId);
     }
 
-    async update(id: number, updateData: Partial<User> & { locationName?: string }): Promise<User> {
+    async updateBadgeDate(userId: number, badgeId: number, date: Date): Promise<User> {
+        await this.userBadgeRepository.update(
+            { user: { id: userId }, badge: { id: badgeId } },
+            { acquiredAt: date }
+        );
+        return this.findOne(userId);
+    }
+
+    async update(id: number, updateData: Partial<User> & { locationName?: string }): Promise<any> {
         if (updateData.locationName) {
             let loc = await this.locationsService.findByName(updateData.locationName);
             if (!loc) {
@@ -134,9 +173,19 @@ export class UsersService implements OnModuleInit {
             updateData.password = await bcrypt.hash(updateData.password, 10);
         }
 
-        await this.usersRepository.save({ ...updateData, id }); // Use save to handle relations properly or update with relation id
-        // update() with relations is tricky in TypeORM. save() is safer if we have the ID.
-        return this.findOne(id);
+        // Enforce unique Leader/Deputy Leader per unit
+        let demotedUser = null;
+        if (updateData.unit && updateData.unitRole) {
+            demotedUser = await this.ensureUniqueUnitRole(updateData.unit.id, updateData.unitRole, id);
+        }
+
+        await this.usersRepository.save({ ...updateData, id });
+        const user = await this.findOne(id);
+
+        return {
+            user,
+            demotedUser
+        };
     }
 
     async updateProfileImage(id: number, imagePath: string): Promise<User> {
@@ -150,6 +199,56 @@ export class UsersService implements OnModuleInit {
 
     async remove(id: number): Promise<void> {
         await this.usersRepository.delete(id);
+    }
+
+    // Ensure only one Leader and one Deputy Leader per unit
+    private async ensureUniqueUnitRole(
+        unitId: number,
+        newRole: UnitRole,
+        excludeUserId?: number
+    ): Promise<{ id: number; username: string; role: string } | null> {
+        if (newRole === UnitRole.LEADER || newRole === UnitRole.DEPUTY_LEADER) {
+            // Find existing user with this role in the unit
+            const existingUser = await this.usersRepository.findOne({
+                where: {
+                    unit: { id: unitId },
+                    unitRole: newRole
+                }
+            });
+
+            if (existingUser && existingUser.id !== excludeUserId) {
+                // Demote to member
+                const demotedInfo = {
+                    id: existingUser.id,
+                    username: existingUser.username,
+                    role: newRole
+                };
+
+                existingUser.unitRole = UnitRole.MEMBER;
+                await this.usersRepository.save(existingUser);
+                console.log(`Demoted user ${existingUser.id} from ${newRole} to MEMBER in unit ${unitId}`);
+
+                return demotedInfo;
+            }
+        }
+        return null;
+    }
+
+    // Helper to transform User entity to match frontend expectations (flattening userBadges to badges with acquiredAt)
+    private transformUser(user: User): any {
+        if (!user) return user;
+        const plainUser = { ...user };
+        if (plainUser.userBadges) {
+            plainUser['badges'] = plainUser.userBadges.map(ub => ({
+                ...ub.badge,
+                acquiredAt: ub.acquiredAt
+            }));
+            delete plainUser.userBadges;
+        }
+        if (plainUser.unit) {
+            plainUser['unitId'] = plainUser.unit.id;
+        }
+        return plainUser;
     }
 }
 

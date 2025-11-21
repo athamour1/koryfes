@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { BadgesModule } from './badges/badges.module';
 import { AdminModule } from './admin/admin.module';
 import { LocationsModule } from './locations/locations.module';
+import { UnitsModule } from './units/units.module';
 
 @Module({
   imports: [
@@ -36,8 +37,11 @@ import { LocationsModule } from './locations/locations.module';
     BadgesModule,
     AdminModule,
     LocationsModule,
+    UnitsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule { }
+
+

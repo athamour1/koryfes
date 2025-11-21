@@ -1,5 +1,5 @@
 <template>
-  <q-page class="flex flex-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+  <q-page class="flex flex-center gradient-purple">
     <q-card style="width: 100%; max-width: 400px; margin: 16px;">
       <!-- Toggle Tabs -->
       <q-tabs
@@ -145,7 +145,17 @@ const passwordRules = computed(() => {
 
 const handleLogin = async () => {
   try {
-    await authStore.login(loginForm.value.username, loginForm.value.password);
+    const success = await authStore.login(loginForm.value.username, loginForm.value.password);
+    
+    if (!success) {
+      $q.notify({
+        color: 'negative',
+        message: 'Invalid username or password',
+        icon: 'report_problem',
+        position: 'top'
+      });
+      return;
+    }
     
     // Redirect based on user role
     if (authStore.isAdmin) {
@@ -155,10 +165,12 @@ const handleLogin = async () => {
     }
   } catch (error) {
     console.error('Login failed', error);
+    const errorMessage = error.response?.data?.message || 'Invalid username or password';
     $q.notify({
       color: 'negative',
-      message: 'Login failed',
-      icon: 'report_problem'
+      message: errorMessage,
+      icon: 'report_problem',
+      position: 'top'
     });
   }
 };

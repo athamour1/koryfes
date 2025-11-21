@@ -1,11 +1,19 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToMany, JoinTable, ManyToOne } from 'typeorm';
-import { Badge } from '../../badges/entities/badge.entity';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne } from 'typeorm';
+import { Exclude } from 'class-transformer';
+import { UserBadge } from './user-badge.entity';
 import { Location } from '../../locations/entities/location.entity';
+import { Unit } from '../../units/entities/unit.entity';
 
 export enum UserRole {
     SUPER_ADMIN = 'super_admin',
     ADMIN = 'admin',
     USER = 'user',
+}
+
+export enum UnitRole {
+    LEADER = 'leader',
+    DEPUTY_LEADER = 'deputy_leader',
+    MEMBER = 'member',
 }
 
 @Entity()
@@ -16,6 +24,7 @@ export class User {
     @Column({ unique: true })
     username: string;
 
+    @Exclude()
     @Column()
     password?: string; // Optional because we might not select it by default
 
@@ -35,17 +44,29 @@ export class User {
     @ManyToOne(() => Location, (location) => location.users, { nullable: true, onDelete: 'SET NULL' })
     location: Location;
 
+    @ManyToOne(() => Unit, (unit) => unit.users, { nullable: true, onDelete: 'SET NULL' })
+    unit: Unit;
+
+    @Column({
+        type: 'simple-enum',
+        enum: UnitRole,
+        default: UnitRole.MEMBER,
+        nullable: true,
+    })
+    unitRole: UnitRole;
+
     @Column({ nullable: true })
     profileImage: string;
 
+    @Exclude()
     @Column({ nullable: true })
     resetPasswordToken: string;
 
+    @Exclude()
     @Column({ nullable: true })
     resetPasswordExpires: Date;
 
-    @ManyToMany(() => Badge, (badge) => badge.users)
-    @JoinTable()
-    badges: Badge[];
+    @OneToMany(() => UserBadge, (userBadge) => userBadge.user, { cascade: true })
+    userBadges: UserBadge[];
 }
 

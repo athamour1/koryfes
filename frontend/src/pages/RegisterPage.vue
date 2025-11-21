@@ -1,5 +1,5 @@
 <template>
-  <q-page class="flex flex-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+  <q-page class="flex flex-center gradient-purple">
     <q-card style="width: 100%; max-width: 400px; margin: 16px;">
       <q-card-section class="text-center q-pb-none">
         <div class="text-h4 text-weight-bold">Create Account</div>
