@@ -4,8 +4,8 @@
     <div class="gradient-purple text-white q-pa-lg">
       <div class="text-center" style="max-width: 600px; margin: 0 auto;">
         <q-icon name="person" size="48px" class="q-mb-sm" />
-        <div class="text-h4 text-weight-bold">Profile Settings</div>
-        <div class="text-body1" style="opacity: 0.9;">Manage your profile information</div>
+        <div class="text-h4 text-weight-bold">{{ $t('profilePage.title') }}</div>
+        <div class="text-body1" style="opacity: 0.9;">{{ $t('profilePage.subtitle') }}</div>
       </div>
     </div>
 
@@ -15,7 +15,7 @@
         <q-card-section>
           <div class="text-h6 q-mb-md">
             <q-icon name="account_circle" class="q-mr-sm" />
-            Profile Information
+            {{ $t('profilePage.infoTitle') }}
           </div>
         </q-card-section>
 
@@ -31,7 +31,7 @@
           <div>
             <q-file
               v-model="imageFile"
-              label="Upload Profile Image"
+              :label="$t('profilePage.uploadImage')"
               filled
               dense
               accept=".jpg, .png, .jpeg"
@@ -52,10 +52,10 @@
         <q-card-section>
           <q-input 
             v-model="location" 
-            label="Location" 
+            :label="$t('profilePage.location')" 
             filled 
             dense
-            hint="Your assigned location"
+            :hint="$t('profilePage.locationHint')"
           >
             <template v-slot:prepend>
               <q-icon name="location_on" />
@@ -66,7 +66,7 @@
         <!-- Actions -->
         <q-card-actions align="right" class="q-pa-md">
           <q-btn 
-            label="Save Changes" 
+            :label="$t('profilePage.saveButton')" 
             color="primary" 
             unelevated
             @click="updateProfile"
@@ -81,6 +81,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../stores/auth';
 import { useUserStore } from '../stores/user';
 import { useQuasar } from 'quasar';
@@ -92,6 +93,7 @@ const userStore = useUserStore();
 const location = ref('');
 const imageFile = ref(null);
 const $q = useQuasar();
+const { t } = useI18n();
 
 const profileImage = computed(() => {
   return getAvatarUrl(authStore.user?.username, authStore.user?.profileImage);
@@ -107,10 +109,10 @@ onMounted(async () => {
 const updateProfile = async () => {
   const success = await userStore.updateProfile({ location: location.value });
   if (success) {
-    $q.notify({ color: 'positive', message: 'Profile updated' });
+    $q.notify({ color: 'positive', message: t('profilePage.notifications.updateSuccess') });
     await authStore.fetchProfile();
   } else {
-    $q.notify({ color: 'negative', message: 'Update failed' });
+    $q.notify({ color: 'negative', message: t('profilePage.notifications.updateError') });
   }
 };
 
@@ -118,11 +120,11 @@ const uploadImage = async (file) => {
   if (file) {
     const success = await userStore.uploadProfileImage(file);
     if (success) {
-      $q.notify({ color: 'positive', message: 'Image uploaded' });
+      $q.notify({ color: 'positive', message: t('profilePage.notifications.imageSuccess') });
       await authStore.fetchProfile();
       imageFile.value = null;
     } else {
-      $q.notify({ color: 'negative', message: 'Upload failed' });
+      $q.notify({ color: 'negative', message: t('profilePage.notifications.imageError') });
     }
   }
 };

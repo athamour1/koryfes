@@ -5,8 +5,8 @@
       <div class="gradient-purple text-white q-pa-lg q-mb-lg" style="border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 1200px; margin: 0 auto;">
         <div class="text-center" style="max-width: 800px; margin: 0 auto;">
           <q-icon name="groups" size="48px" class="q-mb-sm" />
-          <div class="text-h4 text-weight-bold q-mb-sm">Unit Management</div>
-          <div class="text-body1" style="opacity: 0.9;">Manage scout units and their members</div>
+          <div class="text-h4 text-weight-bold q-mb-sm">{{ $t('adminUnits.title') }}</div>
+          <div class="text-body1" style="opacity: 0.9;">{{ $t('adminUnits.subtitle') }}</div>
         </div>
       </div>
     </div>
@@ -16,7 +16,7 @@
 
       <q-card flat bordered>
         <q-table
-      title="Units"
+      :title="$t('adminUnits.tableTitle')"
       :rows="units"
       :columns="columns"
       row-key="id"
@@ -27,12 +27,12 @@
       :loading="loading"
     >
       <template v-slot:top-right>
-        <q-input borderless dense debounce="300" v-model="filter" placeholder="Search">
+        <q-input borderless dense debounce="300" v-model="filter" :placeholder="$t('adminUnits.searchPlaceholder')">
           <template v-slot:append>
             <q-icon name="search" />
           </template>
         </q-input>
-        <q-btn color="primary" icon="add" label="Create New Unit" class="q-ml-md" @click="openCreateDialog" />
+        <q-btn color="primary" icon="add" :label="$t('adminUnits.createButton')" class="q-ml-md" @click="openCreateDialog" />
       </template>
 
       <template v-slot:body-cell-flag="props">
@@ -61,7 +61,7 @@
         <div class="full-width row flex-center text-grey q-gutter-sm q-pa-lg">
           <q-icon size="2em" :name="filter ? 'search_off' : 'groups'" />
           <span>
-            {{ filter ? 'No units match your search' : 'No units created yet' }}
+            {{ filter ? $t('adminUnits.noData.search') : $t('adminUnits.noData.empty') }}
           </span>
         </div>
       </template>
@@ -73,7 +73,7 @@
     <q-dialog v-model="unitDialog">
       <q-card style="min-width: 500px">
         <q-card-section>
-          <div class="text-h6">{{ isEditing ? 'Edit Unit' : 'Create New Unit' }}</div>
+          <div class="text-h6">{{ isEditing ? $t('adminUnits.dialog.editTitle') : $t('adminUnits.dialog.createTitle') }}</div>
         </q-card-section>
 
         <q-card-section>
@@ -103,8 +103,8 @@
               </div>
             </div>
 
-            <q-input filled v-model="unitForm.name" label="Unit Name" :rules="[val => !!val || 'Required']" />
-            <q-input filled v-model="unitForm.description" label="Description" type="textarea" autogrow />
+            <q-input filled v-model="unitForm.name" :label="$t('adminUnits.form.name')" :rules="[val => !!val || $t('adminUnits.form.required')]" />
+            <q-input filled v-model="unitForm.description" :label="$t('adminUnits.form.description')" type="textarea" autogrow />
             
             <!-- Location Selection (Super Admin Only) -->
             <q-select
@@ -116,8 +116,8 @@
               option-label="name"
               emit-value
               map-options
-              label="Location"
-              :rules="[val => !!val || 'Location is required']"
+              :label="$t('adminUnits.form.location')"
+              :rules="[val => !!val || $t('adminUnits.form.locationRequired')]"
             >
               <template v-slot:prepend>
                 <q-icon name="location_on" />
@@ -125,8 +125,8 @@
             </q-select>
 
             <div class="row justify-end q-gutter-sm">
-              <q-btn label="Cancel" flat v-close-popup />
-              <q-btn :label="isEditing ? 'Save Changes' : 'Create'" type="submit" color="primary" :loading="loading" />
+              <q-btn :label="$t('general.cancel')" flat v-close-popup />
+              <q-btn :label="isEditing ? $t('general.save') : $t('general.create')" type="submit" color="primary" :loading="loading" />
             </div>
           </q-form>
         </q-card-section>
@@ -137,6 +137,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useUnitStore } from '../../stores/unit';
 import { useAuthStore } from '../../stores/auth';
 import { useQuasar } from 'quasar';
@@ -146,15 +147,16 @@ import { api } from '../../api';
 const unitStore = useUnitStore();
 const authStore = useAuthStore();
 const $q = useQuasar();
+const { t } = useI18n();
 
-const columns = [
-  { name: 'flag', label: 'Flag', field: 'flag', align: 'center' },
-  { name: 'name', label: 'Name', field: 'name', sortable: true, align: 'left' },
-  { name: 'description', label: 'Description', field: 'description', align: 'left', format: val => val && val.length > 50 ? val.substring(0, 50) + '...' : val },
-  { name: 'location', label: 'Location', field: row => row.location?.name || 'N/A', sortable: true, align: 'left' },
-  { name: 'members', label: 'Members', field: row => row.users?.length || 0, sortable: true, align: 'center' },
-  { name: 'actions', label: 'Actions', field: 'actions', align: 'right' }
-];
+const columns = computed(() => [
+  { name: 'flag', label: t('adminUnits.columns.flag'), field: 'flag', align: 'center' },
+  { name: 'name', label: t('adminUnits.columns.name'), field: 'name', sortable: true, align: 'left' },
+  { name: 'description', label: t('adminUnits.columns.description'), field: 'description', align: 'left', format: val => val && val.length > 50 ? val.substring(0, 50) + '...' : val },
+  { name: 'location', label: t('adminUnits.columns.location'), field: row => row.location?.name || 'N/A', sortable: true, align: 'left' },
+  { name: 'members', label: t('adminUnits.columns.members'), field: row => row.users?.length || 0, sortable: true, align: 'center' },
+  { name: 'actions', label: t('adminUnits.columns.actions'), field: 'actions', align: 'right' }
+]);
 
 const filter = ref('');
 const unitDialog = ref(false);
@@ -239,26 +241,26 @@ const saveUnit = async () => {
       await unitStore.uploadUnitFlag(result.id, uploadFile.value);
     }
     
-    $q.notify({ color: 'positive', message: `Unit ${isEditing.value ? 'updated' : 'created'} successfully`, icon: 'check' });
+    $q.notify({ color: 'positive', message: isEditing.value ? t('adminUnits.notifications.updateSuccess') : t('adminUnits.notifications.createSuccess'), icon: 'check' });
     unitDialog.value = false;
     await unitStore.fetchUnits();
   } else {
-    $q.notify({ color: 'negative', message: unitStore.error || 'Operation failed', icon: 'report_problem' });
+    $q.notify({ color: 'negative', message: unitStore.error || t('adminUnits.notifications.operationFailed'), icon: 'report_problem' });
   }
 };
 
 const confirmDeleteUnit = (unit) => {
   $q.dialog({
-    title: 'Confirm Delete',
-    message: `Are you sure you want to delete unit "${unit.name}"? This action cannot be undone.`,
+    title: t('adminUnits.delete.title'),
+    message: t('adminUnits.delete.message', { name: unit.name }),
     cancel: true,
     persistent: true
   }).onOk(async () => {
     const success = await unitStore.deleteUnit(unit.id);
     if (success) {
-      $q.notify({ color: 'positive', message: 'Unit deleted successfully', icon: 'check' });
+      $q.notify({ color: 'positive', message: t('adminUnits.notifications.deleteSuccess'), icon: 'check' });
     } else {
-      $q.notify({ color: 'negative', message: unitStore.error || 'Failed to delete unit', icon: 'report_problem' });
+      $q.notify({ color: 'negative', message: unitStore.error || t('adminUnits.notifications.deleteError'), icon: 'report_problem' });
     }
   });
 };

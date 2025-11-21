@@ -50,8 +50,8 @@ const routes = [
                 meta: { requiresAuth: true, requiresAdmin: true }
             },
             {
-                path: 'admin/badges',
-                component: () => import('../pages/admin/AdminBadgesPage.vue'),
+                path: 'admin/progress',
+                component: () => import('../pages/admin/AdminProgressPage.vue'),
                 meta: { requiresAuth: true, requiresAdmin: true }
             },
 

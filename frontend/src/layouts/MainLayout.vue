@@ -14,7 +14,7 @@
         />
 
         <q-toolbar-title>
-          Scout Badges
+          {{ $t('navigation.title') }}
         </q-toolbar-title>
 
         <!-- Dark Mode Toggle -->
@@ -26,7 +26,7 @@
           @click="toggleDarkMode"
           class="q-ml-sm"
         >
-          <q-tooltip>Toggle {{ $q.dark.isActive ? 'Light' : 'Dark' }} Mode</q-tooltip>
+          <q-tooltip>{{ $q.dark.isActive ? $t('navigation.toggleLight') : $t('navigation.toggleDark') }}</q-tooltip>
         </q-btn>
       </q-toolbar>
     </q-header>
@@ -40,28 +40,21 @@
       v-if="authStore.isAuthenticated"
     >
       <q-list>
-        <q-item-label header>Navigation</q-item-label>
+        <q-item-label header>{{ $t('navigation.header') }}</q-item-label>
 
         <template v-if="authStore.isAuthenticated">
-          <q-item clickable v-ripple to="/admin/dashboard" v-if="authStore.isAdmin">
-            <q-item-section avatar>
-              <q-icon name="dashboard" />
-            </q-item-section>
-            <q-item-section>Dashboard</q-item-section>
-          </q-item>
-
           <q-item clickable v-ripple to="/my-badges" v-if="!authStore.isAdmin">
             <q-item-section avatar>
               <q-icon name="emoji_events" />
             </q-item-section>
-            <q-item-section>My Badges</q-item-section>
+            <q-item-section>{{ $t('navigation.myBadges') }}</q-item-section>
           </q-item>
 
           <q-item clickable v-ripple to="/users">
             <q-item-section avatar>
               <q-icon name="people" />
             </q-item-section>
-            <q-item-section>Users</q-item-section>
+            <q-item-section>{{ $t('navigation.users') }}</q-item-section>
           </q-item>
 
           <q-item 
@@ -73,45 +66,58 @@
             <q-item-section avatar>
               <q-icon name="groups" />
             </q-item-section>
-            <q-item-section>My Unit</q-item-section>
-          </q-item>
-
-            <q-item clickable v-ripple to="/admin/units" active-class="text-accent" v-if="authStore.isAdmin">
-              <q-item-section avatar>
-                <q-icon name="groups" />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label>Units</q-item-label>
-              </q-item-section>
-            </q-item>
-
-          <q-item clickable v-ripple to="/admin/users" v-if="authStore.isAdmin" active-class="text-accent">
-            <q-item-section avatar>
-              <q-icon name="admin_panel_settings" />
-            </q-item-section>
-            <q-item-section>Admin Users</q-item-section>
-          </q-item>
-
-          <q-item clickable v-ripple to="/admin/badges" v-if="authStore.isSuperAdmin">
-            <q-item-section avatar>
-              <q-icon name="stars" />
-            </q-item-section>
-            <q-item-section>Admin Badges</q-item-section>
-          </q-item>
-
-          <q-item clickable v-ripple to="/admin/locations" v-if="authStore.isSuperAdmin">
-            <q-item-section avatar>
-              <q-icon name="location_on" />
-            </q-item-section>
-            <q-item-section>Locations</q-item-section>
+            <q-item-section>{{ $t('navigation.myUnit') }}</q-item-section>
           </q-item>
 
           <q-item clickable v-ripple to="/profile">
             <q-item-section avatar>
               <q-icon name="person" />
             </q-item-section>
-            <q-item-section>Profile</q-item-section>
+            <q-item-section>{{ $t('navigation.profile') }}</q-item-section>
           </q-item>
+
+          <!-- Admin Section -->
+          <template v-if="authStore.isAdmin">
+            <q-separator class="q-my-md" />
+            <q-item-label header>{{ $t('navigation.administration') }}</q-item-label>
+
+            <q-item clickable v-ripple to="/admin/dashboard">
+              <q-item-section avatar>
+                <q-icon name="dashboard" />
+              </q-item-section>
+              <q-item-section>{{ $t('navigation.dashboard') }}</q-item-section>
+            </q-item>
+
+            <q-item clickable v-ripple to="/admin/units" active-class="text-accent">
+              <q-item-section avatar>
+                <q-icon name="groups" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label>{{ $t('navigation.units') }}</q-item-label>
+              </q-item-section>
+            </q-item>
+
+            <q-item clickable v-ripple to="/admin/users" active-class="text-accent">
+              <q-item-section avatar>
+                <q-icon name="admin_panel_settings" />
+              </q-item-section>
+              <q-item-section>{{ $t('navigation.adminUsers') }}</q-item-section>
+            </q-item>
+
+            <q-item clickable v-ripple to="/admin/progress" v-if="authStore.isSuperAdmin">
+              <q-item-section avatar>
+                <q-icon name="trending_up" />
+              </q-item-section>
+              <q-item-section>{{ $t('navigation.progress') }}</q-item-section>
+            </q-item>
+
+            <q-item clickable v-ripple to="/admin/locations" v-if="authStore.isSuperAdmin">
+              <q-item-section avatar>
+                <q-icon name="location_on" />
+              </q-item-section>
+              <q-item-section>{{ $t('navigation.locations') }}</q-item-section>
+            </q-item>
+          </template>
 
           <q-separator />
 
@@ -122,7 +128,7 @@
             <q-item-section avatar>
               <q-icon name="logout" color="negative" />
             </q-item-section>
-            <q-item-section>Logout</q-item-section>
+            <q-item-section>{{ $t('navigation.logout') }}</q-item-section>
           </q-item>
         </template>
 
@@ -131,14 +137,14 @@
             <q-item-section avatar>
               <q-icon name="login" />
             </q-item-section>
-            <q-item-section>Login</q-item-section>
+            <q-item-section>{{ $t('navigation.login') }}</q-item-section>
           </q-item>
 
           <q-item clickable v-ripple to="/register">
             <q-item-section avatar>
               <q-icon name="person_add" />
             </q-item-section>
-            <q-item-section>Register</q-item-section>
+            <q-item-section>{{ $t('navigation.register') }}</q-item-section>
           </q-item>
         </template>
       </q-list>

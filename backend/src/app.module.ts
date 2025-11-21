@@ -11,6 +11,11 @@ import { BadgesModule } from './badges/badges.module';
 import { AdminModule } from './admin/admin.module';
 import { LocationsModule } from './locations/locations.module';
 import { UnitsModule } from './units/units.module';
+import { PeaksModule } from './peaks/peaks.module';
+import { PathsModule } from './paths/paths.module';
+import { ScoutDiplomasModule } from './scout-diplomas/scout-diplomas.module';
+import { ElectiveDiplomasModule } from './elective-diplomas/elective-diplomas.module';
+import { UserProgressModule } from './user-progress/user-progress.module';
 
 @Module({
   imports: [
@@ -38,6 +43,11 @@ import { UnitsModule } from './units/units.module';
     AdminModule,
     LocationsModule,
     UnitsModule,
+    PeaksModule,
+    PathsModule,
+    ScoutDiplomasModule,
+    ElectiveDiplomasModule,
+    UserProgressModule,
   ],
   controllers: [AppController],
   providers: [AppService],

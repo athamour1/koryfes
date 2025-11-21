@@ -2,7 +2,7 @@
   <q-page class="flex flex-center gradient-purple">
     <q-card class="auth-card" flat bordered>
       <q-card-section>
-        <div class="text-h6 text-center">Forgot Password</div>
+        <div class="text-h6 text-center">{{ $t('auth.forgotPassword.title') }}</div>
       </q-card-section>
 
       <q-card-section>
@@ -10,9 +10,9 @@
           <q-input
             filled
             v-model="email"
-            label="Username / Email"
+            :label="$t('auth.forgotPassword.label')"
             lazy-rules
-            :rules="[val => val && val.length > 0 || 'Please type your username']"
+            :rules="[val => val && val.length > 0 || $t('auth.forgotPassword.rule')]"
           />
 
           <div v-if="message" class="text-positive text-center q-mt-md">
@@ -23,8 +23,8 @@
           </div>
 
           <div class="row justify-between items-center q-mt-md">
-            <q-btn label="Back to Login" to="/login" flat color="primary" />
-            <q-btn label="Send Reset Link" type="submit" color="primary" :loading="loading" />
+            <q-btn :label="$t('auth.forgotPassword.backToLogin')" to="/login" flat color="primary" />
+            <q-btn :label="$t('auth.forgotPassword.submit')" type="submit" color="primary" :loading="loading" />
           </div>
         </q-form>
       </q-card-section>
@@ -35,8 +35,10 @@
 <script setup>
 import { ref } from 'vue';
 import { useAuthStore } from '../stores/auth';
+import { useI18n } from 'vue-i18n';
 
 const authStore = useAuthStore();
+const { t } = useI18n();
 const email = ref('');
 const loading = ref(false);
 const message = ref('');
@@ -50,7 +52,7 @@ const onSubmit = async () => {
   const result = await authStore.forgotPassword(email.value);
   
   if (result.success) {
-    message.value = 'If an account exists, a reset link has been sent (check console for mock token).';
+    message.value = t('auth.forgotPassword.success');
   } else {
     error.value = result.message;
   }

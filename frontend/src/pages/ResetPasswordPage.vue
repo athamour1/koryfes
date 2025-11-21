@@ -2,7 +2,7 @@
   <q-page class="flex flex-center gradient-purple">
     <q-card class="auth-card" flat bordered>
       <q-card-section>
-        <div class="text-h6 text-center">Reset Password</div>
+        <div class="text-h6 text-center">{{ $t('auth.resetPassword.title') }}</div>
       </q-card-section>
 
       <q-card-section>
@@ -10,26 +10,26 @@
           <q-input
             filled
             v-model="password"
-            label="New Password"
+            :label="$t('auth.resetPassword.label')"
             type="password"
             lazy-rules
             :rules="[
-              val => val && val.length >= 8 || 'Password must be at least 8 characters',
-              val => /[A-Z]/.test(val) || 'Must contain uppercase letter',
-              val => /[a-z]/.test(val) || 'Must contain lowercase letter',
-              val => /[0-9]/.test(val) || 'Must contain number'
+              val => val && val.length >= 8 || $t('auth.form.rules.passwordLength'),
+              val => /[A-Z]/.test(val) || $t('auth.form.rules.passwordUpper'),
+              val => /[a-z]/.test(val) || $t('auth.form.rules.passwordLower'),
+              val => /[0-9]/.test(val) || $t('auth.form.rules.passwordNumber')
             ]"
           />
 
           <div v-if="success" class="text-positive text-center q-mt-md">
-            Password reset successfully! Redirecting to login...
+            {{ $t('auth.resetPassword.success') }}
           </div>
           <div v-if="error" class="text-negative text-center q-mt-md">
             {{ error }}
           </div>
 
           <div class="row justify-end q-mt-md">
-            <q-btn label="Reset Password" type="submit" color="primary" :loading="loading" />
+            <q-btn :label="$t('auth.resetPassword.button')" type="submit" color="primary" :loading="loading" />
           </div>
         </q-form>
       </q-card-section>
@@ -41,10 +41,12 @@
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
+import { useI18n } from 'vue-i18n';
 
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
+const { t } = useI18n();
 
 const password = ref('');
 const loading = ref(false);
@@ -55,7 +57,7 @@ const token = ref('');
 onMounted(() => {
   token.value = route.query.token;
   if (!token.value) {
-    error.value = 'Invalid or missing reset token.';
+    error.value = t('auth.resetPassword.invalidToken');
   }
 });
 
@@ -73,7 +75,7 @@ const onSubmit = async () => {
       router.push('/login');
     }, 2000);
   } else {
-    error.value = result.message || 'Failed to reset password';
+    error.value = result.message || t('auth.resetPassword.failed');
   }
   
   loading.value = false;

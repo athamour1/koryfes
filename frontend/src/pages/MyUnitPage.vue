@@ -8,9 +8,9 @@
           <div>
             <h1 class="page-title text-center">
               <q-icon name="groups" />
-              My Unit
+              {{ $t('myUnit.title') }}
             </h1>
-            <div class="page-subtitle">Manage your unit details and flag</div>
+            <div class="page-subtitle">{{ $t('myUnit.subtitle') }}</div>
           </div>
         </div>
       </div>
@@ -22,7 +22,7 @@
       </div>
 
       <div v-else-if="!unit" class="row justify-center q-pa-xl">
-        <div class="text-h6 text-grey">Unit not found or you are not assigned to a unit.</div>
+        <div class="text-h6 text-grey">{{ $t('myUnit.notFound') }}</div>
       </div>
 
       <div v-else class="row q-col-gutter-lg">
@@ -30,28 +30,28 @@
         <div class="col-12 col-md-8">
           <q-card class="modern-card">
             <q-card-section>
-              <div class="text-h6 q-mb-md">Unit Information</div>
+              <div class="text-h6 q-mb-md">{{ $t('myUnit.infoTitle') }}</div>
               <q-form @submit="saveUnit" class="q-gutter-md">
                 <q-input
                   filled
                   v-model="unitForm.name"
-                  label="Unit Name"
+                  :label="$t('myUnit.nameLabel')"
                   readonly
-                  hint="Contact admin to change unit name"
+                  :hint="$t('myUnit.nameHint')"
                 />
 
                 <q-input
                   filled
                   v-model="unitForm.description"
-                  label="Description"
+                  :label="$t('myUnit.descriptionLabel')"
                   type="textarea"
                   :readonly="!isLeader"
-                  :rules="[val => !!val || 'Description is required']"
+                  :rules="[val => !!val || $t('myUnit.descriptionRequired')]"
                 />
 
                 <div class="row justify-end">
                   <q-btn
-                    label="Save Changes"
+                    :label="$t('general.save')"
                     type="submit"
                     color="primary"
                     :loading="saving"
@@ -67,7 +67,7 @@
         <div class="col-12 col-md-4">
           <q-card class="modern-card text-center">
             <q-card-section>
-              <div class="text-h6 q-mb-md">Unit Flag</div>
+              <div class="text-h6 q-mb-md">{{ $t('myUnit.flagTitle') }}</div>
               <div class="relative-position inline-block q-mb-md">
                 <q-avatar size="200px" square class="shadow-3" style="border-radius: 12px">
                   <img 
@@ -98,7 +98,7 @@
                   />
               </div>
               <div class="text-caption text-grey">
-                Click the edit icon to upload a new flag
+                {{ $t('myUnit.flagHint') }}
               </div>
             </q-card-section>
           </q-card>
@@ -110,6 +110,8 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+const { t } = useI18n();
 const isLeader = computed(() => authStore.user?.unitRole === 'leader');
 import { useAuthStore } from '../stores/auth';
 import { useUnitStore } from '../stores/unit';
@@ -161,7 +163,7 @@ const loadUnit = async () => {
     console.error('Failed to load unit', error);
     $q.notify({
       color: 'negative',
-      message: 'Failed to load unit details',
+      message: t('myUnit.loadError'),
       icon: 'report_problem'
     });
   } finally {
@@ -186,7 +188,7 @@ const saveUnit = async () => {
     await api.patch(`/units/${unit.value.id}`, payload);
     $q.notify({
       color: 'positive',
-      message: 'Unit updated successfully',
+      message: t('myUnit.updateSuccess'),
       icon: 'check'
     });
     await loadUnit();
@@ -196,7 +198,7 @@ const saveUnit = async () => {
     console.error('Failed to update unit', error);
     $q.notify({
       color: 'negative',
-      message: error.response?.data?.message || 'Failed to update unit',
+      message: error.response?.data?.message || t('myUnit.updateError'),
       icon: 'report_problem'
     });
   } finally {

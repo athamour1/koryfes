@@ -5,8 +5,8 @@
       <div class="gradient-purple text-white q-pa-lg q-mb-lg" style="border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 1200px; margin: 0 auto;">
         <div class="text-center" style="max-width: 800px; margin: 0 auto;">
           <q-icon name="location_on" size="48px" class="q-mb-sm" />
-          <div class="text-h4 text-weight-bold q-mb-sm">Location Management</div>
-          <div class="text-body1" style="opacity: 0.9;">Manage scout locations and groups</div>
+          <div class="text-h4 text-weight-bold q-mb-sm">{{ $t('locationManagement.title') }}</div>
+          <div class="text-body1" style="opacity: 0.9;">{{ $t('locationManagement.subtitle') }}</div>
         </div>
       </div>
     </div>
@@ -15,7 +15,7 @@
     <div class="q-pa-lg" style="max-width: 1200px; margin: 0 auto;">
       <q-card flat bordered>
         <q-table
-          title="Locations"
+          :title="$t('locationManagement.tableTitle')"
           :rows="locations"
           :columns="columns"
           row-key="id"
@@ -27,12 +27,12 @@
         >
           <template v-slot:top-right>
             <div class="row q-gutter-sm items-center">
-              <q-input outlined dense debounce="300" v-model="filter" placeholder="Search locations">
+              <q-input outlined dense debounce="300" v-model="filter" :placeholder="$t('locationManagement.searchPlaceholder')">
                 <template v-slot:append>
                   <q-icon name="search" />
                 </template>
               </q-input>
-              <q-btn color="primary" icon="add" label="Add Location" @click="showAddDialog = true" />
+              <q-btn color="primary" icon="add" :label="$t('locationManagement.addButton')" @click="showAddDialog = true" />
             </div>
           </template>
           <template v-slot:body-cell-id="props">
@@ -62,7 +62,7 @@
                 icon="edit" 
                 @click="editLocation(props.row)"
               >
-                <q-tooltip>Edit location</q-tooltip>
+                <q-tooltip>{{ $t('locationManagement.tooltips.edit') }}</q-tooltip>
               </q-btn>
               <q-btn 
                 flat 
@@ -72,7 +72,7 @@
                 icon="delete" 
                 @click="confirmDelete(props.row)"
               >
-                <q-tooltip>Delete location</q-tooltip>
+                <q-tooltip>{{ $t('locationManagement.tooltips.delete') }}</q-tooltip>
               </q-btn>
             </q-td>
           </template>
@@ -86,7 +86,7 @@
         <q-card-section class="gradient-blue text-white">
           <div class="text-h6">
             <q-icon name="location_city" size="24px" class="q-mr-sm" />
-            {{ isEditing ? 'Edit Location' : 'Add Location' }}
+            {{ isEditing ? $t('locationManagement.dialog.editTitle') : $t('locationManagement.dialog.addTitle') }}
           </div>
         </q-card-section>
 
@@ -94,10 +94,10 @@
           <q-input 
             filled
             v-model="locationForm.name" 
-            label="Location Name" 
+            :label="$t('locationManagement.form.name')" 
             autofocus 
             @keyup.enter="saveLocation"
-            :rules="[val => !!val || 'Location name is required']"
+            :rules="[val => !!val || $t('locationManagement.form.required')]"
           >
             <template v-slot:prepend>
               <q-icon name="place" />
@@ -106,9 +106,9 @@
         </q-card-section>
 
         <q-card-actions align="right" class="q-pa-md">
-          <q-btn label="Cancel" flat v-close-popup />
+          <q-btn :label="$t('general.cancel')" flat v-close-popup />
           <q-btn 
-            label="Save" 
+            :label="$t('general.save')" 
             color="primary" 
             unelevated
             @click="saveLocation"
@@ -121,21 +121,23 @@
 </template>
 
 <script setup>
-import { ref, onMounted, reactive } from 'vue';
+import { ref, onMounted, reactive, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { api } from '../../api';
 import { useQuasar } from 'quasar';
 
 const $q = useQuasar();
+const { t } = useI18n();
 const locations = ref([]);
 const loading = ref(false);
 const showAddDialog = ref(false);
 const isEditing = ref(false);
 const locationForm = reactive({ id: null, name: '' });
 
-const columns = [
-  { name: 'name', label: 'Name', field: 'name', sortable: true, align: 'left' },
-  { name: 'actions', label: 'Actions', field: 'actions', align: 'right' },
-];
+const columns = computed(() => [
+  { name: 'name', label: t('locationManagement.columns.name'), field: 'name', sortable: true, align: 'left' },
+  { name: 'actions', label: t('locationManagement.columns.actions'), field: 'actions', align: 'right' },
+]);
 
 const filter = ref('');
 
@@ -146,7 +148,7 @@ const fetchLocations = async () => {
     locations.value = response.data;
   } catch (error) {
     console.error('Failed to fetch locations', error);
-    $q.notify({ type: 'negative', message: 'Failed to fetch locations' });
+    $q.notify({ type: 'negative', message: t('locationManagement.notifications.fetchError') });
   } finally {
     loading.value = false;
   }
@@ -154,24 +156,24 @@ const fetchLocations = async () => {
 
 const saveLocation = async () => {
   if (!locationForm.name) {
-    $q.notify({ type: 'warning', message: 'Please enter a location name' });
+    $q.notify({ type: 'warning', message: t('locationManagement.notifications.enterName') });
     return;
   }
 
   try {
     if (isEditing.value) {
       await api.patch(`/locations/${locationForm.id}`, { name: locationForm.name });
-      $q.notify({ type: 'positive', message: 'Location updated successfully', icon: 'check' });
+      $q.notify({ type: 'positive', message: t('locationManagement.notifications.updateSuccess'), icon: 'check' });
     } else {
       await api.post('/locations', { name: locationForm.name });
-      $q.notify({ type: 'positive', message: 'Location created successfully', icon: 'check' });
+      $q.notify({ type: 'positive', message: t('locationManagement.notifications.createSuccess'), icon: 'check' });
     }
     showAddDialog.value = false;
     fetchLocations();
     resetForm();
   } catch (error) {
     console.error('Failed to save location', error);
-    $q.notify({ type: 'negative', message: 'Failed to save location', icon: 'report_problem' });
+    $q.notify({ type: 'negative', message: t('locationManagement.notifications.saveError'), icon: 'report_problem' });
   }
 };
 
@@ -184,19 +186,19 @@ const editLocation = (location) => {
 
 const confirmDelete = (location) => {
   $q.dialog({
-    title: 'Confirm Deletion',
-    message: `Are you sure you want to delete "${location.name}"? This action cannot be undone.`,
+    title: t('locationManagement.delete.title'),
+    message: t('locationManagement.delete.message', { name: location.name }),
     cancel: true,
     persistent: true,
     color: 'negative'
   }).onOk(async () => {
     try {
       await api.delete(`/locations/${location.id}`);
-      $q.notify({ type: 'positive', message: 'Location deleted successfully', icon: 'check' });
+      $q.notify({ type: 'positive', message: t('locationManagement.notifications.deleteSuccess'), icon: 'check' });
       fetchLocations();
     } catch (error) {
       console.error('Failed to delete location', error);
-      $q.notify({ type: 'negative', message: 'Failed to delete location', icon: 'report_problem' });
+      $q.notify({ type: 'negative', message: t('locationManagement.notifications.deleteError'), icon: 'report_problem' });
     }
   });
 };

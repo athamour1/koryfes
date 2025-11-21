@@ -5,8 +5,8 @@
       <div class="gradient-purple text-white q-pa-lg q-mb-lg" style="border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 1400px; margin: 0 auto;">
         <div class="text-center" style="max-width: 800px; margin: 0 auto;">
           <q-icon name="people" size="48px" class="q-mb-sm" />
-          <div class="text-h4 text-weight-bold q-mb-sm">User Management</div>
-          <div class="text-body1" style="opacity: 0.9;">Manage scout users, roles, and permissions</div>
+          <div class="text-h4 text-weight-bold q-mb-sm">{{ $t('adminUsers.title') }}</div>
+          <div class="text-body1" style="opacity: 0.9;">{{ $t('adminUsers.subtitle') }}</div>
         </div>
       </div>
     </div>
@@ -16,7 +16,7 @@
 
       <q-card flat bordered>
         <q-table
-      title="Users"
+      :title="$t('adminUsers.tableTitle')"
       :rows="filteredUsers"
       :columns="columns"
       row-key="id"
@@ -30,11 +30,11 @@
           <div class="row q-col-gutter-sm items-center justify-between">
             <!-- Left side: Filters -->
             <div class="col-12 col-md-auto row q-col-gutter-sm items-center">
-              <div class="text-h6 q-mr-md gt-sm">Users</div>
+              <div class="text-h6 q-mr-md gt-sm">{{ $t('adminUsers.tableTitle') }}</div>
               
               <!-- Search -->
               <div class="col-12 col-sm-auto">
-                <q-input outlined dense debounce="300" v-model="filter" placeholder="Search by name" class="search-input">
+                <q-input outlined dense debounce="300" v-model="filter" :placeholder="$t('adminUsers.searchPlaceholder')" class="search-input">
                   <template v-slot:append>
                     <q-icon name="search" />
                   </template>
@@ -46,7 +46,7 @@
                 <q-select
                   v-model="roleFilter"
                   :options="roleFilterOptions"
-                  label="Role"
+                  :label="$t('adminUsers.filters.role')"
                   dense
                   outlined
                   clearable
@@ -62,7 +62,7 @@
                   option-value="name"
                   emit-value
                   map-options
-                  label="Location"
+                  :label="$t('adminUsers.filters.location')"
                   dense
                   outlined
                   clearable
@@ -80,7 +80,7 @@
                   option-value="id"
                   emit-value
                   map-options
-                  label="Unit"
+                  :label="$t('adminUsers.filters.unit')"
                   dense
                   outlined
                   clearable
@@ -94,7 +94,7 @@
                 <q-select
                   v-model="unitRoleFilter"
                   :options="unitRoleFilterOptions"
-                  label="Unit Role"
+                  :label="$t('adminUsers.filters.unitRole')"
                   dense
                   outlined
                   clearable
@@ -106,7 +106,7 @@
 
             <!-- Right side: Actions -->
             <div class="col-12 col-md-auto text-right q-mt-sm q-mt-md-none">
-              <q-btn color="primary" icon="add" label="Create User" @click="openCreateDialog" class="full-width-mobile" />
+              <q-btn color="primary" icon="add" :label="$t('adminUsers.actions.create')" @click="openCreateDialog" class="full-width-mobile" />
             </div>
           </div>
         </div>
@@ -159,7 +159,7 @@
         <q-td :props="props">
           <div class="row justify-end no-wrap">
             <q-btn flat dense round color="primary" icon="edit" @click="openEditDialog(props.row)">
-              <q-tooltip>Edit User</q-tooltip>
+              <q-tooltip>{{ $t('adminUsers.actions.edit') }}</q-tooltip>
             </q-btn>
             <q-btn 
               flat 
@@ -170,8 +170,8 @@
               @click="confirmDeleteUser(props.row)" 
               :disable="props.row.id === authStore.user?.id"
             >
-              <q-tooltip v-if="props.row.id === authStore.user?.id">Cannot delete yourself</q-tooltip>
-              <q-tooltip v-else>Delete User</q-tooltip>
+              <q-tooltip v-if="props.row.id === authStore.user?.id">{{ $t('adminUsers.actions.cannotDeleteSelf') }}</q-tooltip>
+              <q-tooltip v-else>{{ $t('adminUsers.actions.delete') }}</q-tooltip>
             </q-btn>
           </div>
         </q-td>
@@ -181,7 +181,7 @@
         <div class="full-width row flex-center text-grey q-gutter-sm q-pa-lg">
           <q-icon size="2em" :name="filter ? 'search_off' : 'people_outline'" />
           <span>
-            {{ filter ? 'No users match your search' : 'No users created yet' }}
+            {{ filter ? $t('adminUsers.noData.search') : $t('adminUsers.noData.empty') }}
           </span>
         </div>
       </template>
@@ -193,19 +193,19 @@
     <q-dialog v-model="createDialog">
       <q-card style="min-width: 400px">
         <q-card-section>
-          <div class="text-h6">Create New User</div>
+          <div class="text-h6">{{ $t('adminUsers.dialog.createTitle') }}</div>
         </q-card-section>
         <q-card-section>
           <q-form @submit="createUser" class="q-gutter-md">
-            <q-input filled v-model="newUser.username" label="Username" :rules="[val => !!val || 'Required']" />
-            <q-input filled v-model="newUser.password" label="Password" type="password" :rules="[val => !!val || 'Required']" />
+            <q-input filled v-model="newUser.username" :label="$t('adminUsers.form.username')" :rules="[val => !!val || $t('adminUsers.form.required')]" />
+            <q-input filled v-model="newUser.password" :label="$t('adminUsers.form.password')" type="password" :rules="[val => !!val || $t('adminUsers.form.required')]" />
             
             <!-- Role Selection (Super Admin only) -->
             <q-select
               filled
               v-model="newUser.role"
               :options="availableRoleOptions"
-              label="Role"
+              :label="$t('adminUsers.filters.role')"
               emit-value
               map-options
               @update:model-value="val => { if(val !== 'user') { newUser.unitId = null; newUser.unitRole = null; } }"
@@ -217,14 +217,14 @@
               filled
               v-model="newUser.locationName"
               :options="locationOptions"
-              label="Location"
+              :label="$t('adminUsers.filters.location')"
               option-label="name"
               option-value="name"
               emit-value
               map-options
               new-value-mode="add-unique"
             />
-            <q-input v-else filled :model-value="authStore.user?.location?.name || 'My Location'" label="Location" readonly hint="Locked to your location" />
+            <q-input v-else filled :model-value="authStore.user?.location?.name || $t('adminUsers.form.myLocation')" :label="$t('adminUsers.filters.location')" readonly :hint="$t('adminUsers.form.locationLocked')" />
 
             <!-- Unit Selection -->
             <q-select
@@ -232,7 +232,7 @@
               filled
               v-model="newUser.unitId"
               :options="createUnitOptions"
-              label="Unit"
+              :label="$t('adminUsers.filters.unit')"
               option-label="name"
               option-value="id"
               emit-value
@@ -247,15 +247,15 @@
               filled
               v-model="newUser.unitRole"
               :options="unitRoleOptions"
-              label="Unit Role"
+              :label="$t('adminUsers.filters.unitRole')"
               emit-value
               map-options
-              hint="Note: Assigning Leader/Deputy Leader will demote any existing holder in this unit to Member"
+              :hint="$t('adminUsers.form.unitRoleHint')"
             />
 
             <div class="row justify-end q-gutter-sm">
-              <q-btn label="Cancel" flat v-close-popup />
-              <q-btn label="Create" type="submit" color="primary" />
+              <q-btn :label="$t('general.cancel')" flat v-close-popup />
+              <q-btn :label="$t('general.create')" type="submit" color="primary" />
             </div>
           </q-form>
         </q-card-section>
@@ -269,8 +269,8 @@
         <q-card-section class="text-white q-pa-lg" style="background: linear-gradient(135deg, var(--q-primary) 0%, var(--q-secondary) 100%);">
           <div class="row items-center no-wrap">
             <div class="col">
-              <div class="text-h5 text-weight-bold">Edit User Profile</div>
-              <div class="text-subtitle2 opacity-80">Manage user details and badges</div>
+              <div class="text-h5 text-weight-bold">{{ $t('adminUsers.dialog.editTitle') }}</div>
+              <div class="text-subtitle2 opacity-80">{{ $t('adminUsers.dialog.editSubtitle') }}</div>
             </div>
             <div class="col-auto">
               <q-btn icon="close" flat round dense v-close-popup class="text-white" />
@@ -281,7 +281,7 @@
         <q-card-section class="q-pa-lg">
           <div class="row q-col-gutter-lg">
             <!-- Left Column: Profile Info -->
-            <div class="col-12 col-md-5 text-center">
+            <div class="col-12 text-center" :class="editingUserData.role === 'user' ? 'col-md-5' : 'col-md-12'">
               <div class="relative-position inline-block q-mb-md">
                 <q-avatar size="120px" class="shadow-3">
                   <img :src="getAvatarUrl(editingUserData.username, editingUserData.profileImage)" style="object-fit: cover" />
@@ -309,14 +309,14 @@
                 {{ editingUserData.role }}
               </q-chip>
 
-              <q-input filled v-model="editingUserData.username" label="Username" dense class="q-mb-sm" />
+              <q-input filled v-model="editingUserData.username" :label="$t('adminUsers.form.username')" dense class="q-mb-sm" />
               
               <q-select
                 v-if="authStore.isSuperAdmin"
                 filled
                 v-model="editingUserData.locationName"
                 :options="locationOptions"
-                label="Location"
+                :label="$t('adminUsers.filters.location')"
                 option-label="name"
                 option-value="name"
                 emit-value
@@ -330,7 +330,7 @@
                 filled
                 v-model="editingUserData.unitId"
                 :options="editUnitOptions"
-                label="Unit"
+                :label="$t('adminUsers.filters.unit')"
                 option-label="name"
                 option-value="id"
                 emit-value
@@ -346,111 +346,467 @@
                 filled
                 v-model="editingUserData.unitRole"
                 :options="unitRoleOptions"
-                label="Unit Role"
+                :label="$t('adminUsers.filters.unitRole')"
                 emit-value
                 map-options
                 dense
                 class="q-mb-sm"
-                hint="Note: Assigning Leader/Deputy Leader will demote any existing holder to Member"
+                :hint="$t('adminUsers.form.unitRoleHint')"
               />
             </div>
 
-            <!-- Right Column: Badges -->
-            <div class="col-12 col-md-7">
+            <!-- Right Column: Individual Progress -->
+            <div class="col-12 col-md-7" v-if="editingUserData.role === 'user'">
               <div class="text-subtitle1 text-weight-bold q-mb-sm flex items-center">
-                <q-icon name="military_tech" class="q-mr-sm" color="primary" />
-                Badges & Achievements
+                <q-icon name="trending_up" class="q-mr-sm" color="primary" />
+                {{ $t('progress.admin.title') || 'Individual Progress' }}
               </div>
 
-              <div class="q-mb-md" style="min-height: 150px; max-height: 400px; overflow-y: auto;">
-                <q-markup-table flat bordered v-if="selectedBadges.length > 0">
-                  <thead>
-                    <tr>
-                      <th class="text-left">Badge</th>
-                      <th class="text-left">Acquired Date</th>
-                      <th class="text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="(badge, index) in selectedBadges" :key="badge.id">
-                      <td class="text-left">
-                        <div class="row items-center">
-                          <q-avatar size="32px" class="q-mr-sm">
-                            <img v-if="badge.image" :src="`${config.apiUrl}${badge.image}`" style="object-fit: cover" />
-                            <q-icon v-else name="star" color="primary" />
-                          </q-avatar>
-                          {{ badge.name }}
-                        </div>
-                      </td>
-                      <td class="text-left">
-                        <div class="cursor-pointer text-primary row items-center">
-                          <q-icon name="event" class="q-mr-xs" />
-                          {{ formatDate(badge.acquiredAt) }}
-                          <q-popup-proxy 
-                            cover 
-                            transition-show="scale" 
-                            transition-hide="scale"
-                            :ref="(el) => { if(el) dateProxies[index] = el }"
-                          >
-                            <q-date 
-                              v-model="badge.acquiredAt" 
-                              mask="YYYY-MM-DD"
-                              @update:model-value="() => dateProxies[index]?.hide()"
-                            >
-                              <div class="row items-center justify-end">
-                                <q-btn v-close-popup label="Close" color="primary" flat />
-                              </div>
-                            </q-date>
-                          </q-popup-proxy>
-                        </div>
-                      </td>
-                      <td class="text-right">
-                        <q-btn
-                          round
-                          flat
-                          color="negative"
-                          icon="close"
-                          size="sm"
-                          @click="removeBadgeFromSelection(index)"
-                        />
-                      </td>
-                    </tr>
-                  </tbody>
-                </q-markup-table>
-                <div v-else class="text-grey text-center q-pa-lg bg-grey-2 rounded-borders">
-                  No badges awarded yet.
+              <!-- Current Progress Summary -->
+              <q-card flat bordered class="q-mb-md">
+                <q-card-section>
+                  <div class="row items-center q-mb-sm">
+                    <div class="col">
+                      <div class="text-caption text-grey-7">{{ $t('progress.admin.currentPeak') || 'Current Peak' }}</div>
+                      <div class="text-h6">{{ userProgress?.currentPeak?.name || $t('progress.admin.noPeak') || 'No Peak' }}</div>
+                    </div>
+                    <div class="col-auto">
+                      <q-avatar size="60px" v-if="userProgress?.currentPeak?.image">
+                        <img :src="`${config.apiUrl}${userProgress.currentPeak.image}`" style="object-fit: cover" />
+                      </q-avatar>
+                      <q-icon v-else name="landscape" size="60px" color="grey-4" />
+                    </div>
+                  </div>
+                  
+                  <q-separator class="q-my-sm" />
+                  
+                  <div class="row q-col-gutter-sm text-center">
+                    <div class="col-4">
+                      <div class="text-caption text-grey-7">{{ $t('progress.admin.paths.title') || 'Paths' }}</div>
+                      <div class="text-h6 text-primary">{{ userProgress?.completedPaths?.length || 0 }}/12</div>
+                    </div>
+                    <div class="col-4">
+                      <div class="text-caption text-grey-7">{{ $t('progress.admin.diplomas.scout') || 'Scout' }}</div>
+                      <div class="text-h6 text-primary">{{ userProgress?.scoutDiplomas?.length || 0 }}/3</div>
+                    </div>
+                    <div class="col-4">
+                      <div class="text-caption text-grey-7">{{ $t('progress.admin.diplomas.elective') || 'Elective' }}</div>
+                      <div class="text-h6 text-primary">{{ userProgress?.electiveDiplomas?.length || 0 }}</div>
+                    </div>
+                  </div>
+                </q-card-section>
+              </q-card>
+
+              <!-- Award Promise Peak (ONLY if no peak) -->
+              <div v-if="!userProgress?.currentPeak" class="q-mb-md">
+                <q-btn 
+                  color="primary" 
+                  icon="landscape" 
+                  :label="$t('progress.admin.awardPromisePeak') || 'Award Promise Peak'" 
+                  @click="openAwardPeakDialog"
+                  class="full-width"
+                  unelevated
+                />
+                <div class="text-caption text-grey-7 q-mt-sm text-center">
+                  {{ $t('progress.admin.promiseInfo') || 'Award the Promise peak to unlock progress tracking' }}
                 </div>
               </div>
 
-              <q-select
-                filled
-                v-model="badgeToAdd"
-                :options="badgeOptions"
-                option-label="name"
-                option-value="id"
-                label="Add Badge"
-                emit-value
-                map-options
-                use-input
-                input-debounce="0"
-                @filter="filterBadges"
-                @update:model-value="addBadgeToSelection"
-                dense
-              >
-                <template v-slot:option="scope">
-                  <q-item v-bind="scope.itemProps">
-                    <q-item-section avatar>
-                      <q-avatar size="30px">
-                        <img v-if="scope.opt.image" :src="`${config.apiUrl}${scope.opt.image}`" style="object-fit: cover" />
-                        <q-icon v-else name="star" color="primary" />
-                      </q-avatar>
-                    </q-item-section>
-                    <q-item-section>
-                      <q-item-label>{{ scope.opt.name }}</q-item-label>
-                    </q-item-section>
-                  </q-item>
-                </template>
-              </q-select>
+              <!-- Tab-Based Progress Management (ONLY if user has a peak) -->
+              <div v-if="userProgress?.currentPeak">
+                <q-tabs
+                  v-model="activeTab"
+                  dense
+                  class="text-grey-7"
+                  active-color="primary"
+                  indicator-color="primary"
+                  align="justify"
+                >
+                  <q-tab 
+                    name="bronze" 
+                    :label="$t('progress.admin.bronzeTab')" 
+                    :disable="!isBronzeUnlocked"
+                    :icon="isBronzeUnlocked ? 'workspace_premium' : 'lock'"
+                  />
+                  <q-tab 
+                    name="silver" 
+                    :label="$t('progress.admin.silverTab')" 
+                    :disable="!isSilverUnlocked"
+                    :icon="isSilverUnlocked ? 'workspace_premium' : 'lock'"
+                  />
+                  <q-tab 
+                    name="gold" 
+                    :label="$t('progress.admin.goldTab')" 
+                    :disable="!isGoldUnlocked"
+                    :icon="isGoldUnlocked ? 'workspace_premium' : 'lock'"
+                  />
+                  <q-tab 
+                    name="extra" 
+                    :label="$t('progress.admin.extraTab') || 'Extra'" 
+                    :disable="!isGoldUnlocked"
+                    :icon="isGoldUnlocked ? 'add_circle' : 'lock'"
+                  />
+                </q-tabs>
+
+                <q-separator />
+
+                <q-tab-panels v-model="activeTab" animated>
+                  <!-- Bronze Peak Tab -->
+                  <q-tab-panel name="bronze">
+                    <!-- Elective Diplomas Section -->
+                    <div class="q-mb-md">
+                      <div class="text-subtitle2 text-purple-9 q-mb-sm flex items-center justify-between">
+                        <span>
+                          <q-icon name="stars" class="q-mr-xs" />
+                          {{ $t('progress.admin.diplomas.elective') }} ({{ getElectivesForPeak('bronze').length }}/1)
+                        </span>
+                        <q-btn 
+                          size="sm" 
+                          color="purple" 
+                          icon="add" 
+                          :label="$t('general.award')" 
+                          @click="openAwardElectiveDiplomaDialog"
+                          outline
+                          :disable="getElectivesForPeak('bronze').length >= 1"
+                        />
+                      </div>
+                      <div v-if="getElectivesForPeak('bronze').length > 0">
+                        <q-chip
+                          v-for="diploma in getElectivesForPeak('bronze')"
+                          :key="diploma.id"
+                          color="purple"
+                          text-color="white"
+                          size="sm"
+                          class="q-ma-xs"
+                        >
+                          {{ diploma.name }}
+                        </q-chip>
+                      </div>
+                      <div v-else class="text-caption text-grey-6">
+                        {{ $t('progress.admin.noEarnedElectiveDiplomas') }}
+                      </div>
+                    </div>
+
+                    <!-- Scout Diplomas Section -->
+                    <div class="q-mb-md">
+                      <div class="text-subtitle2 text-blue-9 q-mb-sm flex items-center justify-between">
+                        <span>
+                          <q-icon name="school" class="q-mr-xs" />
+                          {{ $t('progress.admin.diplomas.scout') }} ({{ getScoutDiplomaCount(1) }}/1)
+                        </span>
+                        <q-btn 
+                          size="sm" 
+                          color="blue" 
+                          icon="add" 
+                          :label="$t('general.award')" 
+                          @click="awardScoutDiplomaForPeak('bronze')"
+                          outline
+                          :disable="getScoutDiplomaCount(1) >= 1"
+                        />
+                      </div>
+                      <div v-if="getScoutDiplomasByLevel(1).length > 0">
+                        <q-chip
+                          v-for="diploma in getScoutDiplomasByLevel(1)"
+                          :key="diploma.id"
+                          color="blue"
+                          text-color="white"
+                          size="sm"
+                          class="q-ma-xs"
+                        >
+                          {{ diploma.name }}
+                        </q-chip>
+                      </div>
+                      <div v-else class="text-caption text-grey-6">
+                        {{ $t('progress.admin.noEarnedScoutDiplomas') }}
+                      </div>
+                    </div>
+
+                    <!-- Paths Section -->
+                    <div>
+                      <div class="text-subtitle2 text-teal-9 q-mb-sm flex items-center justify-between">
+                        <span>
+                          <q-icon name="route" class="q-mr-xs" />
+                          {{ $t('progress.admin.paths.title') }} ({{ getPathsForPeak('bronze').length }}/4)
+                        </span>
+                        <q-btn 
+                          size="sm" 
+                          color="teal" 
+                          icon="add" 
+                          :label="$t('general.award')" 
+                          @click="openAwardPathDialog"
+                          outline
+                          :disable="getPathsForPeak('bronze').length >= 4"
+                        />
+                      </div>
+                      <div v-if="getPathsForPeak('bronze').length > 0">
+                        <q-chip
+                          v-for="path in getPathsForPeak('bronze')"
+                          :key="path.id"
+                          color="teal"
+                          text-color="white"
+                          size="sm"
+                          class="q-ma-xs"
+                        >
+                          {{ path.name }}
+                        </q-chip>
+                      </div>
+                      <div v-else class="text-caption text-grey-6">
+                        {{ $t('progress.admin.noEarnedPaths') }}
+                      </div>
+                    </div>
+                  </q-tab-panel>
+
+                  <!-- Silver Peak Tab -->
+                  <q-tab-panel name="silver">
+                    <!-- Elective Diplomas Section -->
+                    <div class="q-mb-md">
+                      <div class="text-subtitle2 text-purple-9 q-mb-sm flex items-center justify-between">
+                        <span>
+                          <q-icon name="stars" class="q-mr-xs" />
+                          {{ $t('progress.admin.diplomas.elective') }} ({{ getElectivesForPeak('silver').length }}/1)
+                        </span>
+                        <q-btn 
+                          size="sm" 
+                          color="purple" 
+                          icon="add" 
+                          :label="$t('general.award')" 
+                          @click="openAwardElectiveDiplomaDialog"
+                          outline
+                          :disable="getElectivesForPeak('silver').length >= 1"
+                        />
+                      </div>
+                      <div v-if="getElectivesForPeak('silver').length > 0">
+                        <q-chip
+                          v-for="diploma in getElectivesForPeak('silver')"
+                          :key="diploma.id"
+                          color="purple"
+                          text-color="white"
+                          size="sm"
+                          class="q-ma-xs"
+                        >
+                          {{ diploma.name }}
+                        </q-chip>
+                      </div>
+                      <div v-else class="text-caption text-grey-6">
+                        {{ $t('progress.admin.noEarnedElectiveDiplomas') }}
+                      </div>
+                    </div>
+
+                    <!-- Scout Diplomas Section -->
+                    <div class="q-mb-md">
+                      <div class="text-subtitle2 text-blue-9 q-mb-sm flex items-center justify-between">
+                        <span>
+                          <q-icon name="school" class="q-mr-xs" />
+                          {{ $t('progress.admin.diplomas.scout') }} ({{ getScoutDiplomaCount(2) }}/1)
+                        </span>
+                        <q-btn 
+                          size="sm" 
+                          color="blue" 
+                          icon="add" 
+                          :label="$t('general.award')" 
+                          @click="awardScoutDiplomaForPeak('silver')"
+                          outline
+                          :disable="getScoutDiplomaCount(2) >= 1"
+                        />
+                      </div>
+                      <div v-if="getScoutDiplomasByLevel(2).length > 0">
+                        <q-chip
+                          v-for="diploma in getScoutDiplomasByLevel(2)"
+                          :key="diploma.id"
+                          color="blue"
+                          text-color="white"
+                          size="sm"
+                          class="q-ma-xs"
+                        >
+                          {{ diploma.name }}
+                        </q-chip>
+                      </div>
+                      <div v-else class="text-caption text-grey-6">
+                        {{ $t('progress.admin.noEarnedScoutDiplomas') }}
+                      </div>
+                    </div>
+
+                    <!-- Paths Section -->
+                    <div>
+                      <div class="text-subtitle2 text-teal-9 q-mb-sm flex items-center justify-between">
+                        <span>
+                          <q-icon name="route" class="q-mr-xs" />
+                          {{ $t('progress.admin.paths.title') }} ({{ getPathsForPeak('silver').length }}/4)
+                        </span>
+                        <q-btn 
+                          size="sm" 
+                          color="teal" 
+                          icon="add" 
+                          :label="$t('general.award')" 
+                          @click="openAwardPathDialog"
+                          outline
+                          :disable="getPathsForPeak('silver').length >= 4"
+                        />
+                      </div>
+                      <div v-if="getPathsForPeak('silver').length > 0">
+                        <q-chip
+                          v-for="path in getPathsForPeak('silver')"
+                          :key="path.id"
+                          color="teal"
+                          text-color="white"
+                          size="sm"
+                          class="q-ma-xs"
+                        >
+                          {{ path.name }}
+                        </q-chip>
+                      </div>
+                      <div v-else class="text-caption text-grey-6">
+                        {{ $t('progress.admin.noEarnedPaths') }}
+                      </div>
+                    </div>
+                  </q-tab-panel>
+
+                  <!-- Gold Peak Tab -->
+                  <q-tab-panel name="gold">
+                    <!-- Elective Diplomas Section -->
+                    <div class="q-mb-md">
+                      <div class="text-subtitle2 text-purple-9 q-mb-sm flex items-center justify-between">
+                        <span>
+                          <q-icon name="stars" class="q-mr-xs" />
+                          {{ $t('progress.admin.diplomas.elective') }} ({{ getElectivesForPeak('gold').length }}/2)
+                        </span>
+                        <q-btn 
+                          size="sm" 
+                          color="purple" 
+                          icon="add" 
+                          :label="$t('general.award')" 
+                          @click="openAwardElectiveDiplomaDialog"
+                          outline
+                          :disable="getElectivesForPeak('gold').length >= 2"
+                        />
+                      </div>
+                      <div v-if="getElectivesForPeak('gold').length > 0">
+                        <q-chip
+                          v-for="diploma in getElectivesForPeak('gold')"
+                          :key="diploma.id"
+                          color="purple"
+                          text-color="white"
+                          size="sm"
+                          class="q-ma-xs"
+                        >
+                          {{ diploma.name }}
+                        </q-chip>
+                      </div>
+                      <div v-else class="text-caption text-grey-6">
+                        {{ $t('progress.admin.noEarnedElectiveDiplomas') }}
+                      </div>
+                    </div>
+
+                    <!-- Scout Diplomas Section -->
+                    <div class="q-mb-md">
+                      <div class="text-subtitle2 text-blue-9 q-mb-sm flex items-center justify-between">
+                        <span>
+                          <q-icon name="school" class="q-mr-xs" />
+                          {{ $t('progress.admin.diplomas.scout') }} ({{ getScoutDiplomaCount(3) }}/1)
+                        </span>
+                        <q-btn 
+                          size="sm" 
+                          color="blue" 
+                          icon="add" 
+                          :label="$t('general.award')" 
+                          @click="awardScoutDiplomaForPeak('gold')"
+                          outline
+                          :disable="getScoutDiplomaCount(3) >= 1"
+                        />
+                      </div>
+                      <div v-if="getScoutDiplomasByLevel(3).length > 0">
+                        <q-chip
+                          v-for="diploma in getScoutDiplomasByLevel(3)"
+                          :key="diploma.id"
+                          color="blue"
+                          text-color="white"
+                          size="sm"
+                          class="q-ma-xs"
+                        >
+                          {{ diploma.name }}
+                        </q-chip>
+                      </div>
+                      <div v-else class="text-caption text-grey-6">
+                        {{ $t('progress.admin.noEarnedScoutDiplomas') }}
+                      </div>
+                    </div>
+
+                    <!-- Paths Section -->
+                    <div>
+                      <div class="text-subtitle2 text-teal-9 q-mb-sm flex items-center justify-between">
+                        <span>
+                          <q-icon name="route" class="q-mr-xs" />
+                          {{ $t('progress.admin.paths.title') }} ({{ getPathsForPeak('gold').length }}/4)
+                        </span>
+                        <q-btn 
+                          size="sm" 
+                          color="teal" 
+                          icon="add" 
+                          :label="$t('general.award')" 
+                          @click="openAwardPathDialog"
+                          outline
+                          :disable="getPathsForPeak('gold').length >= 4"
+                        />
+                      </div>
+                      <div v-if="getPathsForPeak('gold').length > 0">
+                        <q-chip
+                          v-for="path in getPathsForPeak('gold')"
+                          :key="path.id"
+                          color="teal"
+                          text-color="white"
+                          size="sm"
+                          class="q-ma-xs"
+                        >
+                          {{ path.name }}
+                        </q-chip>
+                      </div>
+                      <div v-else class="text-caption text-grey-6">
+                        {{ $t('progress.admin.noEarnedPaths') }}
+                      </div>
+                    </div>
+                  </q-tab-panel>
+
+                  <!-- Extra Diplomas Tab (Post-Gold) -->
+                  <q-tab-panel name="extra">
+                    <div class="q-mb-md">
+                      <div class="text-subtitle2 text-purple-9 q-mb-sm flex items-center justify-between">
+                        <span>
+                          <q-icon name="stars" class="q-mr-xs" />
+                          {{ $t('progress.admin.diplomas.elective') }} ({{ getElectivesForPeak('extra').length }})
+                        </span>
+                        <q-btn 
+                          size="sm" 
+                          color="purple" 
+                          icon="add" 
+                          :label="$t('general.award')" 
+                          @click="openAwardElectiveDiplomaDialog"
+                          outline
+                        />
+                      </div>
+                      <div v-if="getElectivesForPeak('extra').length > 0">
+                        <q-chip
+                          v-for="diploma in getElectivesForPeak('extra')"
+                          :key="diploma.id"
+                          color="purple"
+                          text-color="white"
+                          size="sm"
+                          class="q-ma-xs"
+                        >
+                          {{ diploma.name }}
+                        </q-chip>
+                      </div>
+                      <div v-else class="text-caption text-grey-6">
+                        {{ $t('progress.admin.noEarnedElectiveDiplomas') }}
+                      </div>
+                    </div>
+                    
+                    <div class="text-caption text-grey-7 q-mt-md">
+                      <q-icon name="info" class="q-mr-xs" />
+                      {{ $t('progress.admin.extraStageInfo') || 'This stage allows awarding unlimited elective diplomas after completing the Gold peak.' }}
+                    </div>
+                  </q-tab-panel>
+                </q-tab-panels>
+              </div>
             </div>
           </div>
         </q-card-section>
@@ -458,8 +814,103 @@
         <q-separator />
         
         <q-card-actions align="right" class="q-pa-md bg-grey-1">
-          <q-btn label="Cancel" flat color="grey-8" v-close-popup @click="cancelEdit" />
-          <q-btn label="Save Changes" color="primary" unelevated @click="saveUserEdit" />
+          <q-btn :label="$t('general.cancel')" flat color="grey-8" v-close-popup @click="cancelEdit" />
+          <q-btn :label="$t('general.save')" color="primary" unelevated @click="saveUserEdit" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <!-- Award Peak Dialog -->
+    <q-dialog v-model="awardPeakDialog">
+      <q-card style="min-width: 400px">
+        <q-card-section>
+          <div class="text-h6">{{ $t('progress.admin.awardPeak') || 'Award Promise Peak' }}</div>
+        </q-card-section>
+
+        <q-separator />
+
+        <q-card-section>
+          <p>{{ $t('progress.admin.awardPeakConfirm') || 'Award the Promise peak to this user? This will unlock their ability to earn paths and diplomas.' }}</p>
+        </q-card-section>
+
+        <q-separator />
+
+        <q-card-actions align="right">
+          <q-btn flat :label="$t('general.cancel')" color="grey" v-close-popup />
+          <q-btn flat :label="$t('general.confirm')" color="primary" @click="awardPromisePeak" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <!-- Award Path Dialog -->
+    <q-dialog v-model="awardPathDialog">
+      <q-card style="min-width: 500px">
+        <q-card-section>
+          <div class="text-h6">{{ $t('progress.admin.awardPath') || 'Award Path' }}</div>
+        </q-card-section>
+
+        <q-separator />
+
+        <q-card-section>
+          <q-select
+            filled
+            v-model="selectedPath"
+            :options="availablePaths"
+            option-label="name"
+            option-value="id"
+            :label="$t('progress.admin.selectPath') || 'Select Path'"
+            emit-value
+            map-options
+          >
+            <template v-slot:option="scope">
+              <q-item v-bind="scope.itemProps">
+                <q-item-section>
+                  <q-item-label>{{ scope.opt.name }}</q-item-label>
+                  <q-item-label caption>{{ formatCategory(scope.opt.category) }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </template>
+          </q-select>
+        </q-card-section>
+
+        <q-separator />
+
+        <q-card-actions align="right">
+          <q-btn flat :label="$t('general.cancel')" color="grey" v-close-popup />
+          <q-btn flat :label="$t('general.award')" color="primary" @click="awardPath" :disable="!selectedPath" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+
+
+    <!-- Award Elective Diploma Dialog -->
+    <q-dialog v-model="awardElectiveDiplomaDialog">
+      <q-card style="min-width: 400px">
+        <q-card-section>
+          <div class="text-h6">{{ $t('progress.admin.awardElectiveDiploma') || 'Award Elective Diploma' }}</div>
+        </q-card-section>
+
+        <q-separator />
+
+        <q-card-section>
+          <q-select
+            filled
+            v-model="selectedElectiveDiploma"
+            :options="availableElectiveDiplomas"
+            option-label="name"
+            option-value="id"
+            :label="$t('progress.admin.selectDiploma') || 'Select Diploma'"
+            emit-value
+            map-options
+          />
+        </q-card-section>
+
+        <q-separator />
+
+        <q-card-actions align="right">
+          <q-btn flat :label="$t('general.cancel')" color="grey" v-close-popup />
+          <q-btn flat :label="$t('general.award')" color="primary" @click="awardElectiveDiploma" :disable="!selectedElectiveDiploma" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -468,8 +919,9 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useUserStore } from '../../stores/user';
-import { useBadgeStore } from '../../stores/badge';
+import { useProgressStore } from '../../stores/progress';
 import { useAuthStore } from '../../stores/auth';
 import { useUnitStore } from '../../stores/unit';
 import { useQuasar } from 'quasar';
@@ -479,22 +931,24 @@ import { getAvatarUrl } from '../../utils/avatar';
 import { date } from 'quasar';
 
 const userStore = useUserStore();
-const badgeStore = useBadgeStore();
+const progressStore = useProgressStore();
 const unitStore = useUnitStore();
 const authStore = useAuthStore();
-const $q = useQuasar();
 
-const baseColumns = [
-  { name: 'profileImage', label: 'Profile Image', field: 'profileImage', align: 'center' },
-  { name: 'username', label: 'Username', field: 'username', sortable: true, align: 'left' },
-  { name: 'role', label: 'Role', field: 'role', sortable: true, align: 'center' },
-  { name: 'location', label: 'Location', field: row => row.location?.name || 'N/A', sortable: true, align: 'left' },
-  { name: 'unit', label: 'Unit', field: row => row.unit?.name || 'N/A', sortable: true, align: 'left' },
-  { name: 'unitRole', label: 'Unit Role', field: 'unitRole', sortable: true, align: 'center' },
-  { name: 'actions', label: 'Actions', field: 'actions', align: 'right' }
-];
+const $q = useQuasar();
+const { t } = useI18n();
 
 const columns = computed(() => {
+  const baseColumns = [
+    { name: 'profileImage', label: t('adminUsers.columns.profileImage'), field: 'profileImage', align: 'center' },
+    { name: 'username', label: t('adminUsers.columns.username'), field: 'username', sortable: true, align: 'left' },
+    { name: 'role', label: t('adminUsers.columns.role'), field: 'role', sortable: true, align: 'center' },
+    { name: 'location', label: t('adminUsers.columns.location'), field: row => row.location?.name || 'N/A', sortable: true, align: 'left' },
+    { name: 'unit', label: t('adminUsers.columns.unit'), field: row => row.unit?.name || 'N/A', sortable: true, align: 'left' },
+    { name: 'unitRole', label: t('adminUsers.columns.unitRole'), field: 'unitRole', sortable: true, align: 'center' },
+    { name: 'actions', label: t('adminUsers.columns.actions'), field: 'actions', align: 'right' }
+  ];
+
   // Filter out location column for non-super admins
   if (!authStore.isSuperAdmin) {
     return baseColumns.filter(col => col.name !== 'location');
@@ -503,7 +957,6 @@ const columns = computed(() => {
 });
 
 const users = ref([]);
-const badges = ref([]);
 const units = ref([]);
 const locationOptions = ref([]); // For dropdown
 const createDialog = ref(false);
@@ -515,23 +968,64 @@ const locationFilter = ref(null);
 const unitFilter = ref(null);
 const unitRoleFilter = ref(null);
 
-const roleFilterOptions = [
-  { label: 'Super Admin', value: 'super_admin' },
-  { label: 'Admin', value: 'admin' },
-  { label: 'User', value: 'user' }
-];
+const roleFilterOptions = computed(() => [
+  { label: t('adminUsers.roles.superAdmin'), value: 'super_admin' },
+  { label: t('adminUsers.roles.admin'), value: 'admin' },
+  { label: t('adminUsers.roles.user'), value: 'user' }
+]);
 
-const unitRoleFilterOptions = [
-  { label: 'Leader', value: 'leader' },
-  { label: 'Deputy Leader', value: 'deputy_leader' },
-  { label: 'Member', value: 'member' }
-];
+const unitRoleFilterOptions = computed(() => [
+  { label: t('adminUsers.roles.leader'), value: 'leader' },
+  { label: t('adminUsers.roles.deputyLeader'), value: 'deputy_leader' },
+  { label: t('adminUsers.roles.member'), value: 'member' }
+]);
+
 const originalUserData = ref(null);
-const hoveredBadge = ref(null);
 const uploadImageFile = ref(null);
-const selectedBadges = ref([]);
-const badgeToAdd = ref(null);
-const dateProxies = ref([]);
+
+// Progress management
+const userProgress = ref(null);
+const activeTab = ref('bronze'); // Default to bronze tab
+const awardPeakDialog = ref(false);
+const awardPathDialog = ref(false);
+
+const awardElectiveDiplomaDialog = ref(false);
+const selectedPath = ref(null);
+
+const selectedElectiveDiploma = ref(null);
+
+// Tab unlock logic
+const isBronzeUnlocked = computed(() => userProgress.value?.currentPeak?.order >= 1);
+const isSilverUnlocked = computed(() => userProgress.value?.currentPeak?.order >= 2);
+const isGoldUnlocked = computed(() => userProgress.value?.currentPeak?.order >= 3);
+
+// Helper functions for filtering diplomas
+const getScoutDiplomasByLevel = (level) => {
+  if (!userProgress.value?.scoutDiplomas) return [];
+  return userProgress.value.scoutDiplomas.filter(d => d.level === level);
+};
+
+const getScoutDiplomaCount = (level) => {
+  return getScoutDiplomasByLevel(level).length;
+};
+
+const getPathsForPeak = (peak) => {
+  const paths = userProgress.value?.completedPaths || [];
+  if (peak === 'bronze') return paths.slice(0, 4);
+  if (peak === 'silver') return paths.slice(4, 8);
+  if (peak === 'gold') return paths.slice(8, 12);
+  return [];
+};
+
+const getElectivesForPeak = (peak) => {
+  const electives = userProgress.value?.electiveDiplomas || [];
+  if (peak === 'bronze') return electives.slice(0, 1);
+  if (peak === 'silver') return electives.slice(1, 2);
+  if (peak === 'gold') return electives.slice(2, 4);
+  if (peak === 'extra') return electives.slice(4);
+  return [];
+};
+
 
 
 const newUser = ref({
@@ -543,24 +1037,24 @@ const newUser = ref({
   unitRole: 'member'
 });
 
-const roleOptions = [
-  { label: 'User (Guide)', value: 'user' },
-  { label: 'Admin (Captain)', value: 'admin' },
-  { label: 'Super Admin', value: 'super_admin' }
-];
+const roleOptions = computed(() => [
+  { label: t('adminUsers.roles.user'), value: 'user' },
+  { label: t('adminUsers.roles.admin'), value: 'admin' },
+  { label: t('adminUsers.roles.superAdmin'), value: 'super_admin' }
+]);
 
 const availableRoleOptions = computed(() => {
   if (authStore.isSuperAdmin) {
-    return roleOptions;
+    return roleOptions.value;
   }
-  return roleOptions.filter(opt => opt.value === 'user');
+  return roleOptions.value.filter(opt => opt.value === 'user');
 });
 
-const unitRoleOptions = [
-  { label: 'Member', value: 'member' },
-  { label: 'Deputy Leader', value: 'deputy_leader' },
-  { label: 'Leader', value: 'leader' }
-];
+const unitRoleOptions = computed(() => [
+  { label: t('adminUsers.roles.member'), value: 'member' },
+  { label: t('adminUsers.roles.deputyLeader'), value: 'deputy_leader' },
+  { label: t('adminUsers.roles.leader'), value: 'leader' }
+]);
 
 const filteredUsers = computed(() => {
   let result = users.value;
@@ -588,21 +1082,30 @@ const filteredUsers = computed(() => {
   return result;
 });
 
-const availableBadges = computed(() => badges.value);
-const badgeOptions = ref([]);
+// Progress management computed properties
+const availablePaths = computed(() => {
+  const completedPathIds = userProgress.value?.completedPaths?.map(p => p.id) || [];
+  return progressStore.paths.filter(p => !completedPathIds.includes(p.id));
+});
 
-const filterBadges = (val, update) => {
-  if (val === '') {
-    update(() => {
-      badgeOptions.value = availableBadges.value;
-    });
-    return;
-  }
+const availableScoutDiplomas = computed(() => {
+  const earnedDiplomaIds = userProgress.value?.scoutDiplomas?.map(d => d.id) || [];
+  return progressStore.scoutDiplomas.filter(d => !earnedDiplomaIds.includes(d.id));
+});
 
-  update(() => {
-    const needle = val.toLowerCase();
-    badgeOptions.value = availableBadges.value.filter(v => v.name.toLowerCase().indexOf(needle) > -1);
-  });
+const availableElectiveDiplomas = computed(() => {
+  const earnedDiplomaIds = userProgress.value?.electiveDiplomas?.map(d => d.id) || [];
+  return progressStore.electiveDiplomas.filter(d => !earnedDiplomaIds.includes(d.id));
+});
+
+const formatCategory = (category) => {
+  const labels = {
+    me_and_my_capabilities: 'Me & My Capabilities',
+    society_and_volunteering: 'Society & Volunteering',
+    nature: 'Nature',
+    arts: 'Arts'
+  };
+  return labels[category] || category;
 };
 
 const unitOptions = computed(() => units.value);
@@ -626,8 +1129,13 @@ const loadData = async () => {
     await userStore.fetchUsers();
     users.value = userStore.users;
     
-    await badgeStore.fetchBadges();
-    badges.value = badgeStore.badges;
+    // Load progress data
+    await Promise.all([
+      progressStore.fetchPeaks(),
+      progressStore.fetchPaths(),
+      progressStore.fetchScoutDiplomas(),
+      progressStore.fetchElectiveDiplomas()
+    ]);
 
     await unitStore.fetchUnits();
     units.value = unitStore.units;
@@ -640,7 +1148,7 @@ const loadData = async () => {
     }
   } catch (error) {
     console.error('Failed to load data', error);
-    $q.notify({ color: 'negative', message: 'Failed to load data', icon: 'report_problem' });
+    $q.notify({ color: 'negative', message: t('adminUsers.notifications.loadError'), icon: 'report_problem' });
   }
 };
 
@@ -648,16 +1156,20 @@ onMounted(() => {
   loadData();
 });
 
-const openEditDialog = (user) => {
+const openEditDialog = async (user) => {
   editingUserData.value = JSON.parse(JSON.stringify(user)); // Deep copy
   editingUserData.value.locationName = user.location?.name;
   editingUserData.value.unitId = user.unit?.id;
   editingUserData.value.unitRole = user.unitRole || 'member';
   
-  selectedBadges.value = user.badges ? user.badges.map(b => ({
-    ...b,
-    acquiredAt: b.acquiredAt ? new Date(b.acquiredAt).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
-  })) : [];
+  // Fetch user progress
+  try {
+    const userResponse = await api.get(`/users/${user.id}`);
+    userProgress.value = userResponse.data.progress || null;
+  } catch (error) {
+    console.error('Failed to load user progress:', error);
+    userProgress.value = null;
+  }
   
   originalUserData.value = JSON.parse(JSON.stringify(user));
   uploadImageFile.value = null;
@@ -668,25 +1180,26 @@ const cancelEdit = () => {
   editingUserData.value = null;
   originalUserData.value = null;
   uploadImageFile.value = null;
-  selectedBadges.value = [];
-  badgeToAdd.value = null;
-  dateProxies.value = [];
+  userProgress.value = null;
+  selectedPath.value = null;
+  selectedScoutDiploma.value = null;
+  selectedElectiveDiploma.value = null;
 };
 
 const confirmDeleteUser = (user) => {
   $q.dialog({
-    title: 'Confirm Delete',
-    message: `Are you sure you want to delete user "${user.username}"? This action cannot be undone.`,
+    title: t('adminUsers.delete.title'),
+    message: t('adminUsers.delete.message', { username: user.username }),
     cancel: true,
     persistent: true
   }).onOk(async () => {
     try {
       await api.delete(`/users/${user.id}`);
-      $q.notify({ color: 'positive', message: 'User deleted successfully', icon: 'check' });
+      $q.notify({ color: 'positive', message: t('adminUsers.notifications.deleteSuccess'), icon: 'check' });
       await loadData();
     } catch (error) {
       console.error('Failed to delete user', error);
-      $q.notify({ color: 'negative', message: 'Failed to delete user', icon: 'report_problem' });
+      $q.notify({ color: 'negative', message: t('adminUsers.notifications.deleteError'), icon: 'report_problem' });
     }
   });
 };
@@ -695,7 +1208,7 @@ const saveUserEdit = async () => {
   if (uploadImageFile.value) {
     const imageSuccess = await userStore.uploadUserImage(editingUserData.value.id, uploadImageFile.value);
     if (!imageSuccess) {
-      $q.notify({ color: 'negative', message: 'Failed to upload image', icon: 'report_problem' });
+      $q.notify({ color: 'negative', message: t('adminUsers.notifications.imageError'), icon: 'report_problem' });
       return;
     }
   }
@@ -708,7 +1221,7 @@ const saveUserEdit = async () => {
   });
 
   if (!result) {
-    $q.notify({ color: 'negative', message: 'Failed to update user info', icon: 'report_problem' });
+    $q.notify({ color: 'negative', message: t('adminUsers.notifications.updateError'), icon: 'report_problem' });
     return;
   }
 
@@ -717,61 +1230,119 @@ const saveUserEdit = async () => {
     const roleLabel = formatUnitRole(result.demotedUser.role);
     $q.notify({ 
       color: 'info', 
-      message: `Note: User "${result.demotedUser.username}" was demoted from ${roleLabel} to Member`,
+      message: t('adminUsers.notifications.demotion', { username: result.demotedUser.username, role: roleLabel }),
       icon: 'info',
       timeout: 5000
     });
   }
 
-  const originalBadges = originalUserData.value.badges || [];
-  const currentBadges = selectedBadges.value;
-
-  const removedBadges = originalBadges.filter(ob => !currentBadges.find(cb => cb.id === ob.id));
-  for (const badge of removedBadges) {
-    await userStore.removeBadge(editingUserData.value.id, badge.id);
-  }
-
-  const addedBadges = currentBadges.filter(cb => !originalBadges.find(ob => ob.id === cb.id));
-  for (const badge of addedBadges) {
-    await userStore.assignBadge(editingUserData.value.id, badge.id, badge.acquiredAt);
-  }
-
-  const existingBadges = currentBadges.filter(cb => originalBadges.find(ob => ob.id === cb.id));
-  for (const badge of existingBadges) {
-    const original = originalBadges.find(ob => ob.id === badge.id);
-    const originalDate = original.acquiredAt ? new Date(original.acquiredAt).toISOString().split('T')[0] : '';
-    const newDate = badge.acquiredAt;
-    
-    if (originalDate !== newDate) {
-      await userStore.updateBadgeDate(editingUserData.value.id, badge.id, badge.acquiredAt);
-    }
-  }
-
-  $q.notify({ color: 'positive', message: 'User updated successfully', icon: 'check' });
+  $q.notify({ color: 'positive', message: t('adminUsers.notifications.updateSuccess'), icon: 'check' });
   editDialog.value = false;
   await loadData();
+}
+
+// Progress Management Functions
+const openAwardPeakDialog = () => {
+  awardPeakDialog.value = true;
 };
 
-const getBadgeById = (id) => {
-  return badges.value.find(b => b.id === id);
+const openAwardPathDialog = () => {
+  awardPathDialog.value = true;
 };
 
-const removeBadgeFromSelection = (index) => {
-  selectedBadges.value.splice(index, 1);
+
+
+const openAwardElectiveDiplomaDialog = () => {
+  awardElectiveDiplomaDialog.value = true;
 };
 
-const addBadgeToSelection = (badgeId) => {
-  if (!badgeId) return;
-  const badge = badges.value.find(b => b.id === badgeId);
-  if (badge) {
-    if (!selectedBadges.value.find(b => b.id === badge.id)) {
-      selectedBadges.value.push({
-        ...badge,
-        acquiredAt: new Date().toISOString().split('T')[0]
-      });
+const awardPromisePeak = async () => {
+  try {
+    const promisePeak = progressStore.peaks.find(p => p.order === 1);
+    if (!promisePeak) {
+      $q.notify({ color: 'negative', message: 'Promise peak not found', icon: 'report_problem' });
+      return;
     }
+    
+    await progressStore.awardPeakToUser(editingUserData.value.id, promisePeak.id);
+    $q.notify({ color: 'positive', message: t('progress.admin.peakAwarded') || 'Promise peak awarded successfully!', icon: 'check' });
+    
+    // Refresh user progress
+    const userResponse = await api.get(`/users/${editingUserData.value.id}`);
+    userProgress.value = userResponse.data.progress || null;
+    
+    awardPeakDialog.value = false;
+  } catch (error) {
+    console.error('Error awarding peak:', error);
+    $q.notify({ color: 'negative', message: error.response?.data?.message || 'Failed to award peak', icon: 'report_problem' });
   }
-  badgeToAdd.value = null;
+};
+
+const awardPath = async () => {
+  if (!selectedPath.value) return;
+  
+  try {
+    await progressStore.awardPathToUser(editingUserData.value.id, selectedPath.value);
+    $q.notify({ color: 'positive', message: t('progress.admin.pathAwarded') || 'Path awarded successfully!', icon: 'check' });
+    
+    // Refresh user progress
+    const userResponse = await api.get(`/users/${editingUserData.value.id}`);
+    userProgress.value = userResponse.data.progress || null;
+    
+    selectedPath.value = null;
+    awardPathDialog.value = false;
+  } catch (error) {
+    console.error('Error awarding path:', error);
+    $q.notify({ color: 'negative', message: error.response?.data?.message || 'Failed to award path', icon: 'report_problem' });
+  }
+};
+
+
+
+const awardScoutDiplomaForPeak = async (peak) => {
+  let level = 0;
+  if (peak === 'bronze') level = 1;
+  else if (peak === 'silver') level = 2;
+  else if (peak === 'gold') level = 3;
+
+  // Find available diploma for this level
+  const diploma = availableScoutDiplomas.value.find(d => d.level === level);
+
+  if (!diploma) {
+    $q.notify({ color: 'warning', message: t('progress.admin.noAvailableDiplomaForLevel', { level }) || `No available diploma found for level ${level}`, icon: 'warning' });
+    return;
+  }
+
+  try {
+    await progressStore.awardDiplomaToUser(editingUserData.value.id, diploma.id, 'scout');
+    $q.notify({ color: 'positive', message: t('progress.admin.diplomaAwarded') || 'Scout diploma awarded successfully!', icon: 'check' });
+
+    // Refresh user progress
+    const userResponse = await api.get(`/users/${editingUserData.value.id}`);
+    userProgress.value = userResponse.data.progress || null;
+  } catch (error) {
+    console.error('Error awarding scout diploma:', error);
+    $q.notify({ color: 'negative', message: error.response?.data?.message || 'Failed to award diploma', icon: 'report_problem' });
+  }
+};
+
+const awardElectiveDiploma = async () => {
+  if (!selectedElectiveDiploma.value) return;
+  
+  try {
+    await progressStore.awardDiplomaToUser(editingUserData.value.id, selectedElectiveDiploma.value, 'elective');
+    $q.notify({ color: 'positive', message: t('progress.admin.diplomaAwarded') || 'Elective diploma awarded successfully!', icon: 'check' });
+    
+    // Refresh user progress
+    const userResponse = await api.get(`/users/${editingUserData.value.id}`);
+    userProgress.value = userResponse.data.progress || null;
+    
+    selectedElectiveDiploma.value = null;
+    awardElectiveDiplomaDialog.value = false;
+  } catch (error) {
+    console.error('Error awarding elective diploma:', error);
+    $q.notify({ color: 'negative', message: error.response?.data?.message || 'Failed to award diploma', icon: 'report_problem' });
+  }
 };
 
 const formatDate = (dateString) => {
@@ -782,13 +1353,6 @@ const formatDate = (dateString) => {
 const handleImageUpdate = (file) => {
   if (file) {
     editingUserData.value.profileImage = URL.createObjectURL(file);
-  }
-};
-
-const handleBadgeRemove = async (userId, badge) => {
-  const success = await userStore.removeBadge(userId, badge.id);
-  if (success) {
-    await loadData();
   }
 };
 
@@ -816,7 +1380,7 @@ const createUser = async () => {
     });
     
     if (result) {
-      $q.notify({ color: 'positive', message: 'User created successfully', icon: 'check' });
+      $q.notify({ color: 'positive', message: t('adminUsers.notifications.createSuccess'), icon: 'check' });
       
       // Check for demotion
       if (result.demotedUser) {
@@ -842,11 +1406,11 @@ const createUser = async () => {
       
       await loadData();
     } else {
-      $q.notify({ color: 'negative', message: 'Failed to create user', icon: 'report_problem' });
+      $q.notify({ color: 'negative', message: t('adminUsers.notifications.createError'), icon: 'report_problem' });
     }
   } catch (error) {
     console.error('Error creating user:', error);
-    $q.notify({ color: 'negative', message: error.response?.data?.message || 'Failed to create user', icon: 'report_problem' });
+    $q.notify({ color: 'negative', message: error.response?.data?.message || t('adminUsers.notifications.createError'), icon: 'report_problem' });
   }
 };
 
@@ -861,9 +1425,9 @@ const getUnitRoleColor = (unitRole) => {
 
 const formatUnitRole = (unitRole) => {
   switch(unitRole) {
-    case 'leader': return 'Leader';
-    case 'deputy_leader': return 'Deputy Leader';
-    case 'member': return 'Member';
+    case 'leader': return t('adminUsers.roles.leader');
+    case 'deputy_leader': return t('adminUsers.roles.deputyLeader');
+    case 'member': return t('adminUsers.roles.member');
     default: return unitRole;
   }
 };

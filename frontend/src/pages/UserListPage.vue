@@ -3,8 +3,8 @@
     <!-- Header Section -->
     <div class="feed-header">
       <div class="container">
-        <h1 class="feed-title">Scouts Community</h1>
-        <p class="feed-subtitle">Discover fellow scouts and their achievements</p>
+        <h1 class="feed-title">{{ $t('userListPage.title') }}</h1>
+        <p class="feed-subtitle">{{ $t('userListPage.subtitle') }}</p>
 
         <!-- Search Bar -->
         <div class="search-section">
@@ -12,7 +12,7 @@
             v-model="filterName"
             outlined
             rounded
-            placeholder="Search scouts by name..."
+            :placeholder="$t('userListPage.searchPlaceholder')"
             class="search-input"
             @update:model-value="fetchUsers"
           >
@@ -46,66 +46,46 @@
               <h3 class="user-name">{{ user.username }}</h3>
               <div class="user-location">
                 <q-icon name="place" size="16px" />
-                {{ user.location?.name || 'No location' }}
+                {{ user.location?.name || $t('userListPage.noLocation') }}
               </div>
             </div>
           </div>
 
-          <!-- Stats Row -->
-          <div class="stats-row">
-            <div class="stat-item">
-              <div class="stat-value">{{ user.badges?.length || 0 }}</div>
-              <div class="stat-label">Badges</div>
+          <!-- Unit & Role Card -->
+          <div class="unit-role-card">
+            <div class="unit-section">
+              <div class="text-caption text-grey-7">{{ $t('userListPage.unitLabel') }}</div>
+              <div class="text-weight-bold">{{ user.unit?.name || '-' }}</div>
             </div>
-            <div class="stat-divider"></div>
-            <div class="stat-item">
-              <div class="stat-value">{{ user.role === 'admin' ? 'Captain' : 'Scout' }}</div>
-              <div class="stat-label">Role</div>
+            <div class="unit-divider"></div>
+            <div class="role-section">
+              <div class="text-caption text-grey-7">{{ $t('userListPage.roleLabel') }}</div>
+              <div class="text-weight-bold">{{ formatUnitRole(user.unitRole) }}</div>
             </div>
           </div>
 
           <q-separator class="card-separator" />
 
-          <!-- Badges Section -->
+          <!-- Progress Section -->
           <div class="badges-section">
             <h4 class="badges-title">
-              <q-icon name="military_tech" size="18px" />
-              Achievements
+              <q-icon name="trending_up" size="18px" />
+              {{ $t('progress.admin.currentPeak') || 'Current Peak' }}
             </h4>
 
-            <div v-if="user.badges && user.badges.length > 0" class="badges-grid">
-              <div
-                v-for="badge in user.badges.slice(0, 3)"
-                :key="badge.id"
-                class="badge-item"
-              >
-                <q-avatar size="50px" class="badge-avatar">
-                  <img
-                    v-if="badge.image"
-                    :src="`${config.apiUrl}${badge.image}`"
-                  />
-                  <q-icon v-else name="star" color="primary" size="30px" />
-                </q-avatar>
-                <q-tooltip class="badge-tooltip" anchor="top middle" self="bottom middle">
-                  <div class="tooltip-content">
-                    <strong>{{ badge.name }}</strong>
-                    <div class="text-caption">{{ badge.description }}</div>
-                  </div>
-                </q-tooltip>
-              </div>
-
-              <!-- More Badges Indicator -->
-              <div v-if="user.badges.length > 3" class="more-badges">
-                <q-avatar size="50px" class="more-avatar">
-                  <div class="more-count">+{{ user.badges.length - 3 }}</div>
-                </q-avatar>
-                <q-tooltip>{{ user.badges.length - 3 }} more badges</q-tooltip>
+            <div v-if="user.progress?.currentPeak" class="row items-center q-gutter-md">
+              <q-avatar size="50px" class="badge-avatar">
+                <img :src="`${config.apiUrl}${user.progress.currentPeak.image}`" style="object-fit: cover" />
+              </q-avatar>
+              <div>
+                <div class="text-weight-bold text-subtitle1">{{ user.progress.currentPeak.name }}</div>
+                <div class="text-caption text-grey-7">{{ $t('progress.admin.peaks.' + user.progress.currentPeak.name.toLowerCase()) }}</div>
               </div>
             </div>
 
             <div v-else class="no-badges">
-              <q-icon name="emoji_events" size="40px" color="grey-5" />
-              <p>No badges yet</p>
+              <q-icon name="landscape" size="40px" color="grey-5" />
+              <p>{{ $t('progress.admin.noPeak') || 'No Peak Earned Yet' }}</p>
             </div>
           </div>
 
@@ -115,7 +95,7 @@
               flat
               dense
               color="primary"
-              label="View Profile"
+              :label="$t('userListPage.viewProfile')"
               icon-right="arrow_forward"
               class="view-profile-btn"
               @click="$router.push(`/user/${user.id}`)"
@@ -127,8 +107,8 @@
       <!-- Empty State -->
       <div v-if="filteredUsers.length === 0" class="empty-state">
         <q-icon name="people_outline" size="80px" color="grey-5" />
-        <h3>No scouts found</h3>
-        <p>Try adjusting your filters</p>
+        <h3>{{ $t('userListPage.emptyState.title') }}</h3>
+        <p>{{ $t('userListPage.emptyState.subtitle') }}</p>
       </div>
     </div>
   </q-page>
@@ -136,6 +116,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useUserStore } from '../stores/user';
 import { useAuthStore } from '../stores/auth';
 import { config } from '../config';
@@ -144,6 +125,7 @@ import { getAvatarUrl } from '../utils/avatar';
 const userStore = useUserStore();
 const authStore = useAuthStore();
 const filterName = ref('');
+const { t } = useI18n();
 
 // Filter to show only regular users (scouts) from the same location
 const filteredUsers = computed(() => {
@@ -165,6 +147,16 @@ const filteredUsers = computed(() => {
 
 const fetchUsers = async () => {
   await userStore.fetchUsers();
+};
+
+const formatUnitRole = (unitRole) => {
+  if (!unitRole) return '-';
+  switch(unitRole) {
+    case 'leader': return t('adminUsers.roles.leader');
+    case 'deputy_leader': return t('adminUsers.roles.deputyLeader');
+    case 'member': return t('adminUsers.roles.member');
+    default: return unitRole;
+  }
 };
 
 onMounted(async () => {
@@ -247,12 +239,15 @@ body.body--dark .location-filter :deep(.q-field__control) {
 }
 
 .user-card {
+  border: 4px solid rgba(0, 0, 0, 0.1);
   border-radius: 20px;
   padding: 24px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .user-card::before {
@@ -310,11 +305,48 @@ body.body--dark .location-filter :deep(.q-field__control) {
   font-size: 0.95rem;
 }
 
+.user-unit {
+  display: none;
+}
+
+.unit-role-card {
+  display: flex;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  margin-bottom: 20px;
+  background: rgba(0, 0, 0, 0.02);
+  overflow: hidden;
+}
+
+body.body--dark .unit-role-card {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.unit-section,
+.role-section {
+  flex: 1;
+  padding: 12px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.unit-divider {
+  width: 1px;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+body.body--dark .unit-divider {
+  background: rgba(255, 255, 255, 0.1);
+}
+
 /* Stats Row */
 .stats-row {
   display: flex;
-  justify-content: space-around;
-  padding: 16px 0;
+  justify-content: center;
+  padding: 0 0 16px;
   margin-bottom: 16px;
 }
 
@@ -350,6 +382,7 @@ body.body--dark .location-filter :deep(.q-field__control) {
 /* Badges Section */
 .badges-section {
   margin-bottom: 20px;
+  flex-grow: 1;
 }
 
 .badges-title {
@@ -494,6 +527,8 @@ body.body--dark .card-footer {
 
   .user-card {
     padding: 20px;
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-radius: 20px;
   }
 }
 </style>

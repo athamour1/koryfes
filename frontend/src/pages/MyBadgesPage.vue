@@ -7,10 +7,10 @@
       <div class="relative-position text-center q-pa-md" style="max-width: 800px; margin: 0 auto;">
         <div class="text-h3 text-weight-bold q-mb-sm">
           <q-icon name="emoji_events" size="48px" class="q-mr-sm" />
-          My Badges
+          {{ $t('myBadges.title') }}
         </div>
         <div class="text-h6 text-weight-light" style="opacity: 0.9;">
-          Your achievements and earned badges
+          {{ $t('myBadges.subtitle') }}
         </div>
         
         <!-- Badge Count -->
@@ -21,7 +21,7 @@
             style="background: rgba(255, 255, 255, 0.2); color: white; backdrop-filter: blur(10px);"
           >
             <q-icon name="military_tech" size="24px" class="q-mr-xs" />
-            {{ userBadges.length }} Badge{{ userBadges.length !== 1 ? 's' : '' }} Earned
+            {{ $t('myBadges.badgeCount', { count: userBadges.length }, userBadges.length) }}
           </q-chip>
         </div>
       </div>
@@ -32,8 +32,8 @@
       <!-- Empty State -->
       <div v-if="userBadges.length === 0" class="text-center q-pa-xl">
         <q-icon name="emoji_events" size="120px" color="grey-5" />
-        <div class="text-h5 text-weight-medium text-grey-7 q-mt-md">No badges yet</div>
-        <div class="text-body1 text-grey-6 q-mt-sm">Complete activities to earn badges!</div>
+        <div class="text-h5 text-weight-medium text-grey-7 q-mt-md">{{ $t('myBadges.noBadges.title') }}</div>
+        <div class="text-body1 text-grey-6 q-mt-sm">{{ $t('myBadges.noBadges.subtitle') }}</div>
       </div>
 
       <!-- Badges Grid -->
@@ -86,7 +86,7 @@
                 <q-separator class="q-mb-md" />
                 <div class="text-caption text-grey-6">
                   <q-icon name="verified" size="16px" class="q-mr-xs" />
-                  Earned {{ badge.acquiredAt ? 'on ' + formatDate(badge.acquiredAt) : '' }}
+                  {{ badge.acquiredAt ? $t('myBadges.earnedOn', { date: formatDate(badge.acquiredAt) }) : '' }}
                 </div>
               </q-card-section>
             </q-card>
@@ -98,10 +98,10 @@
           <q-card-section class="text-center q-pa-lg">
             <div class="text-h5 text-weight-bold q-mb-sm">
               <q-icon name="emoji_events" color="white" size="32px" class="q-mr-sm" />
-              Congratulations!
+              {{ $t('myBadges.congratulations') }}
             </div>
             <div class="text-h6 text-weight-light" style="opacity: 0.9;">
-              You have earned {{ userBadges.length }} badge{{ userBadges.length !== 1 ? 's' : '' }}!
+              {{ $t('myBadges.summary', { count: userBadges.length }, userBadges.length) }}
             </div>
           </q-card-section>
         </q-card>
@@ -112,12 +112,14 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../stores/auth';
 import { config } from '../config';
 import { date } from 'quasar';
 
 const authStore = useAuthStore();
 const userBadges = ref([]);
+const { t } = useI18n();
 
 onMounted(async () => {
   await authStore.fetchProfile();

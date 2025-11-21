@@ -1,8 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, OneToOne, ManyToOne } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import { UserBadge } from './user-badge.entity';
 import { Location } from '../../locations/entities/location.entity';
 import { Unit } from '../../units/entities/unit.entity';
+import { UserProgress } from '../../user-progress/user-progress.entity';
 
 export enum UserRole {
     SUPER_ADMIN = 'super_admin',
@@ -68,5 +69,8 @@ export class User {
 
     @OneToMany(() => UserBadge, (userBadge) => userBadge.user, { cascade: true })
     userBadges: UserBadge[];
+
+    @OneToOne(() => UserProgress, (userProgress) => userProgress.user, { nullable: true })
+    progress: UserProgress;
 }
 

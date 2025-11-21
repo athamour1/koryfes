@@ -1,0 +1,469 @@
+{
+    "general": {
+        "welcome": "Welcome",
+        "save": "Save Changes",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "award": "Award",
+        "loading": "Loading...",
+        "success": "Success",
+        "error": "Error"
+    },
+    "navigation": {
+        "title": "Scout Badges",
+        "header": "Navigation",
+        "dashboard": "Dashboard",
+        "myBadges": "My Badges",
+        "users": "Users",
+        "myUnit": "My Unit",
+        "units": "Units",
+        "adminUsers": "Admin Users",
+        "adminBadges": "Admin Badges",
+        "progress": "Progress",
+        "locations": "Locations",
+        "profile": "Profile",
+        "logout": "Logout",
+        "administration": "Administration",
+        "login": "Login",
+        "register": "Register",
+        "toggleLight": "Toggle Light Mode",
+        "toggleDark": "Toggle Dark Mode"
+    },
+    "myUnit": {
+        "title": "My Unit",
+        "subtitle": "Manage your unit details and flag",
+        "notFound": "Unit not found or you are not assigned to a unit.",
+        "infoTitle": "Unit Information",
+        "nameLabel": "Unit Name",
+        "nameHint": "Contact admin to change unit name",
+        "descriptionLabel": "Description",
+        "descriptionRequired": "Description is required",
+        "flagTitle": "Unit Flag",
+        "flagHint": "Click the edit icon to upload a new flag",
+        "updateSuccess": "Unit updated successfully",
+        "loadError": "Failed to load unit details",
+        "updateError": "Failed to update unit"
+    },
+    "dashboard": {
+        "welcome": "Welcome back, {name}!",
+        "subtitle": "Here's what's happening with your scouts today",
+        "stats": {
+            "totalScouts": "Total Scouts",
+            "totalBadges": "Total Badges",
+            "badgesAwarded": "Badges Awarded",
+            "activeLocations": "Active Locations"
+        },
+        "quickActions": {
+            "title": "Quick Actions",
+            "addScout": "Add Scout",
+            "addScoutCaption": "Create new user",
+            "awardBadge": "Award Badge",
+            "awardBadgeCaption": "Assign achievement",
+            "manageLocations": "Manage Locations",
+            "manageLocationsCaption": "Edit locations"
+        },
+        "topScouts": {
+            "title": "Top Scouts",
+            "thisMonth": "This Month"
+        },
+        "distribution": {
+            "title": "Badge Distribution",
+            "awarded": "Awarded",
+            "available": "Available"
+        },
+        "activity": {
+            "title": "Recent Activity"
+        },
+        "locations": {
+            "title": "Locations Overview",
+            "scoutsCount": "{count} scouts",
+            "badgesCount": "{count} badges",
+            "activePercent": "{percent}% active"
+        }
+    },
+    "adminUsers": {
+        "title": "User Management",
+        "subtitle": "Manage scout users, roles, and permissions",
+        "tableTitle": "Users",
+        "searchPlaceholder": "Search by name",
+        "filters": {
+            "role": "Role",
+            "location": "Location",
+            "unit": "Unit",
+            "unitRole": "Unit Role"
+        },
+        "actions": {
+            "create": "Create User",
+            "edit": "Edit User",
+            "delete": "Delete User",
+            "cannotDeleteSelf": "Cannot delete yourself"
+        },
+        "noData": {
+            "search": "No users match your search",
+            "empty": "No users created yet"
+        },
+        "dialog": {
+            "createTitle": "Create New User",
+            "editTitle": "Edit User Profile",
+            "editSubtitle": "Manage user details and badges"
+        },
+        "form": {
+            "username": "Username",
+            "password": "Password",
+            "required": "Required",
+            "locationLocked": "Locked to your location",
+            "unitRoleHint": "Note: Assigning Leader/Deputy Leader will demote any existing holder in this unit to Member",
+            "myLocation": "My Location"
+        },
+        "badges": {
+            "title": "Badges & Achievements",
+            "table": {
+                "badge": "Badge",
+                "date": "Acquired Date",
+                "action": "Action"
+            },
+            "empty": "No badges awarded yet.",
+            "add": "Add Badge"
+        },
+        "delete": {
+            "title": "Confirm Delete",
+            "message": "Are you sure you want to delete user \"{username}\"? This action cannot be undone."
+        },
+        "notifications": {
+            "deleteSuccess": "User deleted successfully",
+            "deleteError": "Failed to delete user",
+            "imageError": "Failed to upload image",
+            "updateError": "Failed to update user info",
+            "demotion": "Note: User \"{username}\" was demoted from {role} to Member",
+            "updateSuccess": "User updated successfully",
+            "createSuccess": "User created successfully",
+            "createError": "Failed to create user",
+            "loadError": "Failed to load data"
+        },
+        "columns": {
+            "profileImage": "Profile Image",
+            "username": "Username",
+            "role": "Role",
+            "location": "Location",
+            "unit": "Unit",
+            "unitRole": "Unit Role",
+            "actions": "Actions"
+        },
+        "roles": {
+            "superAdmin": "Super Admin",
+            "admin": "Admin (Captain)",
+            "user": "User (Guide)",
+            "leader": "Leader",
+            "deputyLeader": "Deputy Leader",
+            "member": "Member"
+        }
+    },
+    "adminBadges": {
+        "title": "Badge Management",
+        "subtitle": "Manage scout badges and achievements",
+        "tableTitle": "Badges",
+        "searchPlaceholder": "Search",
+        "createButton": "Create New Badge",
+        "noData": {
+            "search": "No badges match your search",
+            "empty": "No badges created yet"
+        },
+        "dialog": {
+            "createTitle": "Create New Badge",
+            "editTitle": "Edit Badge"
+        },
+        "form": {
+            "name": "Badge Name",
+            "description": "Description",
+            "image": "Badge Image",
+            "updateImage": "Update Badge Image",
+            "required": "Required"
+        },
+        "columns": {
+            "image": "Image",
+            "name": "Name",
+            "description": "Description",
+            "actions": "Actions"
+        },
+        "notifications": {
+            "imageError": "Failed to upload image",
+            "updateSuccess": "Badge updated successfully",
+            "updateError": "Failed to update badge",
+            "createSuccess": "Badge created successfully",
+            "createError": "Failed to create badge"
+        }
+    },
+    "adminUnits": {
+        "title": "Unit Management",
+        "subtitle": "Manage scout units and their members",
+        "tableTitle": "Units",
+        "searchPlaceholder": "Search",
+        "createButton": "Create New Unit",
+        "noData": {
+            "search": "No units match your search",
+            "empty": "No units created yet"
+        },
+        "dialog": {
+            "createTitle": "Create New Unit",
+            "editTitle": "Edit Unit"
+        },
+        "form": {
+            "name": "Unit Name",
+            "description": "Description",
+            "location": "Location",
+            "required": "Required",
+            "locationRequired": "Location is required"
+        },
+        "columns": {
+            "flag": "Flag",
+            "name": "Name",
+            "description": "Description",
+            "location": "Location",
+            "members": "Members",
+            "actions": "Actions"
+        },
+        "delete": {
+            "title": "Confirm Delete",
+            "message": "Are you sure you want to delete unit \"{name}\"? This action cannot be undone."
+        },
+        "notifications": {
+            "updateSuccess": "Unit updated successfully",
+            "createSuccess": "Unit created successfully",
+            "deleteSuccess": "Unit deleted successfully",
+            "deleteError": "Failed to delete unit",
+            "operationFailed": "Operation failed"
+        }
+    },
+    "locationManagement": {
+        "title": "Location Management",
+        "subtitle": "Manage scout locations and groups",
+        "tableTitle": "Locations",
+        "searchPlaceholder": "Search locations",
+        "addButton": "Add Location",
+        "dialog": {
+            "addTitle": "Add Location",
+            "editTitle": "Edit Location"
+        },
+        "form": {
+            "name": "Location Name",
+            "required": "Location name is required"
+        },
+        "columns": {
+            "name": "Name",
+            "actions": "Actions"
+        },
+        "tooltips": {
+            "edit": "Edit location",
+            "delete": "Delete location"
+        },
+        "delete": {
+            "title": "Confirm Deletion",
+            "message": "Are you sure you want to delete \"{name}\"? This action cannot be undone."
+        },
+        "notifications": {
+            "fetchError": "Failed to fetch locations",
+            "enterName": "Please enter a location name",
+            "updateSuccess": "Location updated successfully",
+            "createSuccess": "Location created successfully",
+            "saveError": "Failed to save location",
+            "deleteSuccess": "Location deleted successfully",
+            "deleteError": "Failed to delete location"
+        }
+    },
+    "myBadges": {
+        "title": "My Badges",
+        "subtitle": "Your achievements and earned badges",
+        "earned": "Earned",
+        "badgeCount": "{count} Badge | {count} Badges",
+        "noBadges": {
+            "title": "No badges yet",
+            "subtitle": "Complete activities to earn badges!"
+        },
+        "earnedOn": "Earned on {date}",
+        "congratulations": "Congratulations!",
+        "summary": "You have earned {count} badge! | You have earned {count} badges!"
+    },
+    "profilePage": {
+        "title": "Profile Settings",
+        "subtitle": "Manage your profile information",
+        "infoTitle": "Profile Information",
+        "uploadImage": "Upload Profile Image",
+        "location": "Location",
+        "locationHint": "Your assigned location",
+        "saveButton": "Save Changes",
+        "notifications": {
+            "updateSuccess": "Profile updated",
+            "updateError": "Update failed",
+            "imageSuccess": "Image uploaded",
+            "imageError": "Upload failed"
+        }
+    },
+    "userListPage": {
+        "title": "Scouts Community",
+        "subtitle": "Discover fellow scouts and their achievements",
+        "searchPlaceholder": "Search scouts by name...",
+        "noLocation": "No location",
+        "unit": "Unit: {name}",
+        "unitLabel": "Unit",
+        "roleLabel": "Role",
+        "stats": {
+            "badges": "Badges",
+            "role": "Role"
+        },
+        "roles": {
+            "captain": "Captain",
+            "scout": "Scout"
+        },
+        "achievements": "Achievements",
+        "moreBadges": "{count} more badges",
+        "noBadges": "No badges yet",
+        "viewProfile": "View Profile",
+        "emptyState": {
+            "title": "No scouts found",
+            "subtitle": "Try adjusting your filters"
+        }
+    },
+    "userProfilePage": {
+        "backButton": "Back to Directory",
+        "noLocation": "No Location",
+        "roles": {
+            "captain": "Captain",
+            "scout": "Scout"
+        },
+        "stats": {
+            "badgesEarned": "Badges Earned",
+            "achievementRate": "Achievement Rate",
+            "status": "Status",
+            "active": "Active",
+            "admin": "Admin"
+        },
+        "badgeCollection": {
+            "title": "Badge Collection",
+            "subtitle": "{count} badges earned"
+        },
+        "noDescription": "No description available",
+        "earned": "Earned",
+        "noBadges": {
+            "title": "No Badges Yet",
+            "subtitle": "This scout hasn't earned any badges yet. Check back later!"
+        }
+    },
+    "unitPage": {
+        "aboutUnit": "About Unit",
+        "noDescription": "No description available.",
+        "members": "Members",
+        "roles": {
+            "captain": "Captain",
+            "scout": "Scout"
+        },
+        "noMembers": "No members in this unit yet.",
+        "notFound": "Unit not found",
+        "goBack": "Go Back",
+        "unitLabel": "Unit",
+        "roleLabel": "Role"
+    },
+    "auth": {
+        "login": {
+            "tab": "Login",
+            "title": "Welcome Back",
+            "subtitle": "Sign in to continue",
+            "button": "Login",
+            "success": "Login successful",
+            "invalid": "Invalid username or password"
+        },
+        "register": {
+            "tab": "Register",
+            "title": "Create Account",
+            "subtitle": "Join Scout Badges today",
+            "button": "Register",
+            "success": "Registration successful! Please login.",
+            "failed": "Registration failed",
+            "alreadyHaveAccount": "Already have an account?",
+            "loginLink": "Login here"
+        },
+        "form": {
+            "username": "Username",
+            "password": "Password",
+            "location": "Location (Optional)",
+            "rules": {
+                "usernameRequired": "Username is required",
+                "validEmail": "Must be a valid email",
+                "passwordRequired": "Password is required",
+                "passwordLength": "Password must be at least 8 characters",
+                "passwordUpper": "Password must contain an uppercase letter",
+                "passwordLower": "Password must contain a lowercase letter",
+                "passwordNumber": "Password must contain a number"
+            }
+        },
+        "forgotPassword": {
+            "title": "Forgot Password",
+            "label": "Username / Email",
+            "rule": "Please type your username",
+            "backToLogin": "Back to Login",
+            "submit": "Send Reset Link",
+            "success": "If an account exists, a reset link has been sent (check console for mock token)."
+        },
+        "resetPassword": {
+            "title": "Reset Password",
+            "label": "New Password",
+            "button": "Reset Password",
+            "success": "Password reset successfully! Redirecting to login...",
+            "invalidToken": "Invalid or missing reset token.",
+            "failed": "Failed to reset password"
+        }
+    },
+    "progress": {
+        "admin": {
+            "title": "Progress Management",
+            "currentPeak": "Current Peak",
+            "noPeak": "No peak",
+            "paths": {
+                "title": "Paths",
+                "completed": "{count}/{total}"
+            },
+            "diplomas": {
+                "title": "Diplomas",
+                "scout": "Scout Diplomas",
+                "elective": "Elective Diplomas"
+            },
+            "awardPromisePeak": "Award Promise",
+            "awardPeak": "Award Peak",
+            "awardPath": "Award Path",
+            "awardScoutDiploma": "Award Scout Diploma",
+            "awardElectiveDiploma": "Award Elective Diploma",
+            "promiseInfo": "The Promise is the first step in the user's progress journey.",
+            "awardPeakConfirm": "Award the Promise peak to this user? This will unlock their ability to earn paths and diplomas.",
+            "selectPath": "Select a path",
+            "selectScoutDiploma": "Select a scout diploma",
+            "selectElectiveDiploma": "Select an elective diploma",
+            "selectDiploma": "Select diploma",
+            "bronzeTab": "Bronze Peak",
+            "silverTab": "Silver Peak",
+            "goldTab": "Gold Peak",
+            "extraTab": "Extra",
+            "locked": "Locked",
+            "earnedItems": "Earned Items",
+            "earnedPaths": "Earned Paths",
+            "earnedScoutDiplomas": "Earned Scout Diplomas",
+            "earnedElectiveDiplomas": "Earned Elective Diplomas",
+            "noEarnedPaths": "No paths yet",
+            "noEarnedScoutDiplomas": "No scout diplomas yet",
+            "noEarnedElectiveDiplomas": "No elective diplomas yet",
+            "noAvailableDiplomaForLevel": "No available diploma found for level {level}",
+            "extraStageInfo": "This stage allows awarding unlimited elective diplomas after completing the Gold peak."
+        },
+        "peaks": {
+            "promise": "Promise",
+            "bronze": "Bronze",
+            "silver": "Silver",
+            "gold": "Gold"
+        },
+        "notifications": {
+            "peakAwarded": "Peak awarded successfully",
+            "pathAwarded": "Path awarded successfully",
+            "scoutDiplomaAwarded": "Scout diploma awarded successfully",
+            "electiveDiplomaAwarded": "Elective diploma awarded successfully",
+            "awardError": "Failed to award"
+        }
+    }
+}

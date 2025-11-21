@@ -8,10 +8,13 @@ import './css/admin-pages.css'
 import App from './App.vue'
 import router from './router'
 
+import i18n from './i18n'
+
 const myApp = createApp(App)
 
 myApp.use(createPinia())
 myApp.use(router)
+myApp.use(i18n)
 myApp.use(Quasar, {
     plugins: {
         Notify,

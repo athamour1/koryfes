@@ -6,10 +6,10 @@
         <div class="text-center">
           <div class="text-h3 text-weight-bold q-mb-sm">
             <span class="wave">👋</span>
-            Welcome back, {{ stats.userName || 'Admin' }}!
+            {{ $t('dashboard.welcome', { name: stats.userName }) }}
           </div>
           <div class="text-h6 text-weight-light" style="opacity: 0.9;">
-            Here's what's happening with your scouts today
+            {{ $t('dashboard.subtitle') }}
           </div>
         </div>
 
@@ -42,7 +42,7 @@
           <q-card-section>
             <div class="text-h6 q-mb-md">
               <q-icon name="bolt" size="24px" class="q-mr-sm" />
-              Quick Actions
+              {{ $t('dashboard.quickActions.title') }}
             </div>
             <q-list separator>
               <q-item clickable v-ripple @click="$router.push('/admin/users')" class="q-pa-md">
@@ -52,8 +52,8 @@
                   </q-avatar>
                 </q-item-section>
                 <q-item-section>
-                  <q-item-label class="text-weight-medium">Add Scout</q-item-label>
-                  <q-item-label caption>Create new user</q-item-label>
+                  <q-item-label class="text-weight-medium">{{ $t('dashboard.quickActions.addScout') }}</q-item-label>
+                  <q-item-label caption>{{ $t('dashboard.quickActions.addScoutCaption') }}</q-item-label>
                 </q-item-section>
                 <q-item-section side>
                   <q-icon name="chevron_right" />
@@ -67,8 +67,8 @@
                   </q-avatar>
                 </q-item-section>
                 <q-item-section>
-                  <q-item-label class="text-weight-medium">Award Badge</q-item-label>
-                  <q-item-label caption>Assign achievement</q-item-label>
+                  <q-item-label class="text-weight-medium">{{ $t('dashboard.quickActions.awardBadge') }}</q-item-label>
+                  <q-item-label caption>{{ $t('dashboard.quickActions.awardBadgeCaption') }}</q-item-label>
                 </q-item-section>
                 <q-item-section side>
                   <q-icon name="chevron_right" />
@@ -82,8 +82,8 @@
                   </q-avatar>
                 </q-item-section>
                 <q-item-section>
-                  <q-item-label class="text-weight-medium">Manage Locations</q-item-label>
-                  <q-item-label caption>Edit locations</q-item-label>
+                  <q-item-label class="text-weight-medium">{{ $t('dashboard.quickActions.manageLocations') }}</q-item-label>
+                  <q-item-label caption>{{ $t('dashboard.quickActions.manageLocationsCaption') }}</q-item-label>
                 </q-item-section>
                 <q-item-section side>
                   <q-icon name="chevron_right" />
@@ -100,11 +100,11 @@
               <div class="col">
                 <div class="text-h6">
                   <q-icon name="stars" size="24px" class="q-mr-sm" />
-                  Top Scouts
+                  {{ $t('dashboard.topScouts.title') }}
                 </div>
               </div>
               <div class="col-auto">
-                <q-chip color="primary" text-color="white" dense>This Month</q-chip>
+                <q-chip color="primary" text-color="white" dense>{{ $t('dashboard.topScouts.thisMonth') }}</q-chip>
               </div>
             </div>
 
@@ -148,7 +148,7 @@
           <q-card-section>
             <div class="text-h6 q-mb-md">
               <q-icon name="pie_chart" size="24px" class="q-mr-sm" />
-              Badge Distribution
+              {{ $t('dashboard.distribution.title') }}
             </div>
 
             <div class="text-center q-mb-md">
@@ -163,7 +163,7 @@
               >
                 <div class="text-h4 text-weight-bold text-primary">{{ achievementPercentage }}%</div>
               </q-circular-progress>
-              <div class="text-caption">Awarded</div>
+              <div class="text-caption">{{ $t('dashboard.distribution.awarded') }}</div>
             </div>
 
             <q-list dense>
@@ -172,7 +172,7 @@
                   <q-icon name="circle" color="primary" size="12px" />
                 </q-item-section>
                 <q-item-section>
-                  <q-item-label>Total Badges</q-item-label>
+                  <q-item-label>{{ $t('dashboard.stats.totalBadges') }}</q-item-label>
                 </q-item-section>
                 <q-item-section side>
                   <q-item-label class="text-weight-bold">{{ stats.totalBadges }}</q-item-label>
@@ -184,7 +184,7 @@
                   <q-icon name="circle" color="pink" size="12px" />
                 </q-item-section>
                 <q-item-section>
-                  <q-item-label>Awarded</q-item-label>
+                  <q-item-label>{{ $t('dashboard.distribution.awarded') }}</q-item-label>
                 </q-item-section>
                 <q-item-section side>
                   <q-item-label class="text-weight-bold">{{ stats.awardedBadges }}</q-item-label>
@@ -196,7 +196,7 @@
                   <q-icon name="circle" color="grey-5" size="12px" />
                 </q-item-section>
                 <q-item-section>
-                  <q-item-label>Available</q-item-label>
+                  <q-item-label>{{ $t('dashboard.distribution.available') }}</q-item-label>
                 </q-item-section>
                 <q-item-section side>
                   <q-item-label class="text-weight-bold">{{ stats.totalBadges - stats.awardedBadges }}</q-item-label>
@@ -211,7 +211,7 @@
           <q-card-section>
             <div class="text-h6 q-mb-md">
               <q-icon name="history" size="24px" class="q-mr-sm" />
-              Recent Activity
+              {{ $t('dashboard.activity.title') }}
             </div>
 
             <q-timeline color="primary">
@@ -237,7 +237,7 @@
       <q-card-section>
         <div class="text-h6 q-mb-md">
           <q-icon name="public" size="24px" class="q-mr-sm" />
-          Locations Overview
+          {{ $t('dashboard.locations.title') }}
         </div>
 
         <div class="row q-col-gutter-md">
@@ -254,13 +254,13 @@
                     <q-item-section avatar>
                       <q-icon name="people" />
                     </q-item-section>
-                    <q-item-section>{{ location.userCount }} scouts</q-item-section>
+                    <q-item-section>{{ $t('dashboard.locations.scoutsCount', { count: location.userCount }) }}</q-item-section>
                   </q-item>
                   <q-item dense class="q-px-none">
                     <q-item-section avatar>
                       <q-icon name="emoji_events" />
                     </q-item-section>
-                    <q-item-section>{{ location.badgeCount }} badges</q-item-section>
+                    <q-item-section>{{ $t('dashboard.locations.badgesCount', { count: location.badgeCount }) }}</q-item-section>
                   </q-item>
                 </q-list>
 
@@ -271,7 +271,7 @@
                   size="8px"
                   rounded
                 />
-                <div class="text-caption q-mt-xs">{{ location.progress }}% active</div>
+                <div class="text-caption q-mt-xs">{{ $t('dashboard.locations.activePercent', { percent: location.progress }) }}</div>
               </q-card-section>
             </q-card>
           </div>
@@ -283,11 +283,13 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../../stores/auth';
 import { api } from '../../api';
 import { getAvatarUrl } from '../../utils/avatar';
 
 const authStore = useAuthStore();
+const { t } = useI18n();
 
 const stats = ref({
   userName: authStore.user?.username || 'Admin',
@@ -309,28 +311,28 @@ const recentActivity = ref([
 const mainStats = computed(() => [
   {
     icon: 'people',
-    label: 'Total Scouts',
+    label: t('dashboard.stats.totalScouts'),
     value: stats.value.totalUsers,
     change: '+12%',
     trend: 'up'
   },
   {
     icon: 'workspace_premium',
-    label: 'Total Badges',
+    label: t('dashboard.stats.totalBadges'),
     value: stats.value.totalBadges,
     change: '+5%',
     trend: 'up'
   },
   {
     icon: 'emoji_events',
-    label: 'Badges Awarded',
+    label: t('dashboard.stats.badgesAwarded'),
     value: stats.value.awardedBadges,
     change: '+24%',
     trend: 'up'
   },
   {
     icon: 'location_on',
-    label: 'Active Locations',
+    label: t('dashboard.stats.activeLocations'),
     value: stats.value.activeLocations,
     change: '0%',
     trend: 'flat'

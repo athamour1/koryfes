@@ -4,6 +4,7 @@ import { api } from '../api';
 export const useUserStore = defineStore('user', {
     state: () => ({
         users: [],
+        userProgress: null,
     }),
     actions: {
         async fetchUsers() {
@@ -110,6 +111,66 @@ export const useUserStore = defineStore('user', {
             } catch (error) {
                 console.error('Delete user failed', error);
                 throw new Error(error.response?.data?.message || 'Failed to delete user');
+            }
+        },
+        // User Progress Actions
+        async fetchMyProgress() {
+            try {
+                const response = await api.get('/user-progress/me');
+                this.userProgress = response.data;
+                return response.data;
+            } catch (error) {
+                console.error('Fetch user progress failed', error);
+                return null;
+            }
+        },
+        async initializeProgress() {
+            try {
+                const response = await api.post('/user-progress/initialize');
+                this.userProgress = response.data;
+                return response.data;
+            } catch (error) {
+                console.error('Initialize progress failed', error);
+                return null;
+            }
+        },
+        async awardPeak(userId, peakId) {
+            try {
+                const response = await api.post('/user-progress/award-peak', { userId, peakId });
+                // Refresh the user's progress if it's the current user
+                if (this.userProgress && this.userProgress.userId === userId) {
+                    this.userProgress = response.data;
+                }
+                return response.data;
+            } catch (error) {
+                console.error('Award peak failed', error);
+                return null;
+            }
+        },
+        async awardPath(userId, pathId) {
+            try {
+                const response = await api.post('/user-progress/award-path', { userId, pathId });
+                // Refresh the user's progress if it's the current user
+                if (this.userProgress && this.userProgress.userId === userId) {
+                    this.userProgress = response.data;
+                }
+                return response.data;
+            } catch (error) {
+                console.error('Award path failed', error);
+                return null;
+            }
+        },
+        async awardDiploma(userId, diplomaId, type) {
+            try {
+                const response = await api.post('/user-progress/award-diploma', { userId, diplomaId, type });
+                // Refresh the user's progress if it's the current user
+                if (this.userProgress && this.userProgress.userId === userId) {
+                    this.userProgress = response.data;
+                }
+                return response.data;
+            } catch (error) {
+                console.error('Award diploma failed', error);
+                return null;
             }
         },
     },

@@ -90,7 +90,17 @@ export class UsersService implements OnModuleInit {
     async findByUsername(username: string): Promise<User | undefined> {
         const user = await this.usersRepository.findOne({
             where: { username },
-            relations: ['userBadges', 'userBadges.badge', 'location', 'unit']
+            relations: [
+                'userBadges',
+                'userBadges.badge',
+                'location',
+                'unit',
+                'progress',
+                'progress.currentPeak',
+                'progress.completedPaths',
+                'progress.scoutDiplomas',
+                'progress.electiveDiplomas'
+            ]
         });
         return this.transformUser(user);
     }
@@ -98,7 +108,17 @@ export class UsersService implements OnModuleInit {
     async findOne(id: number): Promise<User | undefined> {
         const user = await this.usersRepository.findOne({
             where: { id },
-            relations: ['userBadges', 'userBadges.badge', 'location', 'unit']
+            relations: [
+                'userBadges',
+                'userBadges.badge',
+                'location',
+                'unit',
+                'progress',
+                'progress.currentPeak',
+                'progress.completedPaths',
+                'progress.scoutDiplomas',
+                'progress.electiveDiplomas'
+            ]
         });
         return this.transformUser(user);
     }
@@ -113,7 +133,17 @@ export class UsersService implements OnModuleInit {
         }
         const users = await this.usersRepository.find({
             where,
-            relations: ['userBadges', 'userBadges.badge', 'location', 'unit']
+            relations: [
+                'userBadges',
+                'userBadges.badge',
+                'location',
+                'unit',
+                'progress',
+                'progress.currentPeak',
+                'progress.completedPaths',
+                'progress.scoutDiplomas',
+                'progress.electiveDiplomas'
+            ]
         });
         return users.map(user => this.transformUser(user));
     }

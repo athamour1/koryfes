@@ -10,8 +10,8 @@
         indicator-color="primary"
         align="justify"
       >
-        <q-tab name="login" label="Login" />
-        <q-tab name="register" label="Register" />
+        <q-tab name="login" :label="$t('auth.login.tab')" />
+        <q-tab name="register" :label="$t('auth.register.tab')" />
       </q-tabs>
 
       <q-separator />
@@ -20,31 +20,31 @@
         <!-- Login Panel -->
         <q-tab-panel name="login">
           <q-card-section class="text-center q-pb-none">
-            <div class="text-h4 text-weight-bold">Welcome Back</div>
-            <div class="text-subtitle2 text-grey-7">Sign in to continue</div>
+            <div class="text-h4 text-weight-bold">{{ $t('auth.login.title') }}</div>
+            <div class="text-subtitle2 text-grey-7">{{ $t('auth.login.subtitle') }}</div>
           </q-card-section>
 
           <q-card-section>
             <q-form @submit="handleLogin">
               <q-input 
                 v-model="loginForm.username" 
-                label="Username" 
+                :label="$t('auth.form.username')" 
                 outlined 
                 dense 
                 class="q-mb-md"
-                :rules="[val => !!val || 'Username is required']"
+                :rules="[val => !!val || $t('auth.form.rules.usernameRequired')]"
               />
               <q-input 
                 v-model="loginForm.password" 
-                label="Password" 
+                :label="$t('auth.form.password')" 
                 type="password" 
                 outlined 
                 dense 
                 class="q-mb-md"
-                :rules="[val => !!val || 'Password is required']"
+                :rules="[val => !!val || $t('auth.form.rules.passwordRequired')]"
               />
               <q-btn 
-                label="Login" 
+                :label="$t('auth.login.button')" 
                 type="submit" 
                 color="primary" 
                 class="full-width" 
@@ -58,15 +58,15 @@
         <!-- Register Panel -->
         <q-tab-panel name="register">
           <q-card-section class="text-center q-pb-none">
-            <div class="text-h4 text-weight-bold">Create Account</div>
-            <div class="text-subtitle2 text-grey-7">Join Scout Badges today</div>
+            <div class="text-h4 text-weight-bold">{{ $t('auth.register.title') }}</div>
+            <div class="text-subtitle2 text-grey-7">{{ $t('auth.register.subtitle') }}</div>
           </q-card-section>
 
           <q-card-section>
             <q-form @submit="handleRegister">
               <q-input 
                 v-model="registerForm.username" 
-                label="Username" 
+                :label="$t('auth.form.username')" 
                 outlined 
                 dense 
                 class="q-mb-md"
@@ -74,7 +74,7 @@
               />
               <q-input 
                 v-model="registerForm.password" 
-                label="Password" 
+                :label="$t('auth.form.password')" 
                 type="password" 
                 outlined 
                 dense 
@@ -83,13 +83,13 @@
               />
               <q-input 
                 v-model="registerForm.location" 
-                label="Location (Optional)" 
+                :label="$t('auth.form.location')" 
                 outlined 
                 dense 
                 class="q-mb-md"
               />
               <q-btn 
-                label="Register" 
+                :label="$t('auth.register.button')" 
                 type="submit" 
                 color="primary" 
                 class="full-width" 
@@ -109,11 +109,13 @@ import { ref, computed } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
 import { config } from '../config';
 
 const authStore = useAuthStore();
 const router = useRouter();
 const $q = useQuasar();
+const { t } = useI18n();
 
 const tab = ref('login');
 const loginForm = ref({ username: '', password: '' });
@@ -123,24 +125,24 @@ const registerForm = ref({ username: '', password: '', location: '' });
 const usernameRules = computed(() => {
   if (config.isProd) {
     return [
-      val => !!val || 'Username is required',
-      val => /.+@.+\..+/.test(val) || 'Must be a valid email'
+      val => !!val || t('auth.form.rules.usernameRequired'),
+      val => /.+@.+\..+/.test(val) || t('auth.form.rules.validEmail')
     ];
   }
-  return [val => !!val || 'Username is required'];
+  return [val => !!val || t('auth.form.rules.usernameRequired')];
 });
 
 const passwordRules = computed(() => {
   if (config.isProd) {
     return [
-      val => !!val || 'Password is required',
-      val => val.length >= 8 || 'Password must be at least 8 characters',
-      val => /[A-Z]/.test(val) || 'Password must contain an uppercase letter',
-      val => /[a-z]/.test(val) || 'Password must contain a lowercase letter',
-      val => /[0-9]/.test(val) || 'Password must contain a number'
+      val => !!val || t('auth.form.rules.passwordRequired'),
+      val => val.length >= 8 || t('auth.form.rules.passwordLength'),
+      val => /[A-Z]/.test(val) || t('auth.form.rules.passwordUpper'),
+      val => /[a-z]/.test(val) || t('auth.form.rules.passwordLower'),
+      val => /[0-9]/.test(val) || t('auth.form.rules.passwordNumber')
     ];
   }
-  return [val => !!val || 'Password is required'];
+  return [val => !!val || t('auth.form.rules.passwordRequired')];
 });
 
 const handleLogin = async () => {
@@ -150,7 +152,7 @@ const handleLogin = async () => {
     if (!success) {
       $q.notify({
         color: 'negative',
-        message: 'Invalid username or password',
+        message: t('auth.login.invalid'),
         icon: 'report_problem',
         position: 'top'
       });
@@ -165,7 +167,7 @@ const handleLogin = async () => {
     }
   } catch (error) {
     console.error('Login failed', error);
-    const errorMessage = error.response?.data?.message || 'Invalid username or password';
+    const errorMessage = error.response?.data?.message || t('auth.login.invalid');
     $q.notify({
       color: 'negative',
       message: errorMessage,
@@ -180,7 +182,7 @@ const handleRegister = async () => {
     await authStore.register(registerForm.value);
     $q.notify({
       color: 'positive',
-      message: 'Registration successful! Please login.',
+      message: t('auth.register.success'),
       icon: 'check'
     });
     tab.value = 'login';
@@ -190,7 +192,7 @@ const handleRegister = async () => {
     console.error('Registration failed', error);
     $q.notify({
       color: 'negative',
-      message: 'Registration failed',
+      message: t('auth.register.failed'),
       icon: 'report_problem'
     });
   }
