@@ -263,7 +263,7 @@
     </q-dialog>
 
     <!-- Edit User Dialog -->
-    <q-dialog v-model="editDialog">
+    <q-dialog v-model="editDialog" @hide="activeTab = 'bronze'">
       <q-card style="min-width: 1000px; border-radius: 20px; overflow: hidden;">
         <!-- Header with Gradient -->
         <q-card-section class="text-white q-pa-lg" style="background: linear-gradient(135deg, var(--q-primary) 0%, var(--q-secondary) 100%);">
@@ -328,13 +328,11 @@
               <q-select
                 v-if="editingUserData.role === 'user'"
                 filled
-                v-model="editingUserData.unitId"
+                v-model="editingUserData.unit"
                 :options="editUnitOptions"
                 :label="$t('adminUsers.filters.unit')"
                 option-label="name"
                 option-value="id"
-                emit-value
-                map-options
                 dense
                 class="q-mb-sm"
                 clearable
@@ -342,7 +340,7 @@
               />
 
               <q-select
-                v-if="editingUserData.unitId"
+                v-if="editingUserData.role === 'user' && editingUserData.unit"
                 filled
                 v-model="editingUserData.unitRole"
                 :options="unitRoleOptions"
@@ -378,7 +376,7 @@
                     </div>
                   </div>
                   
-                  <q-separator class="q-my-sm" />
+                  <!-- <q-separator class="q-my-sm" />
                   
                   <div class="row q-col-gutter-sm text-center">
                     <div class="col-4">
@@ -393,7 +391,7 @@
                       <div class="text-caption text-grey-7">{{ $t('progress.admin.diplomas.elective') || 'Elective' }}</div>
                       <div class="text-h6 text-primary">{{ userProgress?.electiveDiplomas?.length || 0 }}</div>
                     </div>
-                  </div>
+                  </div> -->
                 </q-card-section>
               </q-card>
 
@@ -1098,7 +1096,7 @@ const openEditDialog = async (user) => {
   editingUserData.value = { 
     ...user, 
     locationName: user.location?.name,
-    unitId: user.unit?.id
+    unit: user.unit ? { id: user.unit.id, name: user.unit.name } : null
   };
   uploadImageFile.value = null;
   
@@ -1154,10 +1152,14 @@ const saveUserChanges = async () => {
   try {
     const updateData = {
       username: editingUserData.value.username,
-      locationName: editingUserData.value.locationName,
-      unit: editingUserData.value.unitId ? { id: editingUserData.value.unitId } : null,
-      unitRole: editingUserData.value.unitRole
+      locationName: editingUserData.value.locationName
     };
+
+    // Only add unit fields for regular users, not for admins
+    if (editingUserData.value.role === 'user') {
+      updateData.unit = editingUserData.value.unit ? { id: editingUserData.value.unit.id } : null;
+      updateData.unitRole = editingUserData.value.unitRole;
+    }
 
     const success = await userStore.updateUser(editingUserData.value.id, updateData);
     if (success) {
