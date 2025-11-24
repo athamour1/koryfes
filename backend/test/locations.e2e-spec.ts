@@ -11,7 +11,7 @@ import { Location } from './../src/locations/entities/location.entity';
 import { UserProgress } from './../src/user-progress/user-progress.entity';
 import { Peak } from './../src/peaks/peak.entity';
 import { Path } from './../src/paths/path.entity';
-import { ScoutDiploma } from './../src/scout-diplomas/scout-diploma.entity';
+import { GuideDiploma } from './../src/guide-diplomas/guide-diploma.entity';
 import { ElectiveDiploma } from './../src/elective-diplomas/elective-diploma.entity';
 import { Unit } from './../src/units/entities/unit.entity';
 import { Repository } from 'typeorm';
@@ -35,7 +35,7 @@ describe('LocationsController (e2e)', () => {
                         UserProgress,
                         Peak,
                         Path,
-                        ScoutDiploma,
+                        GuideDiploma,
                         ElectiveDiploma,
                         Unit
                     ],

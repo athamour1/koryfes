@@ -41,7 +41,7 @@ const defaultConfig = {
   hatColor: 'white',
   faceMask: false,
   faceMaskColor: 'white',
-  scarfColor: 'blue', // Scout scarf color
+  scarfColor: 'blue', // Guide scarf color
 };
 
 // Merge user config with defaults

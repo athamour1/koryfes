@@ -1,4 +1,4 @@
-# Scout Badges - Testing Checklist
+# Guide Badges - Testing Checklist
 
 **Test Date:** _____________  
 **Tester:** _____________  
@@ -86,12 +86,12 @@
 - [ ] Can award path to user
 - [ ] Path categories work
 
-### Progress System - Scout Diplomas
-- [ ] Can view all scout diplomas
-- [ ] Can create scout diploma (levels 1-3)
-- [ ] Can update scout diploma details
-- [ ] Can delete scout diploma
-- [ ] Can award scout diploma to user
+### Progress System - Guide Diplomas
+- [ ] Can view all guide diplomas
+- [ ] Can create guide diploma (levels 1-3)
+- [ ] Can update guide diploma details
+- [ ] Can delete guide diploma
+- [ ] Can award guide diploma to user
 - [ ] Diploma levels are enforced
 
 ### Progress System - Elective Diplomas
@@ -105,7 +105,7 @@
 - [ ] Can view any user's progress
 - [ ] Can award Promise peak
 - [ ] Can award paths
-- [ ] Can award scout diplomas
+- [ ] Can award guide diplomas
 - [ ] Can award elective diplomas
 - [ ] Automatic peak unlock works (Bronze)
 - [ ] Automatic peak unlock works (Silver)
@@ -223,13 +223,13 @@
 - [ ] Can view own progress page
 - [ ] Current peak displays correctly
 - [ ] Completed paths count is accurate
-- [ ] Scout diplomas display correctly
+- [ ] Guide diplomas display correctly
 - [ ] Elective diplomas display correctly
 - [ ] Progress chart displays
 - [ ] Peak images show correctly
 
 ### Community Features
-- [ ] Can view Scouts Community page
+- [ ] Can view Guides Community page
 - [ ] Can see list of other users
 - [ ] Can click to view user profiles
 - [ ] User profile page shows progress

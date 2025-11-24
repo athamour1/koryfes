@@ -370,7 +370,7 @@ const availableOptions = {
   clothingColor: ['white', 'blue', 'black', 'green', 'red'],
   lipColor: ['red', 'purple', 'pink', 'turquoise', 'green'],
   hatColor: ['white', 'blue', 'black', 'green', 'red'],
-  scarfColor: ['blue', 'green', 'yellow', 'dark-blue', 'turquoise', 'red'], // Scout scarf colors
+  scarfColor: ['blue', 'green', 'yellow', 'dark-blue', 'turquoise', 'red'], // Guide scarf colors
 };
 
 const getOptions = (category) => {

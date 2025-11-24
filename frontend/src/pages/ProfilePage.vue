@@ -74,7 +74,7 @@ const defaultAvatarConfig = {
   hatColor: 'white',
   faceMask: false,
   faceMaskColor: 'white',
-  scarfColor: 'blue', // Scout scarf color
+  scarfColor: 'blue', // Guide scarf color
 };
 
 const avatarConfig = ref({});

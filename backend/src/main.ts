@@ -37,8 +37,8 @@ async function bootstrap() {
   const isDevelopment = process.env.NODE_ENV !== 'production';
   if (isDevelopment) {
     const config = new DocumentBuilder()
-      .setTitle('Scout Badges API')
-      .setDescription('REST API for Scout Badges Management System')
+      .setTitle('Guide Badges API')
+      .setDescription('REST API for Guide Badges Management System')
       .setVersion('1.0')
       .addBearerAuth()
       .build();

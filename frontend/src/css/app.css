@@ -2,6 +2,27 @@
 
 /* Global Quasar overrides for rounded corners and polish */
 
+/* mainlayout theming */
+
+/* .q-drawer__content {
+  border-radius: 10px;
+  border-style: solid;
+  border-width: thin;
+}
+
+.q-drawer {
+  padding: 8px;
+  background-color: rgba(0, 0, 0, 0);
+}
+
+.q-header {
+  padding: 8px;
+}
+
+.q-toolbar {
+  border-radius: 10px;
+} */
+
 /* Cards */
 .q-card {
   border-radius: 12px !important;

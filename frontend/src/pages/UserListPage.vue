@@ -127,7 +127,7 @@ const authStore = useAuthStore();
 const filterName = ref('');
 const { t } = useI18n();
 
-// Filter to show only regular users (scouts) from the same location
+// Filter to show only regular users (guides) from the same location
 const filteredUsers = computed(() => {
   let users = userStore.users.filter(u => u.role === 'user');
 

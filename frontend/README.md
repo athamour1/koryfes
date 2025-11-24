@@ -1,6 +1,6 @@
-# Scout Badges (scout-badges-quasar)
+# Guide Badges (guide-badges-quasar)
 
-Track your scout progress and badges
+Track your guide progress and badges
 
 ## Install the dependencies
 ```bash

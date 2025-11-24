@@ -49,7 +49,7 @@
               <div class="unit-divider"></div>
               <div class="role-section">
                 <div class="text-caption text-grey-7">{{ $t('unitPage.roleLabel') || 'Role' }}</div>
-                <div class="text-weight-bold">{{ member.role === 'admin' ? $t('unitPage.roles.captain') : $t('unitPage.roles.scout') }}</div>
+                <div class="text-weight-bold">{{ member.role === 'admin' ? $t('unitPage.roles.captain') : $t('unitPage.roles.guide') }}</div>
               </div>
             </div>
           </q-card>

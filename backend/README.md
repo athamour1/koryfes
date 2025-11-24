@@ -1,12 +1,12 @@
-# Scout Badges - Backend
+# Guide Badges - Backend
 
-The RESTful API for Scout Badges, built with **NestJS**.
+The RESTful API for Guide Badges, built with **NestJS**.
 
 ## ✨ Key Features
 
 ### 🔐 Authentication & Security
 -   **JWT Authentication:** Secure stateless authentication using JSON Web Tokens.
--   **Role-Based Access Control (RBAC):** Guards to protect endpoints based on user roles (Admin, Leader, Scout).
+-   **Role-Based Access Control (RBAC):** Guards to protect endpoints based on user roles (Admin, Leader, Guide).
 -   **Password Hashing:** Secure password storage using `bcrypt`.
 -   **Helmet:** Security headers for HTTP protection.
 -   **Rate Limiting:** Protection against brute-force attacks.
@@ -19,7 +19,7 @@ The RESTful API for Scout Badges, built with **NestJS**.
 ### 🚀 API Capabilities
 -   **Users:** CRUD operations, profile management, progress tracking.
 -   **Badges:** Badge creation, assignment, and retrieval.
--   **Units:** Management of scout units and membership.
+-   **Units:** Management of guide units and membership.
 -   **Progress:** Logic for calculating and awarding path completions and diplomas.
 
 ## 🛠️ Tech Stack

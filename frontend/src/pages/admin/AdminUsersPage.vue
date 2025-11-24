@@ -468,26 +468,26 @@
                       </div>
                     </div>
 
-                    <!-- Scout Diplomas Section -->
+                    <!-- Guide Diplomas Section -->
                     <div class="q-mb-md">
                       <div class="text-subtitle2 text-blue-9 q-mb-sm flex items-center justify-between">
                         <span>
                           <q-icon name="school" class="q-mr-xs" />
-                          {{ $t('progress.admin.diplomas.scout') }} ({{ getScoutDiplomaCount(1) }}/1)
+                          {{ $t('progress.admin.diplomas.guide') }} ({{ getGuideDiplomaCount(1) }}/1)
                         </span>
                         <q-btn 
                           size="sm" 
                           color="blue" 
                           icon="add" 
                           :label="$t('general.award')" 
-                          @click="awardScoutDiplomaForPeak('bronze')"
+                          @click="awardGuideDiplomaForPeak('bronze')"
                           outline
-                          :disable="getScoutDiplomaCount(1) >= 1"
+                          :disable="getGuideDiplomaCount(1) >= 1"
                         />
                       </div>
-                      <div v-if="getScoutDiplomasByLevel(1).length > 0">
+                      <div v-if="getGuideDiplomasByLevel(1).length > 0">
                         <q-chip
-                          v-for="diploma in getScoutDiplomasByLevel(1)"
+                          v-for="diploma in getGuideDiplomasByLevel(1)"
                           :key="diploma.id"
                           color="blue"
                           text-color="white"
@@ -498,7 +498,7 @@
                         </q-chip>
                       </div>
                       <div v-else class="text-caption text-grey-6">
-                        {{ $t('progress.admin.noEarnedScoutDiplomas') }}
+                        {{ $t('progress.admin.noEarnedGuideDiplomas') }}
                       </div>
                     </div>
 
@@ -573,26 +573,26 @@
                       </div>
                     </div>
 
-                    <!-- Scout Diplomas Section -->
+                    <!-- Guide Diplomas Section -->
                     <div class="q-mb-md">
                       <div class="text-subtitle2 text-blue-9 q-mb-sm flex items-center justify-between">
                         <span>
                           <q-icon name="school" class="q-mr-xs" />
-                          {{ $t('progress.admin.diplomas.scout') }} ({{ getScoutDiplomaCount(2) }}/1)
+                          {{ $t('progress.admin.diplomas.guide') }} ({{ getGuideDiplomaCount(2) }}/1)
                         </span>
                         <q-btn 
                           size="sm" 
                           color="blue" 
                           icon="add" 
                           :label="$t('general.award')" 
-                          @click="awardScoutDiplomaForPeak('silver')"
+                          @click="awardGuideDiplomaForPeak('silver')"
                           outline
-                          :disable="getScoutDiplomaCount(2) >= 1"
+                          :disable="getGuideDiplomaCount(2) >= 1"
                         />
                       </div>
-                      <div v-if="getScoutDiplomasByLevel(2).length > 0">
+                      <div v-if="getGuideDiplomasByLevel(2).length > 0">
                         <q-chip
-                          v-for="diploma in getScoutDiplomasByLevel(2)"
+                          v-for="diploma in getGuideDiplomasByLevel(2)"
                           :key="diploma.id"
                           color="blue"
                           text-color="white"
@@ -603,7 +603,7 @@
                         </q-chip>
                       </div>
                       <div v-else class="text-caption text-grey-6">
-                        {{ $t('progress.admin.noEarnedScoutDiplomas') }}
+                        {{ $t('progress.admin.noEarnedGuideDiplomas') }}
                       </div>
                     </div>
 
@@ -678,26 +678,26 @@
                       </div>
                     </div>
 
-                    <!-- Scout Diplomas Section -->
+                    <!-- Guide Diplomas Section -->
                     <div class="q-mb-md">
                       <div class="text-subtitle2 text-blue-9 q-mb-sm flex items-center justify-between">
                         <span>
                           <q-icon name="school" class="q-mr-xs" />
-                          {{ $t('progress.admin.diplomas.scout') }} ({{ getScoutDiplomaCount(3) }}/1)
+                          {{ $t('progress.admin.diplomas.guide') }} ({{ getGuideDiplomaCount(3) }}/1)
                         </span>
                         <q-btn 
                           size="sm" 
                           color="blue" 
                           icon="add" 
                           :label="$t('general.award')" 
-                          @click="awardScoutDiplomaForPeak('gold')"
+                          @click="awardGuideDiplomaForPeak('gold')"
                           outline
-                          :disable="getScoutDiplomaCount(3) >= 1"
+                          :disable="getGuideDiplomaCount(3) >= 1"
                         />
                       </div>
-                      <div v-if="getScoutDiplomasByLevel(3).length > 0">
+                      <div v-if="getGuideDiplomasByLevel(3).length > 0">
                         <q-chip
-                          v-for="diploma in getScoutDiplomasByLevel(3)"
+                          v-for="diploma in getGuideDiplomasByLevel(3)"
                           :key="diploma.id"
                           color="blue"
                           text-color="white"
@@ -708,7 +708,7 @@
                         </q-chip>
                       </div>
                       <div v-else class="text-caption text-grey-6">
-                        {{ $t('progress.admin.noEarnedScoutDiplomas') }}
+                        {{ $t('progress.admin.noEarnedGuideDiplomas') }}
                       </div>
                     </div>
 
@@ -841,17 +841,17 @@
       </q-card>
     </q-dialog>
 
-    <!-- Award Scout Diploma Dialog -->
-    <q-dialog v-model="awardScoutDiplomaDialog">
+    <!-- Award Guide Diploma Dialog -->
+    <q-dialog v-model="awardGuideDiplomaDialog">
       <q-card style="min-width: 400px">
         <q-card-section>
-          <div class="text-h6">{{ $t('progress.admin.awardScoutDiplomaTitle') || 'Award Scout Diploma' }}</div>
+          <div class="text-h6">{{ $t('progress.admin.awardGuideDiplomaTitle') || 'Award Guide Diploma' }}</div>
         </q-card-section>
 
         <q-card-section>
           <q-select
-            v-model="selectedScoutDiploma"
-            :options="availableScoutDiplomas"
+            v-model="selectedGuideDiploma"
+            :options="availableGuideDiplomas"
             option-label="name"
             option-value="id"
             :label="$t('progress.admin.selectDiploma') || 'Select Diploma'"
@@ -863,7 +863,7 @@
 
         <q-card-actions align="right">
           <q-btn flat :label="$t('general.cancel')" color="primary" v-close-popup />
-          <q-btn flat :label="$t('general.award')" color="primary" @click="awardScoutDiploma" :disable="!selectedScoutDiploma" />
+          <q-btn flat :label="$t('general.award')" color="primary" @click="awardGuideDiploma" :disable="!selectedGuideDiploma" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -942,13 +942,13 @@ const userProgress = ref(null);
 const activeTab = ref('bronze');
 const awardPeakDialog = ref(false);
 const awardElectiveDiplomaDialog = ref(false);
-const awardScoutDiplomaDialog = ref(false);
+const awardGuideDiplomaDialog = ref(false);
 const awardPathDialog = ref(false);
 const selectedElectiveDiploma = ref(null);
-const selectedScoutDiploma = ref(null);
+const selectedGuideDiploma = ref(null);
 const selectedPath = ref(null);
 const allElectiveDiplomas = ref([]);
-const allScoutDiplomas = ref([]);
+const allGuideDiplomas = ref([]);
 const allPaths = ref([]);
 
 const roleFilterOptions = [
@@ -1031,13 +1031,13 @@ const fetchLocations = async () => {
 
 const fetchProgressData = async () => {
   try {
-    const [electiveDiplomasRes, scoutDiplomasRes, pathsRes] = await Promise.all([
+    const [electiveDiplomasRes, guideDiplomasRes, pathsRes] = await Promise.all([
       api.get('/elective-diplomas'),
-      api.get('/scout-diplomas'),
+      api.get('/guide-diplomas'),
       api.get('/paths')
     ]);
     allElectiveDiplomas.value = electiveDiplomasRes.data;
-    allScoutDiplomas.value = scoutDiplomasRes.data;
+    allGuideDiplomas.value = guideDiplomasRes.data;
     allPaths.value = pathsRes.data;
   } catch (error) {
     console.error('Error fetching progress metadata:', error);
@@ -1242,14 +1242,14 @@ const getElectivesForPeak = (peakLevel) => {
   return [];
 };
 
-const getScoutDiplomasByLevel = (level) => {
-  // Scout diplomas have a 'level' field (1, 2, or 3)
-  const allScoutDiplomas = userProgress.value?.scoutDiplomas || [];
-  return allScoutDiplomas.filter(d => d.level === level);
+const getGuideDiplomasByLevel = (level) => {
+  // Guide diplomas have a 'level' field (1, 2, or 3)
+  const allGuideDiplomas = userProgress.value?.guideDiplomas || [];
+  return allGuideDiplomas.filter(d => d.level === level);
 };
 
-const getScoutDiplomaCount = (level) => {
-  return getScoutDiplomasByLevel(level).length;
+const getGuideDiplomaCount = (level) => {
+  return getGuideDiplomasByLevel(level).length;
 };
 
 const getPathsForPeak = (peakLevel) => {
@@ -1277,9 +1277,9 @@ const openAwardElectiveDiplomaDialog = () => {
   awardElectiveDiplomaDialog.value = true;
 };
 
-const openAwardScoutDiplomaDialog = (level) => {
-  selectedScoutDiploma.value = null;
-  awardScoutDiplomaDialog.value = true;
+const openAwardGuideDiplomaDialog = (level) => {
+  selectedGuideDiploma.value = null;
+  awardGuideDiplomaDialog.value = true;
 };
 
 const openAwardPathDialog = () => {
@@ -1293,9 +1293,9 @@ const availableElectiveDiplomas = computed(() => {
   return allElectiveDiplomas.value.filter(d => !earnedIds.includes(d.id));
 });
 
-const availableScoutDiplomas = computed(() => {
-  const earnedIds = userProgress.value?.scoutDiplomas?.map(d => d.id) || [];
-  return allScoutDiplomas.value.filter(d => !earnedIds.includes(d.id));
+const availableGuideDiplomas = computed(() => {
+  const earnedIds = userProgress.value?.guideDiplomas?.map(d => d.id) || [];
+  return allGuideDiplomas.value.filter(d => !earnedIds.includes(d.id));
 });
 
 const availablePaths = computed(() => {
@@ -1342,16 +1342,16 @@ const awardPath = async () => {
   }
 };
 
-const awardScoutDiplomaForPeak = async (peakLevel) => {
-  openAwardScoutDiplomaDialog();
+const awardGuideDiplomaForPeak = async (peakLevel) => {
+  openAwardGuideDiplomaDialog();
 };
 
-const awardScoutDiploma = async () => {
-  if (!selectedScoutDiploma.value) return;
+const awardGuideDiploma = async () => {
+  if (!selectedGuideDiploma.value) return;
   try {
-    await api.post(`/users/${editingUserData.value.id}/progress/diploma`, { diplomaId: selectedScoutDiploma.value, type: 'scout' });
+    await api.post(`/users/${editingUserData.value.id}/progress/diploma`, { diplomaId: selectedGuideDiploma.value, type: 'guide' });
     $q.notify({ color: 'positive', message: t('progress.admin.notifications.diplomaAwarded'), icon: 'check' });
-    awardScoutDiplomaDialog.value = false;
+    awardGuideDiplomaDialog.value = false;
     await fetchUserProgress(editingUserData.value.id);
   } catch (error) {
     $q.notify({ color: 'negative', message: t('progress.admin.notifications.error'), icon: 'report_problem' });

@@ -271,7 +271,7 @@ export class UsersController {
     @Post(':id/progress/diploma')
     async awardDiplomaToUser(
         @Param('id') id: string,
-        @Body() body: { diplomaId: number; type?: 'scout' | 'elective' },
+        @Body() body: { diplomaId: number; type?: 'guide' | 'elective' },
         @Request() req
     ) {
         if (req.user.role !== 'admin' && req.user.role !== 'super_admin') {

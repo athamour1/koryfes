@@ -1,4 +1,4 @@
-# Scout Badges - System Capabilities & User Roles
+# Guide Badges - System Capabilities & User Roles
 
 ## User Roles & Permissions
 
@@ -42,7 +42,7 @@
 - ✅ View all user progress
 - ✅ Award peaks to any user (including Promise peak)
 - ✅ Award paths to any user
-- ✅ Award scout diplomas (levels 1-3)
+- ✅ Award guide diplomas (levels 1-3)
 - ✅ Award elective diplomas
 - ✅ Remove progress items
 
@@ -58,7 +58,7 @@
 - ✅ Categorize paths
 
 #### Diplomas Management
-- ✅ Create scout diplomas (levels 1-3)
+- ✅ Create guide diplomas (levels 1-3)
 - ✅ Create elective diplomas
 - ✅ Update diploma details
 
@@ -127,7 +127,7 @@
 
 ---
 
-### 4. User (Guide/Scout)
+### 4. User (Guide/Guide)
 **Role:** `user`
 
 #### Own Profile
@@ -144,7 +144,7 @@
 - ❌ Cannot award progress to themselves
 
 #### Community
-- ✅ View other users (Scouts Community page)
+- ✅ View other users (Guides Community page)
 - ✅ View other users' profiles
 - ✅ View other users' progress
 - ✅ View own unit information
@@ -248,7 +248,7 @@
 - Automatic peak progression based on achievements
 - Peak requirements validation
 - Path tracking
-- Scout diploma progression (levels 1-3)
+- Guide diploma progression (levels 1-3)
 - Elective diploma tracking
 
 ### Peaks Module
@@ -267,9 +267,9 @@
 
 **Default Peaks:**
 1. **Promise** (Order 1) - Manually awarded, unlocks progress system
-2. **Bronze** (Order 2) - Auto-unlocked: 4 paths + 1st scout diploma + 1 elective
-3. **Silver** (Order 3) - Auto-unlocked: 8 paths + 2nd scout diploma + 2 electives
-4. **Gold** (Order 4) - Auto-unlocked: 12 paths + 3rd scout diploma + 4 electives
+2. **Bronze** (Order 2) - Auto-unlocked: 4 paths + 1st guide diploma + 1 elective
+3. **Silver** (Order 3) - Auto-unlocked: 8 paths + 2nd guide diploma + 2 electives
+4. **Gold** (Order 4) - Auto-unlocked: 12 paths + 3rd guide diploma + 4 electives
 
 ### Paths Module
 **Endpoints:**
@@ -284,13 +284,13 @@
 - Path descriptions
 - Completion tracking
 
-### Scout Diplomas Module
+### Guide Diplomas Module
 **Endpoints:**
-- `GET /scout-diplomas` - List scout diplomas
-- `POST /scout-diplomas` - Create scout diploma (super admin)
-- `GET /scout-diplomas/:id` - Get diploma details
-- `PATCH /scout-diplomas/:id` - Update diploma (super admin)
-- `DELETE /scout-diplomas/:id` - Delete diploma (super admin)
+- `GET /guide-diplomas` - List guide diplomas
+- `POST /guide-diplomas` - Create guide diploma (super admin)
+- `GET /guide-diplomas/:id` - Get diploma details
+- `PATCH /guide-diplomas/:id` - Update diploma (super admin)
+- `DELETE /guide-diplomas/:id` - Delete diploma (super admin)
 
 **Features:**
 - Level-based diplomas (1, 2, 3)
@@ -328,7 +328,7 @@
 ### Core Entities
 - **User** - User accounts with authentication
 - **UserBadge** - Many-to-many relationship (User ↔ Badge)
-- **Unit** - Scout units/groups
+- **Unit** - Guide units/groups
 - **Location** - Geographic locations/regions
 - **Badge** - Badge definitions (legacy system)
 
@@ -336,7 +336,7 @@
 - **UserProgress** - User progress tracking
 - **Peak** - Peak definitions
 - **Path** - Path definitions
-- **ScoutDiploma** - Scout diploma definitions
+- **GuideDiploma** - Guide diploma definitions
 - **ElectiveDiploma** - Elective diploma definitions
 
 ### Entity Relationships
@@ -347,7 +347,7 @@ User ─┬─ many badges via UserBadge
       └─ has one UserProgress
                   ├─ has current Peak
                   ├─ has many completed Paths
-                  ├─ has many ScoutDiplomas
+                  ├─ has many GuideDiplomas
                   └─ has many ElectiveDiplomas
 ```
 

@@ -11,7 +11,7 @@ import { LocationsModule } from './locations/locations.module';
 import { UnitsModule } from './units/units.module';
 import { PeaksModule } from './peaks/peaks.module';
 import { PathsModule } from './paths/paths.module';
-import { ScoutDiplomasModule } from './scout-diplomas/scout-diplomas.module';
+import { GuideDiplomasModule } from './guide-diplomas/guide-diplomas.module';
 import { ElectiveDiplomasModule } from './elective-diplomas/elective-diplomas.module';
 import { UserProgressModule } from './user-progress/user-progress.module';
 
@@ -23,7 +23,7 @@ import { UserProgressModule } from './user-progress/user-progress.module';
       port: parseInt(process.env.DB_PORT) || 5432,
       username: process.env.DB_USERNAME || 'postgres',
       password: process.env.DB_PASSWORD || 'postgres',
-      database: process.env.DB_DATABASE || 'scout_badges',
+      database: process.env.DB_DATABASE || 'guide_badges',
       autoLoadEntities: true,
       synchronize: true,
     }),
@@ -41,7 +41,7 @@ import { UserProgressModule } from './user-progress/user-progress.module';
     UnitsModule,
     PeaksModule,
     PathsModule,
-    ScoutDiplomasModule,
+    GuideDiplomasModule,
     ElectiveDiplomasModule,
     UserProgressModule,
   ],

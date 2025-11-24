@@ -79,11 +79,11 @@
           
           <q-card class="diplomas-card">
             <q-card-section>
-              <!-- Scout Diplomas -->
-              <div v-if="user?.progress?.scoutDiplomas && user?.progress?.scoutDiplomas.length > 0">
-                <div class="text-subtitle2 text-grey-7 q-mb-sm">{{ $t('progress.admin.diplomas.scout') || 'Scout Diplomas' }}</div>
+              <!-- Guide Diplomas -->
+              <div v-if="user?.progress?.guideDiplomas && user?.progress?.guideDiplomas.length > 0">
+                <div class="text-subtitle2 text-grey-7 q-mb-sm">{{ $t('progress.admin.diplomas.guide') || 'Guide Diplomas' }}</div>
                 <div class="diplomas-grid">
-                  <div v-for="diploma in user?.progress?.scoutDiplomas" :key="diploma.id" class="diploma-item">
+                  <div v-for="diploma in user?.progress?.guideDiplomas" :key="diploma.id" class="diploma-item">
                     <q-avatar size="60px" class="diploma-avatar">
                       <img v-if="diploma.image" :src="`${config.apiUrl}${diploma.image}`" style="object-fit: contain" />
                       <q-icon v-else name="school" color="accent" size="30px" />
@@ -92,7 +92,7 @@
                   </div>
                 </div>
               </div>
-              <div v-else class="text-grey-5 q-mb-md">{{ $t('progress.admin.noEarnedScoutDiplomas') || 'No Scout Diplomas Yet' }}</div>
+              <div v-else class="text-grey-5 q-mb-md">{{ $t('progress.admin.noEarnedGuideDiplomas') || 'No Guide Diplomas Yet' }}</div>
 
               <q-separator class="q-my-md" />
 

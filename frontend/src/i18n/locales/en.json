@@ -7,7 +7,7 @@
         "create": "Create"
     },
     "navigation": {
-        "title": "Scout Badges",
+        "title": "Guide Badges",
         "header": "Navigation",
         "dashboard": "Dashboard",
         "myProgress": "My Progress",
@@ -47,9 +47,9 @@
     },
     "dashboard": {
         "welcome": "Welcome back, {name}!",
-        "subtitle": "Here's what's happening with your scouts today",
+        "subtitle": "Here's what's happening with your guides today",
         "stats": {
-            "totalScouts": "Total Scouts",
+            "totalGuides": "Total Guides",
             "totalDiplomas": "Total Diplomas",
             "pathsCompleted": "Paths Completed",
             "peaksReached": "Peaks Reached",
@@ -57,15 +57,15 @@
         },
         "quickActions": {
             "title": "Quick Actions",
-            "addScout": "Add Scout",
-            "addScoutCaption": "Create new user",
+            "addGuide": "Add Guide",
+            "addGuideCaption": "Create new user",
             "manageProgress": "Manage Progress",
             "manageProgressCaption": "Track user growth",
             "manageLocations": "Manage Locations",
             "manageLocationsCaption": "Edit locations"
         },
-        "topScouts": {
-            "title": "Top Scouts",
+        "topGuides": {
+            "title": "Top Guides",
             "thisMonth": "This Month"
         },
         "activity": {
@@ -73,7 +73,7 @@
         },
         "locations": {
             "title": "Locations Overview",
-            "scoutsCount": "{count} scouts",
+            "guidesCount": "{count} guides",
             "diplomasCount": "{count} diplomas",
             "activePercent": "{percent}% active"
         },
@@ -84,7 +84,7 @@
     },
     "adminUsers": {
         "title": "User Management",
-        "subtitle": "Manage scout users, roles, and permissions",
+        "subtitle": "Manage guide users, roles, and permissions",
         "tableTitle": "Users",
         "searchPlaceholder": "Search by name",
         "filters": {
@@ -150,7 +150,7 @@
     },
     "adminUnits": {
         "title": "Unit Management",
-        "subtitle": "Manage scout units and their members",
+        "subtitle": "Manage guide units and their members",
         "tableTitle": "Units",
         "searchPlaceholder": "Search",
         "createButton": "Create New Unit",
@@ -191,7 +191,7 @@
     },
     "locationManagement": {
         "title": "Location Management",
-        "subtitle": "Manage scout locations and groups",
+        "subtitle": "Manage guide locations and groups",
         "tableTitle": "Locations",
         "searchPlaceholder": "Search locations",
         "addButton": "Add Location",
@@ -235,15 +235,15 @@
         }
     },
     "userListPage": {
-        "title": "Scouts Community",
-        "subtitle": "Discover fellow scouts and their achievements",
-        "searchPlaceholder": "Search scouts by name...",
+        "title": "Guides Community",
+        "subtitle": "Discover fellow guides and their achievements",
+        "searchPlaceholder": "Search guides by name...",
         "noLocation": "No location",
         "unitLabel": "Unit",
         "roleLabel": "Role",
         "viewProfile": "View Profile",
         "emptyState": {
-            "title": "No scouts found",
+            "title": "No guides found",
             "subtitle": "Try adjusting your filters"
         }
     },
@@ -256,7 +256,7 @@
         "members": "Members",
         "roles": {
             "captain": "Captain",
-            "scout": "Scout"
+            "guide": "Guide"
         },
         "noMembers": "No members in this unit yet.",
         "notFound": "Unit not found",
@@ -276,7 +276,7 @@
         "register": {
             "tab": "Register",
             "title": "Create Account",
-            "subtitle": "Join Scout Badges today",
+            "subtitle": "Join Guide Badges today",
             "button": "Register",
             "success": "Registration successful! Please login.",
             "failed": "Registration failed",
@@ -324,13 +324,13 @@
             },
             "diplomas": {
                 "title": "Diplomas",
-                "scout": "Scout Diplomas",
+                "guide": "Guide Diplomas",
                 "elective": "Elective Diplomas"
             },
             "awardPromisePeak": "Award Promise",
             "awardPeakTitle": "Award Peak",
             "awardPathTitle": "Award Path",
-            "awardScoutDiplomaTitle": "Award Scout Diploma",
+            "awardGuideDiplomaTitle": "Award Guide Diploma",
             "awardElectiveDiplomaTitle": "Award Elective Diploma",
             "promiseInfo": "The Promise is the first step in the user's progress journey.",
             "awardPeakConfirm": "Award the Promise peak to this user? This will unlock their ability to earn paths and diplomas.",
@@ -374,7 +374,7 @@
         "clothing": "Clothing",
         "clothingColor": "Clothing Color",
         "scarfColor": "Scarf Color",
-        "scarfInfo": "The scout scarf is always visible",
+        "scarfInfo": "The guide scarf is always visible",
         "options": {
             "skin": {
                 "light": "Light",
@@ -464,7 +464,7 @@
     },
     "error404": {
         "title": "Off the Path?",
-        "message": "Oops! It looks like you've wandered into uncharted territory. Even the best scouts get lost sometimes!",
+        "message": "Oops! It looks like you've wandered into uncharted territory. Even the best guides get lost sometimes!",
         "returnHome": "Return to Base",
         "goBack": "Go Back"
     }

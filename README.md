@@ -1,4 +1,4 @@
-# Scout Badges Application
+# Guide Badges Application
 
 A full-stack badge management system built with **NestJS**, **Vue 3**, **Quasar**, and **PostgreSQL**.
 
@@ -9,7 +9,7 @@ A full-stack badge management system built with **NestJS**, **Vue 3**, **Quasar*
 1.  **Clone the repository**
     ```bash
     git clone <repository-url>
-    cd scout-badges
+    cd guide-badges
     ```
 
 2.  **Start the application**
@@ -29,7 +29,7 @@ A full-stack badge management system built with **NestJS**, **Vue 3**, **Quasar*
 
 ## ✨ Features Overview
 
--   **User Management:** Complete authentication system with role-based access (Scouts, Leaders, Admins).
+-   **User Management:** Complete authentication system with role-based access (Guides, Leaders, Admins).
 -   **Badge System:** Dynamic badge creation, assignment, and progress tracking.
 -   **Avatar Editor:** Custom avatar creator with extensive customization options.
 -   **Admin Dashboard:** Powerful tools for managing users, units, and badges.

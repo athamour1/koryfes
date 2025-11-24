@@ -52,8 +52,8 @@
                   </q-avatar>
                 </q-item-section>
                 <q-item-section>
-                  <q-item-label class="text-weight-medium">{{ $t('dashboard.quickActions.addScout') }}</q-item-label>
-                  <q-item-label caption>{{ $t('dashboard.quickActions.addScoutCaption') }}</q-item-label>
+                  <q-item-label class="text-weight-medium">{{ $t('dashboard.quickActions.addGuide') }}</q-item-label>
+                  <q-item-label caption>{{ $t('dashboard.quickActions.addGuideCaption') }}</q-item-label>
                 </q-item-section>
                 <q-item-section side>
                   <q-icon name="chevron_right" />
@@ -93,23 +93,23 @@
           </q-card-section>
         </q-card>
 
-        <!-- Top Scouts -->
+        <!-- Top Guides -->
         <q-card flat bordered>
           <q-card-section>
             <div class="row items-center q-mb-md">
               <div class="col">
                 <div class="text-h6">
                   <q-icon name="stars" size="24px" class="q-mr-sm" />
-                  {{ $t('dashboard.topScouts.title') }}
+                  {{ $t('dashboard.topGuides.title') }}
                 </div>
               </div>
               <div class="col-auto">
-                <q-chip color="primary" text-color="white" dense>{{ $t('dashboard.topScouts.thisMonth') }}</q-chip>
+                <q-chip color="primary" text-color="white" dense>{{ $t('dashboard.topGuides.thisMonth') }}</q-chip>
               </div>
             </div>
 
             <q-list separator>
-              <q-item v-for="(scout, index) in topScouts" :key="scout.id" class="q-pa-sm">
+              <q-item v-for="(guide, index) in topGuides" :key="guide.id" class="q-pa-sm">
                 <q-item-section avatar>
                   <q-avatar size="40px">
                     <span v-if="index === 0" class="text-h6">🥇</span>
@@ -120,19 +120,19 @@
                 </q-item-section>
                 <q-item-section avatar>
                   <q-avatar size="40px">
-                    <img :src="getAvatarUrl(scout.username, scout.profileImage)" />
+                    <img :src="getAvatarUrl(guide.username, guide.profileImage)" />
                   </q-avatar>
                 </q-item-section>
                 <q-item-section>
-                  <q-item-label class="text-weight-medium">{{ scout.username }}</q-item-label>
+                  <q-item-label class="text-weight-medium">{{ guide.username }}</q-item-label>
                   <q-item-label caption>
                     <q-icon name="place" size="14px" />
-                    {{ scout.location?.name }}
+                    {{ guide.location?.name }}
                   </q-item-label>
                 </q-item-section>
                 <q-item-section side>
                   <q-chip dense color="amber" text-color="white" icon="military_tech">
-                    {{ getTotalDiplomas(scout) }}
+                    {{ getTotalDiplomas(guide) }}
                   </q-chip>
                 </q-item-section>
               </q-item>
@@ -254,7 +254,7 @@
                     <q-item-section avatar>
                       <q-icon name="people" />
                     </q-item-section>
-                    <q-item-section>{{ $t('dashboard.locations.scoutsCount', { count: location.userCount }) }}</q-item-section>
+                    <q-item-section>{{ $t('dashboard.locations.guidesCount', { count: location.userCount }) }}</q-item-section>
                   </q-item>
                   <q-item dense class="q-px-none">
                     <q-item-section avatar>
@@ -300,19 +300,19 @@ const stats = ref({
   activeLocations: 0
 });
 
-const topScouts = ref([]);
+const topGuides = ref([]);
 const locationStats = ref([]);
 const recentActivity = ref([
-  { icon: 'person_add', text: 'New scout joined TT Megarwn', time: '2 hours ago' },
+  { icon: 'person_add', text: 'New guide joined TT Megarwn', time: '2 hours ago' },
   { icon: 'emoji_events', text: 'Diploma earned by user_eleysinas_5', time: '5 hours ago' },
-  { icon: 'military_tech', text: '12 scouts completed paths', time: 'Yesterday' },
+  { icon: 'military_tech', text: '12 guides completed paths', time: 'Yesterday' },
   { icon: 'location_on', text: 'TT Salaminas updated', time: '2 days ago' },
 ]);
 
 const mainStats = computed(() => [
   {
     icon: 'people',
-    label: t('dashboard.stats.totalScouts'),
+    label: t('dashboard.stats.totalGuides'),
     value: stats.value.totalUsers,
     change: '+12%',
     trend: 'up'
@@ -349,9 +349,9 @@ const achievementPercentage = computed(() => {
 
 const getTotalDiplomas = (user) => {
   if (!user.progress) return 0;
-  const scoutCount = user.progress.scoutDiplomas?.length || 0;
+  const guideCount = user.progress.guideDiplomas?.length || 0;
   const electiveCount = user.progress.electiveDiplomas?.length || 0;
-  return scoutCount + electiveCount;
+  return guideCount + electiveCount;
 };
 
 const getActivityColor = (icon) => {
@@ -374,9 +374,9 @@ const fetchDashboardData = async () => {
     // Calculate progress stats
     stats.value.totalDiplomas = users.reduce((sum, user) => {
       if (!user.progress) return sum;
-      const scoutCount = user.progress.scoutDiplomas?.length || 0;
+      const guideCount = user.progress.guideDiplomas?.length || 0;
       const electiveCount = user.progress.electiveDiplomas?.length || 0;
-      return sum + scoutCount + electiveCount;
+      return sum + guideCount + electiveCount;
     }, 0);
     
     stats.value.pathsCompleted = users.reduce((sum, user) => {
@@ -390,8 +390,8 @@ const fetchDashboardData = async () => {
     const locations = locationsRes.data;
     stats.value.activeLocations = locations.length;
     
-    // Top scouts (users with most diplomas)
-    topScouts.value = users
+    // Top guides (users with most diplomas)
+    topGuides.value = users
       .filter(u => u.role === 'user')
       .sort((a, b) => getTotalDiplomas(b) - getTotalDiplomas(a))
       .slice(0, 5);

@@ -149,9 +149,9 @@ export default defineConfig((/* ctx */) => {
       // swFilename: 'sw.js',
       // manifestFilename: 'manifest.json',
       extendManifestJson(json) {
-        json.name = 'Scout Badges'
-        json.short_name = 'ScoutBadges'
-        json.description = 'Track your scout progress and badges'
+        json.name = 'Guide Badges'
+        json.short_name = 'GuideBadges'
+        json.description = 'Track your guide progress and badges'
         json.theme_color = '#6a1b9a'
         json.background_color = '#ffffff'
       },
@@ -203,7 +203,7 @@ export default defineConfig((/* ctx */) => {
       builder: {
         // https://www.electron.build/configuration/configuration
 
-        appId: 'scout-badges-quasar'
+        appId: 'guide-badges-quasar'
       }
     },
 

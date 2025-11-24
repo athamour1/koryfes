@@ -96,7 +96,7 @@ export class UsersService implements OnModuleInit {
                 'progress',
                 'progress.currentPeak',
                 'progress.completedPaths',
-                'progress.scoutDiplomas',
+                'progress.guideDiplomas',
                 'progress.electiveDiplomas'
             ]
         });
@@ -112,7 +112,7 @@ export class UsersService implements OnModuleInit {
                 'progress',
                 'progress.currentPeak',
                 'progress.completedPaths',
-                'progress.scoutDiplomas',
+                'progress.guideDiplomas',
                 'progress.electiveDiplomas'
             ]
         });
@@ -135,7 +135,7 @@ export class UsersService implements OnModuleInit {
                 'progress',
                 'progress.currentPeak',
                 'progress.completedPaths',
-                'progress.scoutDiplomas',
+                'progress.guideDiplomas',
                 'progress.electiveDiplomas'
             ]
         });
