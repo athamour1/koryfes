@@ -1,25 +1,20 @@
 {
     "general": {
-        "welcome": "Welcome",
         "save": "Save Changes",
         "cancel": "Cancel",
-        "confirm": "Confirm",
         "award": "Award",
-        "loading": "Loading...",
-        "success": "Success",
-        "error": "Error"
+        "back": "Back",
+        "create": "Create"
     },
     "navigation": {
         "title": "Scout Badges",
         "header": "Navigation",
         "dashboard": "Dashboard",
-        "myBadges": "My Badges",
         "myProgress": "My Progress",
         "users": "Users",
         "myUnit": "My Unit",
         "units": "Units",
         "adminUsers": "Admin Users",
-        "adminBadges": "Admin Badges",
         "progress": "Progress",
         "locations": "Locations",
         "profile": "Profile",
@@ -47,12 +42,7 @@
         "membersTitle": "Unit Members",
         "noMembers": "No members in this unit yet",
         "noPeak": "No peak assigned yet",
-        "awardPromise": "Award Promise",
         "viewProgress": "View Progress",
-        "confirmAwardTitle": "Award Promise Peak",
-        "confirmAwardMessage": "Are you sure you want to award the Promise peak to {username}? This will unlock their progress tracking.",
-        "awardSuccess": "Promise peak awarded to {username} successfully",
-        "awardError": "Failed to award promise peak",
         "loadMembersError": "Failed to load unit members"
     },
     "dashboard": {
@@ -60,16 +50,17 @@
         "subtitle": "Here's what's happening with your scouts today",
         "stats": {
             "totalScouts": "Total Scouts",
-            "totalBadges": "Total Badges",
-            "badgesAwarded": "Badges Awarded",
+            "totalDiplomas": "Total Diplomas",
+            "pathsCompleted": "Paths Completed",
+            "peaksReached": "Peaks Reached",
             "activeLocations": "Active Locations"
         },
         "quickActions": {
             "title": "Quick Actions",
             "addScout": "Add Scout",
             "addScoutCaption": "Create new user",
-            "awardBadge": "Award Badge",
-            "awardBadgeCaption": "Assign achievement",
+            "manageProgress": "Manage Progress",
+            "manageProgressCaption": "Track user growth",
             "manageLocations": "Manage Locations",
             "manageLocationsCaption": "Edit locations"
         },
@@ -77,19 +68,18 @@
             "title": "Top Scouts",
             "thisMonth": "This Month"
         },
-        "distribution": {
-            "title": "Badge Distribution",
-            "awarded": "Awarded",
-            "available": "Available"
-        },
         "activity": {
             "title": "Recent Activity"
         },
         "locations": {
             "title": "Locations Overview",
             "scoutsCount": "{count} scouts",
-            "badgesCount": "{count} badges",
+            "diplomasCount": "{count} diplomas",
             "activePercent": "{percent}% active"
+        },
+        "progress": {
+            "title": "Progress Overview",
+            "completion": "Completion Rate"
         }
     },
     "adminUsers": {
@@ -126,16 +116,6 @@
             "unitRoleHint": "Note: Assigning Leader/Deputy Leader will demote any existing holder in this unit to Member",
             "myLocation": "My Location"
         },
-        "badges": {
-            "title": "Badges & Achievements",
-            "table": {
-                "badge": "Badge",
-                "date": "Acquired Date",
-                "action": "Action"
-            },
-            "empty": "No badges awarded yet.",
-            "add": "Add Badge"
-        },
         "delete": {
             "title": "Confirm Delete",
             "message": "Are you sure you want to delete user \"{username}\"? This action cannot be undone."
@@ -143,16 +123,14 @@
         "notifications": {
             "deleteSuccess": "User deleted successfully",
             "deleteError": "Failed to delete user",
-            "imageError": "Failed to upload image",
+            "imageUpdateSuccess": "Profile image updated",
+            "imageUpdateError": "Failed to update image",
             "updateError": "Failed to update user info",
-            "demotion": "Note: User \"{username}\" was demoted from {role} to Member",
             "updateSuccess": "User updated successfully",
             "createSuccess": "User created successfully",
-            "createError": "Failed to create user",
-            "loadError": "Failed to load data"
+            "createError": "Failed to create user"
         },
         "columns": {
-            "profileImage": "Profile Image",
             "username": "Username",
             "role": "Role",
             "location": "Location",
@@ -161,47 +139,13 @@
             "actions": "Actions"
         },
         "roles": {
+            "all": "All Roles",
             "superAdmin": "Super Admin",
             "admin": "Admin (Captain)",
             "user": "User (Guide)",
             "leader": "Leader",
             "deputyLeader": "Deputy Leader",
             "member": "Member"
-        }
-    },
-    "adminBadges": {
-        "title": "Badge Management",
-        "subtitle": "Manage scout badges and achievements",
-        "tableTitle": "Badges",
-        "searchPlaceholder": "Search",
-        "createButton": "Create New Badge",
-        "noData": {
-            "search": "No badges match your search",
-            "empty": "No badges created yet"
-        },
-        "dialog": {
-            "createTitle": "Create New Badge",
-            "editTitle": "Edit Badge"
-        },
-        "form": {
-            "name": "Badge Name",
-            "description": "Description",
-            "image": "Badge Image",
-            "updateImage": "Update Badge Image",
-            "required": "Required"
-        },
-        "columns": {
-            "image": "Image",
-            "name": "Name",
-            "description": "Description",
-            "actions": "Actions"
-        },
-        "notifications": {
-            "imageError": "Failed to upload image",
-            "updateSuccess": "Badge updated successfully",
-            "updateError": "Failed to update badge",
-            "createSuccess": "Badge created successfully",
-            "createError": "Failed to create badge"
         }
     },
     "adminUnits": {
@@ -281,32 +225,13 @@
             "deleteError": "Failed to delete location"
         }
     },
-    "myBadges": {
-        "title": "My Badges",
-        "subtitle": "Your achievements and earned badges",
-        "earned": "Earned",
-        "badgeCount": "{count} Badge | {count} Badges",
-        "noBadges": {
-            "title": "No badges yet",
-            "subtitle": "Complete activities to earn badges!"
-        },
-        "earnedOn": "Earned on {date}",
-        "congratulations": "Congratulations!",
-        "summary": "You have earned {count} badge! | You have earned {count} badges!"
-    },
     "profilePage": {
         "title": "Profile Settings",
         "subtitle": "Manage your profile information",
-        "infoTitle": "Profile Information",
-        "uploadImage": "Upload Profile Image",
-        "location": "Location",
-        "locationHint": "Your assigned location",
         "saveButton": "Save Changes",
         "notifications": {
             "updateSuccess": "Profile updated",
-            "updateError": "Update failed",
-            "imageSuccess": "Image uploaded",
-            "imageError": "Upload failed"
+            "updateError": "Update failed"
         }
     },
     "userListPage": {
@@ -314,20 +239,8 @@
         "subtitle": "Discover fellow scouts and their achievements",
         "searchPlaceholder": "Search scouts by name...",
         "noLocation": "No location",
-        "unit": "Unit: {name}",
         "unitLabel": "Unit",
         "roleLabel": "Role",
-        "stats": {
-            "badges": "Badges",
-            "role": "Role"
-        },
-        "roles": {
-            "captain": "Captain",
-            "scout": "Scout"
-        },
-        "achievements": "Achievements",
-        "moreBadges": "{count} more badges",
-        "noBadges": "No badges yet",
         "viewProfile": "View Profile",
         "emptyState": {
             "title": "No scouts found",
@@ -335,29 +248,7 @@
         }
     },
     "userProfilePage": {
-        "backButton": "Back to Directory",
-        "noLocation": "No Location",
-        "roles": {
-            "captain": "Captain",
-            "scout": "Scout"
-        },
-        "stats": {
-            "badgesEarned": "Badges Earned",
-            "achievementRate": "Achievement Rate",
-            "status": "Status",
-            "active": "Active",
-            "admin": "Admin"
-        },
-        "badgeCollection": {
-            "title": "Badge Collection",
-            "subtitle": "{count} badges earned"
-        },
-        "noDescription": "No description available",
-        "earned": "Earned",
-        "noBadges": {
-            "title": "No Badges Yet",
-            "subtitle": "This scout hasn't earned any badges yet. Check back later!"
-        }
+        "noLocation": "No Location"
     },
     "unitPage": {
         "aboutUnit": "About Unit",
@@ -380,7 +271,6 @@
             "subtitle": "Sign in to continue",
             "button": "Login",
             "rememberMe": "Stay logged in",
-            "success": "Login successful",
             "invalid": "Invalid username or password"
         },
         "register": {
@@ -430,8 +320,7 @@
             "currentPeak": "Current Peak",
             "noPeak": "No peak",
             "paths": {
-                "title": "Paths",
-                "completed": "{count}/{total}"
+                "title": "Paths"
             },
             "diplomas": {
                 "title": "Diplomas",
@@ -439,43 +328,144 @@
                 "elective": "Elective Diplomas"
             },
             "awardPromisePeak": "Award Promise",
-            "awardPeak": "Award Peak",
-            "awardPath": "Award Path",
-            "awardScoutDiploma": "Award Scout Diploma",
-            "awardElectiveDiploma": "Award Elective Diploma",
+            "awardPeakTitle": "Award Peak",
+            "awardPathTitle": "Award Path",
+            "awardScoutDiplomaTitle": "Award Scout Diploma",
+            "awardElectiveDiplomaTitle": "Award Elective Diploma",
             "promiseInfo": "The Promise is the first step in the user's progress journey.",
             "awardPeakConfirm": "Award the Promise peak to this user? This will unlock their ability to earn paths and diplomas.",
             "selectPath": "Select a path",
-            "selectScoutDiploma": "Select a scout diploma",
-            "selectElectiveDiploma": "Select an elective diploma",
             "selectDiploma": "Select diploma",
             "bronzeTab": "Bronze Peak",
             "silverTab": "Silver Peak",
             "goldTab": "Gold Peak",
             "extraTab": "Extra",
-            "locked": "Locked",
-            "earnedItems": "Earned Items",
-            "earnedPaths": "Earned Paths",
-            "earnedScoutDiplomas": "Earned Scout Diplomas",
-            "earnedElectiveDiplomas": "Earned Elective Diplomas",
-            "noEarnedPaths": "No paths yet",
-            "noEarnedScoutDiplomas": "No scout diplomas yet",
-            "noEarnedElectiveDiplomas": "No elective diplomas yet",
-            "noAvailableDiplomaForLevel": "No available diploma found for level {level}",
-            "extraStageInfo": "This stage allows awarding unlimited elective diplomas after completing the Gold peak."
-        },
-        "peaks": {
-            "promise": "Promise",
-            "bronze": "Bronze",
-            "silver": "Silver",
-            "gold": "Gold"
-        },
-        "notifications": {
-            "peakAwarded": "Peak awarded successfully",
-            "pathAwarded": "Path awarded successfully",
-            "scoutDiplomaAwarded": "Scout diploma awarded successfully",
-            "electiveDiplomaAwarded": "Elective diploma awarded successfully",
-            "awardError": "Failed to award"
+            "extraStageInfo": "This stage allows awarding unlimited elective diplomas after completing the Gold peak.",
+            "notifications": {
+                "peakAwarded": "Peak awarded successfully",
+                "pathAwarded": "Path awarded successfully",
+                "diplomaAwarded": "Diploma awarded successfully",
+                "error": "Error"
+            }
         }
+    },
+    "avatar": {
+        "randomize": "Randomize",
+        "identity": "Identity",
+        "face": "Face",
+        "hair": "Hair",
+        "headwear": "Headwear",
+        "outfit": "Outfit",
+        "gender": "Gender",
+        "boy": "Boy",
+        "girl": "Girl",
+        "skinTone": "Skin Tone",
+        "eyes": "Eyes",
+        "eyebrows": "Eyebrows",
+        "mouth": "Mouth",
+        "lipColor": "Lip Color",
+        "lashes": "Lashes",
+        "faceMask": "Face Mask",
+        "hairStyle": "Hair Style",
+        "hairColor": "Hair Color",
+        "hat": "Hat",
+        "hatColor": "Hat Color",
+        "accessory": "Accessory",
+        "clothing": "Clothing",
+        "clothingColor": "Clothing Color",
+        "scarfColor": "Scarf Color",
+        "scarfInfo": "The scout scarf is always visible",
+        "options": {
+            "skin": {
+                "light": "Light",
+                "yellow": "Yellow",
+                "brown": "Brown",
+                "dark": "Dark",
+                "red": "Red",
+                "black": "Black"
+            },
+            "eye": {
+                "normal-eyes": "Normal",
+                "left-twitch-eyes": "Twitch",
+                "happy-eyes": "Happy",
+                "content-eyes": "Content",
+                "squint-eyes": "Squint",
+                "simple-eyes": "Simple",
+                "dizzy-eyes": "Dizzy",
+                "wink": "Wink",
+                "heart-eyes": "Heart Eyes"
+            },
+            "eyebrows": {
+                "none": "None",
+                "raised": "Raised",
+                "left-lowered": "Lowered",
+                "serious": "Serious",
+                "angry": "Angry",
+                "concerned": "Concerned"
+            },
+            "mouth": {
+                "grin": "Grin",
+                "sad": "Sad",
+                "open-smile": "Open Smile",
+                "lips": "Lips",
+                "open": "Open",
+                "serious": "Serious",
+                "tongue": "Tongue",
+                "pirate-smile": "Pirate Smile",
+                "smile": "Smile"
+            },
+            "hair": {
+                "none": "None",
+                "short": "Short",
+                "long": "Long",
+                "bun": "Bun",
+                "pixie": "Pixie",
+                "balding": "Balding",
+                "buzz": "Buzz",
+                "afro": "Afro",
+                "bob": "Bob"
+            },
+            "clothing": {
+                "none": "None",
+                "naked": "Shirtless",
+                "shirt": "T-Shirt",
+                "dress-shirt": "Dress Shirt",
+                "v-neck": "V-Neck",
+                "tank-top": "Tank Top",
+                "dress": "Dress"
+            },
+            "accessory": {
+                "none": "None",
+                "round-glasses": "Round Glasses",
+                "tiny-glasses": "Tiny Glasses",
+                "shades": "Sunglasses"
+            },
+            "hat": {
+                "none": "None",
+                "beanie": "Beanie",
+                "turban": "Turban"
+            },
+            "colors": {
+                "white": "White",
+                "blonde": "Blonde",
+                "orange": "Orange",
+                "black": "Black",
+                "brown": "Brown",
+                "blue": "Blue",
+                "pink": "Pink",
+                "green": "Green",
+                "red": "Red",
+                "purple": "Purple",
+                "turquoise": "Turquoise",
+                "yellow": "Yellow",
+                "dark-blue": "Dark Blue"
+            }
+        }
+    },
+    "error404": {
+        "title": "Off the Path?",
+        "message": "Oops! It looks like you've wandered into uncharted territory. Even the best scouts get lost sometimes!",
+        "returnHome": "Return to Base",
+        "goBack": "Go Back"
     }
 }
