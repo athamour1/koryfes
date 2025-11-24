@@ -151,17 +151,6 @@
 
                   <q-item-section side>
                     <q-btn
-                      v-if="!member.progress?.currentPeak"
-                      color="primary"
-                      icon="add_task"
-                      :label="$t('myUnit.awardPromise') || 'Award Promise'"
-                      @click="confirmAwardPromise(member)"
-                      outline
-                      dense
-                      no-caps
-                    />
-                    <q-btn
-                      v-else
                       color="blue"
                       icon="visibility"
                       :label="$t('myUnit.viewProgress') || 'View Progress'"
@@ -345,43 +334,11 @@ const saveUnit = async () => {
   }
 };
 
-const confirmAwardPromise = (member) => {
-  $q.dialog({
-    title: t('myUnit.confirmAwardTitle') || 'Award Promise Peak',
-    message: t('myUnit.confirmAwardMessage', { username: member.username }) || `Are you sure you want to award the Promise peak to ${member.username}? This will unlock their progress tracking.`,
-    cancel: true,
-    persistent: false
-  }).onOk(async () => {
-    await awardPromisePeak(member);
-  });
-};
 
-const awardPromisePeak = async (member) => {
-  try {
-    // Award Promise Peak (ID 1)
-    await api.post(`/users/${member.id}/progress/peak`, { peakId: 1 });
-    
-    $q.notify({
-      color: 'positive',
-      message: t('myUnit.awardSuccess', { username: member.username }) || `Promise peak awarded to ${member.username}`,
-      icon: 'check'
-    });
-    
-    // Reload members to update the display
-    await loadUnitMembers();
-  } catch (error) {
-    console.error('Failed to award promise peak', error);
-    $q.notify({
-      color: 'negative',
-      message: error.response?.data?.message || t('myUnit.awardError') || 'Failed to award promise peak',
-      icon: 'report_problem'
-    });
-  }
-};
 
 const viewMemberProgress = (member) => {
   // Navigate to the user's profile page
-  router.push(`/users/${member.id}`);
+  router.push(`/user/${member.id}`);
 };
 
 onMounted(async () => {

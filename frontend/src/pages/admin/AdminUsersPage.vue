@@ -375,23 +375,6 @@
                       <q-icon v-else name="landscape" size="60px" color="grey-4" />
                     </div>
                   </div>
-                  
-                  <!-- <q-separator class="q-my-sm" />
-                  
-                  <div class="row q-col-gutter-sm text-center">
-                    <div class="col-4">
-                      <div class="text-caption text-grey-7">{{ $t('progress.admin.paths.title') || 'Paths' }}</div>
-                      <div class="text-h6 text-primary">{{ userProgress?.completedPaths?.length || 0 }}/12</div>
-                    </div>
-                    <div class="col-4">
-                      <div class="text-caption text-grey-7">{{ $t('progress.admin.diplomas.scout') || 'Scout' }}</div>
-                      <div class="text-h6 text-primary">{{ userProgress?.scoutDiplomas?.length || 0 }}/3</div>
-                    </div>
-                    <div class="col-4">
-                      <div class="text-caption text-grey-7">{{ $t('progress.admin.diplomas.elective') || 'Elective' }}</div>
-                      <div class="text-h6 text-primary">{{ userProgress?.electiveDiplomas?.length || 0 }}</div>
-                    </div>
-                  </div> -->
                 </q-card-section>
               </q-card>
 
