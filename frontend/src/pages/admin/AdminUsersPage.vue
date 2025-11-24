@@ -805,6 +805,11 @@
             </div>
           </div>
         </q-card-section>
+        <!-- Action Buttons -->
+        <q-card-actions align="right" class="q-pa-md">
+          <q-btn flat :label="$t('general.cancel')" color="grey-7" v-close-popup />
+          <q-btn unelevated :label="$t('general.save')" color="primary" @click="saveUserChanges" icon="save" />
+        </q-card-actions>
       </q-card>
     </q-dialog>
 
@@ -1145,6 +1150,30 @@ const handleImageUpdate = async (file) => {
   }
 };
 
+const saveUserChanges = async () => {
+  try {
+    const updateData = {
+      username: editingUserData.value.username,
+      locationName: editingUserData.value.locationName,
+      unit: editingUserData.value.unitId ? { id: editingUserData.value.unitId } : null,
+      unitRole: editingUserData.value.unitRole
+    };
+
+    const success = await userStore.updateUser(editingUserData.value.id, updateData);
+    if (success) {
+      $q.notify({ color: 'positive', message: t('adminUsers.notifications.updateSuccess') || 'User updated successfully', icon: 'check' });
+      editDialog.value = false;
+      await userStore.fetchUsers();
+    } else {
+      $q.notify({ color: 'negative', message: userStore.error || t('adminUsers.notifications.updateError') || 'Error updating user', icon: 'report_problem' });
+    }
+  } catch (error) {
+    console.error('Error saving user changes:', error);
+    $q.notify({ color: 'negative', message: t('adminUsers.notifications.updateError') || 'Error updating user', icon: 'report_problem' });
+  }
+};
+
+
 const confirmDeleteUser = (user) => {
   $q.dialog({
     title: t('adminUsers.delete.title'),
@@ -1191,47 +1220,66 @@ const formatUnitRole = (role) => {
 
 // --- Progress Management Logic ---
 
+// Tabs unlock progressively and stay unlocked (cumulative)
+// Promise peak → Bronze tab unlocked
+// Bronze peak awarded → Bronze + Silver tabs unlocked
+// Silver peak awarded → Bronze + Silver + Gold tabs unlocked
+// Gold peak awarded → All tabs unlocked (including Extra)
 const isBronzeUnlocked = computed(() => {
-  const peak = userProgress.value?.currentPeak?.name?.toLowerCase();
-  return ['promise', 'bronze', 'silver', 'gold'].includes(peak);
+  const peakType = userProgress.value?.currentPeak?.type?.toLowerCase();
+  return ['promise', 'bronze', 'silver', 'gold'].includes(peakType);
 });
 
 const isSilverUnlocked = computed(() => {
-  const peak = userProgress.value?.currentPeak?.name?.toLowerCase();
-  return ['bronze', 'silver', 'gold'].includes(peak);
+  const peakType = userProgress.value?.currentPeak?.type?.toLowerCase();
+  return ['bronze', 'silver', 'gold'].includes(peakType);
 });
 
 const isGoldUnlocked = computed(() => {
-  const peak = userProgress.value?.currentPeak?.name?.toLowerCase();
-  return ['silver', 'gold'].includes(peak);
+  const peakType = userProgress.value?.currentPeak?.type?.toLowerCase();
+  return ['silver', 'gold'].includes(peakType);
 });
 
 const getElectivesForPeak = (peakLevel) => {
-  // Logic to filter electives based on when they were awarded relative to peaks would go here
-  // For now, we'll just show all electives in the 'extra' tab or distribute them if we had timestamps
-  // Simplified: Show all in 'extra' if gold, or distributed if we implement that logic.
-  // Actually, let's just show all elective diplomas in the tab corresponding to the user's current stage?
-  // No, we should show the ones earned towards that peak.
-  // Since the backend doesn't link diplomas to specific peaks explicitly (just a collection),
-  // we might need to rely on the count or just show them all in a list.
-  // For this UI, let's just return all elective diplomas for now to avoid complexity, 
-  // or filter by some ID if we had it.
-  // A better approach for now:
-  return userProgress.value?.electiveDiplomas || [];
+  // Each peak level gets a certain number of elective diplomas
+  // Bronze: first 1, Silver: next 1, Gold: next 2, Extra: remaining
+  const allElectives = userProgress.value?.electiveDiplomas || [];
+  
+  if (peakLevel === 'bronze') {
+    return allElectives.slice(0, 1); // First elective diploma
+  } else if (peakLevel === 'silver') {
+    return allElectives.slice(1, 2); // Second elective diploma
+  } else if (peakLevel === 'gold') {
+    return allElectives.slice(2, 4); // Third and fourth elective diplomas
+  } else if (peakLevel === 'extra') {
+    return allElectives.slice(4); // Any beyond the first 4
+  }
+  return [];
 };
 
 const getScoutDiplomasByLevel = (level) => {
-  // Assuming scout diplomas have a 'level' or we filter by name/id
-  // For now, return all scout diplomas
-  return userProgress.value?.scoutDiplomas || [];
+  // Scout diplomas have a 'level' field (1, 2, or 3)
+  const allScoutDiplomas = userProgress.value?.scoutDiplomas || [];
+  return allScoutDiplomas.filter(d => d.level === level);
 };
 
 const getScoutDiplomaCount = (level) => {
-  return userProgress.value?.scoutDiplomas?.length || 0;
+  return getScoutDiplomasByLevel(level).length;
 };
 
 const getPathsForPeak = (peakLevel) => {
-  return userProgress.value?.completedPaths || [];
+  // Each peak level gets 4 paths
+  // Bronze: first 4, Silver: next 4, Gold: next 4, Extra: N/A
+  const allPaths = userProgress.value?.completedPaths || [];
+  
+  if (peakLevel === 'bronze') {
+    return allPaths.slice(0, 4); // First 4 paths
+  } else if (peakLevel === 'silver') {
+    return allPaths.slice(4, 8); // Paths 5-8
+  } else if (peakLevel === 'gold') {
+    return allPaths.slice(8, 12); // Paths 9-12
+  }
+  return [];
 };
 
 // Dialog Openers
