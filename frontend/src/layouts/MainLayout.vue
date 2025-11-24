@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
+  <q-layout view="hHh lpR fFf">
     <q-header elevated class="bg-primary" v-if="!isAuthPage">
       <q-toolbar>
         <q-btn
@@ -14,7 +14,7 @@
         />
 
         <q-toolbar-title>
-          {{ $t('navigation.title') }}
+          {{ pageTitle }}
         </q-toolbar-title>
 
         <!-- Dark Mode Toggle -->
@@ -43,11 +43,11 @@
         <q-item-label header>{{ $t('navigation.header') }}</q-item-label>
 
         <template v-if="authStore.isAuthenticated">
-          <q-item clickable v-ripple to="/my-badges" v-if="!authStore.isAdmin">
+          <q-item clickable v-ripple to="/my-progress" v-if="!authStore.isAdmin">
             <q-item-section avatar>
               <q-icon name="emoji_events" />
             </q-item-section>
-            <q-item-section>{{ $t('navigation.myBadges') }}</q-item-section>
+            <q-item-section>{{ $t('navigation.myProgress') }}</q-item-section>
           </q-item>
 
           <q-item clickable v-ripple to="/users">
@@ -88,7 +88,7 @@
               <q-item-section>{{ $t('navigation.dashboard') }}</q-item-section>
             </q-item>
 
-            <q-item clickable v-ripple to="/admin/units" active-class="text-accent">
+            <q-item clickable v-ripple to="/admin/units">
               <q-item-section avatar>
                 <q-icon name="groups" />
               </q-item-section>
@@ -97,7 +97,7 @@
               </q-item-section>
             </q-item>
 
-            <q-item clickable v-ripple to="/admin/users" active-class="text-accent">
+            <q-item clickable v-ripple to="/admin/users">
               <q-item-section avatar>
                 <q-icon name="admin_panel_settings" />
               </q-item-section>
@@ -161,17 +161,28 @@ import { ref, computed } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { useRouter, useRoute } from 'vue-router';
 import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
 
 const authStore = useAuthStore();
 const router = useRouter();
 const route = useRoute();
 const $q = useQuasar();
+const { t } = useI18n();
+
 // Open drawer by default on desktop (>768px), closed on mobile
 const drawer = ref($q.screen.gt.sm);
 
 // Check if current route is login or register
 const isAuthPage = computed(() => {
   return route.path === '/login' || route.path === '/register' || route.path === '/';
+});
+
+// Page Title Logic
+const pageTitle = computed(() => {
+  if ($q.screen.lt.md && route.meta.titleKey) {
+    return t(route.meta.titleKey);
+  }
+  return t('navigation.title');
 });
 
 // Initialize dark mode from localStorage

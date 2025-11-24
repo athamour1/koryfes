@@ -1,12 +1,14 @@
 <template>
-  <q-page class="flex flex-center gradient-purple">
-    <q-card style="width: 100%; max-width: 400px; margin: 16px;">
+  <q-page class="flex flex-center login-page" @mousemove="handleMouseMove">
+    <div class="interactive-bg" :style="bgStyle"></div>
+    
+    <q-card style="width: 100%; max-width: 400px; margin: 16px; z-index: 1; backdrop-filter: blur(10px); background: rgba(30, 30, 40, 0.85); border: 1px solid rgba(255,255,255,0.1);">
       <!-- Toggle Tabs -->
       <q-tabs
         v-model="tab"
         dense
-        class="text-grey"
-        active-color="primary"
+        class="text-grey-5"
+        active-color="white"
         indicator-color="primary"
         align="justify"
       >
@@ -14,14 +16,14 @@
         <q-tab name="register" :label="$t('auth.register.tab')" />
       </q-tabs>
 
-      <q-separator />
+      <q-separator color="grey-8" />
 
-      <q-tab-panels v-model="tab" animated>
+      <q-tab-panels v-model="tab" animated class="bg-transparent text-white">
         <!-- Login Panel -->
         <q-tab-panel name="login">
           <q-card-section class="text-center q-pb-none">
             <div class="text-h4 text-weight-bold">{{ $t('auth.login.title') }}</div>
-            <div class="text-subtitle2 text-grey-7">{{ $t('auth.login.subtitle') }}</div>
+            <div class="text-subtitle2 text-grey-4">{{ $t('auth.login.subtitle') }}</div>
           </q-card-section>
 
           <q-card-section>
@@ -31,6 +33,7 @@
                 :label="$t('auth.form.username')" 
                 outlined 
                 dense 
+                dark
                 class="q-mb-md"
                 :rules="[val => !!val || $t('auth.form.rules.usernameRequired')]"
               />
@@ -40,6 +43,7 @@
                 type="password" 
                 outlined 
                 dense 
+                dark
                 class="q-mb-md"
                 :rules="[val => !!val || $t('auth.form.rules.passwordRequired')]"
               />
@@ -59,7 +63,7 @@
         <q-tab-panel name="register">
           <q-card-section class="text-center q-pb-none">
             <div class="text-h4 text-weight-bold">{{ $t('auth.register.title') }}</div>
-            <div class="text-subtitle2 text-grey-7">{{ $t('auth.register.subtitle') }}</div>
+            <div class="text-subtitle2 text-grey-4">{{ $t('auth.register.subtitle') }}</div>
           </q-card-section>
 
           <q-card-section>
@@ -69,6 +73,7 @@
                 :label="$t('auth.form.username')" 
                 outlined 
                 dense 
+                dark
                 class="q-mb-md"
                 :rules="usernameRules"
               />
@@ -78,6 +83,7 @@
                 type="password" 
                 outlined 
                 dense 
+                dark
                 class="q-mb-md"
                 :rules="passwordRules"
               />
@@ -86,6 +92,7 @@
                 :label="$t('auth.form.location')" 
                 outlined 
                 dense 
+                dark
                 class="q-mb-md"
               />
               <q-btn 
@@ -105,7 +112,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
@@ -120,6 +127,20 @@ const { t } = useI18n();
 const tab = ref('login');
 const loginForm = ref({ username: '', password: '' });
 const registerForm = ref({ username: '', password: '', location: '' });
+const mouseX = ref(50);
+const mouseY = ref(50);
+
+const bgStyle = computed(() => ({
+  '--mouse-x': `${mouseX.value}%`,
+  '--mouse-y': `${mouseY.value}%`
+}));
+
+const handleMouseMove = (event) => {
+  const { clientX, clientY } = event;
+  const { innerWidth, innerHeight } = window;
+  mouseX.value = (clientX / innerWidth) * 100;
+  mouseY.value = (clientY / innerHeight) * 100;
+};
 
 // Validation rules for register
 const usernameRules = computed(() => {
@@ -163,7 +184,7 @@ const handleLogin = async () => {
     if (authStore.isAdmin) {
       router.push('/admin/dashboard');
     } else {
-      router.push('/my-badges');
+      router.push('/my-progress');
     }
   } catch (error) {
     console.error('Login failed', error);
@@ -198,3 +219,28 @@ const handleRegister = async () => {
   }
 };
 </script>
+
+<style scoped>
+.login-page {
+  position: relative;
+  overflow: hidden;
+  background: #1a1a2e; /* Fallback */
+}
+
+.interactive-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(
+      circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(138, 43, 226, 0.4) 0%,
+      rgba(0, 0, 0, 0) 50%
+    ),
+    linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  z-index: 0;
+  transition: background 0.1s ease;
+}
+</style>

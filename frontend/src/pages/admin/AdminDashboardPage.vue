@@ -3,7 +3,7 @@
     <!-- Header Section -->
     <q-card class="gradient-purple text-white q-mb-lg" flat>
       <q-card-section class="q-pa-xl">
-        <div class="text-center">
+        <div class="text-center welcome-section">
           <div class="text-h3 text-weight-bold q-mb-sm">
             <span class="wave">👋</span>
             {{ $t('dashboard.welcome', { name: stats.userName }) }}
@@ -416,5 +416,14 @@ onMounted(() => {
   20% { transform: rotate(-8deg); }
   40% { transform: rotate(-4deg); }
   50% { transform: rotate(10deg); }
+}
+
+@media (max-width: 768px) {
+  .welcome-section {
+    display: none;
+  }
+  .q-card-section.q-pa-xl {
+    padding: 16px !important;
+  }
 }
 </style>

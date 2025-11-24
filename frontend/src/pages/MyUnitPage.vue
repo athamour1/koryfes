@@ -218,4 +218,10 @@ onMounted(() => {
   border-radius: 12px;
   overflow: hidden;
 }
+
+@media (max-width: 768px) {
+  .page-hero {
+    display: none;
+  }
+}
 </style>

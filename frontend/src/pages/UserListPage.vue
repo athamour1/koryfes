@@ -37,10 +37,10 @@
           :key="user.id"
           class="user-card"
         >
-          <div class="card-header">
-            <q-avatar size="80px" class="user-avatar">
-              <img :src="getAvatarUrl(user.username, user.profileImage)" style="border-radius: 50%; object-fit: cover;" />
-            </q-avatar>
+          <div class="card-header" :key="`avatar-card header-${user.id}`">
+            <div class="user-avatar-wrapper shadow-2" :key="`avatar-div-${user.id}`">
+              <AvatarDisplay :config="user.avatarConfig" size="80px" :key="`avatar-${user.id}`" />
+            </div>
 
             <div class="user-info">
               <h3 class="user-name">{{ user.username }}</h3>
@@ -120,7 +120,7 @@ import { useI18n } from 'vue-i18n';
 import { useUserStore } from '../stores/user';
 import { useAuthStore } from '../stores/auth';
 import { config } from '../config';
-import { getAvatarUrl } from '../utils/avatar';
+import AvatarDisplay from '../components/AvatarDisplay.vue';
 
 const userStore = useUserStore();
 const authStore = useAuthStore();
@@ -161,6 +161,17 @@ const formatUnitRole = (unitRole) => {
 
 onMounted(async () => {
   await fetchUsers();
+  // Debug: Log avatar configs to verify different data
+  console.log('[UserListPage] First 5 users avatarConfigs:');
+  const regularUsers = userStore.users.filter(u => u.role === 'user').slice(0, 5);
+  regularUsers.forEach((user, index) => {
+    console.log(`User ${index + 1} (${user.username}):`, {
+      skin: user.avatarConfig?.skin,
+      hair: user.avatarConfig?.hair,
+      eyes: user.avatarConfig?.eyes,
+      fullConfig: user.avatarConfig
+    });
+  });
 });
 </script>
 
@@ -279,12 +290,15 @@ body.body--dark .location-filter :deep(.q-field__control) {
   margin-bottom: 20px;
 }
 
-.user-avatar {
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
-.user-avatar img {
-  object-fit: cover;
+.user-avatar-wrapper {
+  border-radius: 50%;
+  overflow: hidden;
+  background: white;
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .user-info {
@@ -449,6 +463,7 @@ body.body--dark .badge-avatar {
   text-align: center;
   padding: 40px 20px;
   opacity: 0.5;
+  padding: 20px;
 }
 
 .no-badges p {
@@ -503,12 +518,14 @@ body.body--dark .card-footer {
 
 /* Responsive */
 @media (max-width: 768px) {
-  .feed-title {
-    font-size: 2rem;
+  .feed-title,
+  .feed-subtitle {
+    display: none;
   }
 
-  .feed-subtitle {
-    font-size: 1rem;
+  .feed-header {
+    padding: 20px 20px 40px;
+    margin-bottom: 0;
   }
 
   .search-section {
@@ -523,6 +540,7 @@ body.body--dark .card-footer {
   .cards-grid {
     grid-template-columns: 1fr;
     gap: 16px;
+    margin-top: 20px;
   }
 
   .user-card {

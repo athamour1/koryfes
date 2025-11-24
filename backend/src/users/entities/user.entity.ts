@@ -59,6 +59,9 @@ export class User {
     @Column({ nullable: true })
     profileImage: string;
 
+    @Column({ type: 'jsonb', nullable: true })
+    avatarConfig: Record<string, any>;
+
     @Exclude()
     @Column({ nullable: true })
     resetPasswordToken: string;

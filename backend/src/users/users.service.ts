@@ -7,6 +7,8 @@ import { BadgesService } from '../badges/badges.service';
 import { LocationsService } from '../locations/locations.service';
 import * as bcrypt from 'bcrypt';
 
+import { generateRandomAvatarConfig } from './avatar.utils';
+
 @Injectable()
 export class UsersService implements OnModuleInit {
     constructor(
@@ -38,6 +40,7 @@ export class UsersService implements OnModuleInit {
                     location: adminLocation,
                     role: UserRole.SUPER_ADMIN,
                     isAdmin: true,
+                    avatarConfig: generateRandomAvatarConfig(),
                 });
                 await this.usersRepository.save(adminUser);
                 console.log(`Admin user '${adminUsername}' created.`);
@@ -64,7 +67,8 @@ export class UsersService implements OnModuleInit {
             password: hashedPassword,
             location: locationEntity,
             role: userData.role || UserRole.USER,
-            isAdmin: userData.role === UserRole.SUPER_ADMIN || userData.role === UserRole.ADMIN
+            isAdmin: userData.role === UserRole.SUPER_ADMIN || userData.role === UserRole.ADMIN,
+            avatarConfig: userData.avatarConfig || generateRandomAvatarConfig(),
         });
 
         // Enforce unique Leader/Deputy Leader per unit

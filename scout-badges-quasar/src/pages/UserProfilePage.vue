@@ -1,0 +1,586 @@
+<template>
+  <q-page class="user-profile-page">
+    <!-- Hero Header -->
+    <div class="q-pa-md">
+      <div class="gradient-purple text-white q-pa-lg q-mb-lg" style="border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 1400px; margin: 0 auto;">
+        <div class="flex items-center q-mb-md">
+          <q-btn
+            flat
+            round
+            dense
+            icon="arrow_back"
+            class="text-white q-mr-md"
+            @click="$router.back()"
+          >
+            <q-tooltip>{{ $t('general.back') }}</q-tooltip>
+          </q-btn>
+        </div>
+        
+        <div class="profile-hero">
+          <div class="profile-avatar-wrapper shadow-10" v-if="user">
+            <AvatarDisplay :config="user.avatarConfig" size="120px" />
+          </div>
+          
+          <div class="profile-info">
+            <h1 class="profile-name">{{ user?.username }}</h1>
+            <div class="text-subtitle1 text-grey-5 q-mb-md">
+              <q-icon name="place" size="sm" class="q-mr-xs" />
+              {{ user?.location?.name || $t('userProfilePage.noLocation') }}
+            </div>
+
+            <div class="unit-role-card-hero q-mt-md">
+              <div class="unit-section">
+                <div class="text-caption text-white-7">{{ $t('userListPage.unitLabel') || 'Unit' }}</div>
+                <div class="text-weight-bold">{{ user?.unit?.name || '-' }}</div>
+              </div>
+              <div class="unit-divider-hero"></div>
+              <div class="role-section">
+                <div class="text-caption text-white-7">{{ $t('userListPage.roleLabel') || 'Role' }}</div>
+                <div class="text-weight-bold">{{ formatUnitRole(user?.unitRole) }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress Section -->
+    <div class="q-pa-lg" style="max-width: 1400px; margin: 0 auto;">
+      <q-card flat bordered>
+        <q-card-section>
+          <div class="section-header">
+            <h2>
+              <q-icon name="insights" size="32px" />
+              {{ $t('progress.admin.title') || 'Individual Progress' }}
+            </h2>
+            <p>{{ $t('progress.admin.extraStageInfo') || 'Track your journey through peaks, paths, and diplomas.' }}</p>
+          </div>
+
+          <div class="row q-col-gutter-xl q-mb-xl">
+        <!-- 1. Current Peak (Left) -->
+        <div class="col-12 col-md-4 text-center">
+          <div v-if="user?.progress?.currentPeak">
+            <q-avatar size="200px" class="peak-avatar shadow-10">
+              <img :src="`${config.apiUrl}${user?.progress?.currentPeak?.image}`" style="object-fit: cover" />
+            </q-avatar>
+          </div>
+          <div v-else class="empty-state-card">
+            <q-icon name="landscape" size="60px" color="grey-4" />
+            <div class="text-h6 text-grey-6 q-mt-md">{{ $t('progress.admin.noPeak') || 'No Peak Earned Yet' }}</div>
+          </div>
+        </div>
+
+        <!-- 2. Diplomas (Right) -->
+        <div class="col-12 col-md-8">
+          <h3 class="text-h5 q-mb-md flex items-center">
+            <q-icon name="school" class="q-mr-sm" color="accent" />
+            {{ $t('progress.admin.diplomas.title') || 'Diplomas' }}
+          </h3>
+          
+          <q-card class="diplomas-card">
+            <q-card-section>
+              <!-- Scout Diplomas -->
+              <div v-if="user?.progress?.scoutDiplomas && user?.progress?.scoutDiplomas.length > 0">
+                <div class="text-subtitle2 text-grey-7 q-mb-sm">{{ $t('progress.admin.diplomas.scout') || 'Scout Diplomas' }}</div>
+                <div class="diplomas-grid">
+                  <div v-for="diploma in user?.progress?.scoutDiplomas" :key="diploma.id" class="diploma-item">
+                    <q-avatar size="60px" class="diploma-avatar">
+                      <img v-if="diploma.image" :src="`${config.apiUrl}${diploma.image}`" style="object-fit: contain" />
+                      <q-icon v-else name="school" color="accent" size="30px" />
+                    </q-avatar>
+                    <div class="diploma-name">{{ diploma.name }}</div>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="text-grey-5 q-mb-md">{{ $t('progress.admin.noEarnedScoutDiplomas') || 'No Scout Diplomas Yet' }}</div>
+
+              <q-separator class="q-my-md" />
+
+              <!-- Elective Diplomas -->
+              <div v-if="user?.progress?.electiveDiplomas && user?.progress?.electiveDiplomas.length > 0">
+                <div class="text-subtitle2 text-grey-7 q-mb-sm">{{ $t('progress.admin.diplomas.elective') || 'Elective Diplomas' }}</div>
+                <div class="diplomas-grid">
+                  <div v-for="diploma in user?.progress?.electiveDiplomas" :key="diploma.id" class="diploma-item">
+                    <q-avatar size="60px" class="diploma-avatar">
+                      <img v-if="diploma.image" :src="`${config.apiUrl}${diploma.image}`" style="object-fit: contain" />
+                      <q-icon v-else name="star" color="purple" size="30px" />
+                    </q-avatar>
+                    <div class="diploma-name">{{ diploma.name }}</div>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="text-grey-5">{{ $t('progress.admin.noEarnedElectiveDiplomas') || 'No Elective Diplomas Yet' }}</div>
+            </q-card-section>
+          </q-card>
+        </div>
+      </div>
+
+      <!-- 3. Completed Paths (Bottom) -->
+      <div>
+        <h3 class="text-h5 q-mb-md flex items-center">
+          <q-icon name="explore" class="q-mr-sm" color="secondary" />
+          {{ $t('progress.admin.paths.title') || 'Completed Paths' }} ({{ user?.progress?.completedPaths?.length || 0 }})
+        </h3>
+        
+        <div v-if="user?.progress?.completedPaths && user?.progress?.completedPaths.length > 0">
+          <q-card class="paths-text-card">
+            <q-card-section>
+              <div class="row q-col-gutter-md">
+                <div v-for="path in user?.progress?.completedPaths" :key="path.id" class="col-12 col-sm-6 col-md-4">
+                  <div class="flex items-center path-item-text">
+                    <q-icon name="check_circle" color="secondary" size="sm" class="q-mr-sm flex-shrink-0" />
+                    <span class="text-body1 path-name-text">{{ path.name }}</span>
+                  </div>
+                </div>
+              </div>
+            </q-card-section>
+          </q-card>
+        </div>
+        <div v-else class="empty-state-card">
+          <q-icon name="map" size="60px" color="grey-4" />
+          <div class="text-h6 text-grey-6 q-mt-md">{{ $t('progress.admin.noEarnedPaths') || 'No Paths Completed Yet' }}</div>
+        </div>
+      </div>
+        </q-card-section>
+      </q-card>
+    </div>
+  </q-page>
+</template>
+
+<script setup>
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
+import { useAuthStore } from '../stores/auth';
+import { api } from '../api';
+import { config } from '../config';
+import { date } from 'quasar';
+import AvatarDisplay from '../components/AvatarDisplay.vue';
+
+const route = useRoute();
+const router = useRouter();
+const authStore = useAuthStore();
+const { t } = useI18n();
+const user = ref(null);
+
+const formatDate = (dateString) => {
+  if (!dateString) return '';
+  return date.formatDate(dateString, 'MMM D, YYYY');
+};
+
+const fetchUserProfile = async () => {
+  try {
+    const userId = route.params.id;
+    const response = await api.get(`/users/${userId}`);
+    
+    if (!response.data) {
+      router.push('/users');
+      return;
+    }
+
+    const fetchedUser = response.data;
+
+    // Access Control:
+    // 1. Super Admins can see everyone
+    // 2. Regular users/admins can only see users in their location
+    if (!authStore.isSuperAdmin) {
+      const myLocationId = authStore.user?.location?.id;
+      const userLocationId = fetchedUser.location?.id;
+
+      if (myLocationId !== userLocationId) {
+        router.push('/users');
+        return;
+      }
+    }
+
+    user.value = fetchedUser;
+  } catch (error) {
+    console.error('Failed to fetch user profile', error);
+    router.push('/users');
+  }
+};
+
+const formatUnitRole = (unitRole) => {
+  if (!unitRole) return '-';
+  switch(unitRole) {
+    case 'leader': return t('adminUsers.roles.leader');
+    case 'deputy_leader': return t('adminUsers.roles.deputyLeader');
+    case 'member': return t('adminUsers.roles.member');
+    default: return unitRole;
+  }
+};
+
+onMounted(() => {
+  fetchUserProfile();
+});
+
+onBeforeUnmount(() => {
+  // Clean up user data before component unmounts
+  user.value = null;
+});
+</script>
+
+<style scoped>
+.user-profile-page {
+  min-height: 100vh;
+}
+
+/* Header Section */
+.gradient-purple {
+  background: linear-gradient(135deg, var(--q-primary) 0%, var(--q-secondary) 100%);
+}
+
+.profile-header {
+  background: linear-gradient(135deg, var(--q-primary) 0%, var(--q-secondary) 100%);
+  padding: 30px 20px 60px;
+  position: relative;
+  margin-bottom: -30px;
+}
+
+.back-btn {
+  margin-bottom: 20px;
+}
+
+.profile-hero {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  margin-bottom: 40px;
+}
+
+.profile-avatar-wrapper {
+  border-radius: 50%;
+  overflow: hidden;
+  background: white;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-info {
+  flex: 1;
+  color: white;
+}
+
+.profile-name {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 12px;
+  color: white;
+}
+
+.profile-meta {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.text-white-7 {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.unit-role-card-hero {
+  display: flex;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  overflow: hidden;
+  max-width: 400px;
+}
+
+.unit-section,
+.role-section {
+  flex: 1;
+  padding: 12px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.unit-divider-hero {
+  width: 1px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Stats Cards */
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  padding: 24px;
+  text-align: center;
+  color: white;
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 12px 0 4px;
+}
+
+.stat-label {
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+.section-header {
+  margin-bottom: 32px;
+}
+
+.section-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+
+.section-header p {
+  opacity: 0.7;
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+/* Badges Grid */
+.badges-detailed-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+}
+
+.badge-detail-card {
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.badge-detail-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.badge-card-image {
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.03);
+  padding: 20px;
+}
+
+body.body--dark .badge-card-image {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.badge-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.badge-card-content {
+  padding: 20px;
+}
+
+.badge-name {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0 0 8px;
+}
+
+.badge-description {
+  opacity: 0.7;
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.badge-card-footer {
+  padding: 12px 20px;
+  background: rgba(0, 0, 0, 0.03);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+body.body--dark .badge-card-footer {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Empty State */
+.empty-badges {
+  text-align: center;
+  padding: 80px 20px;
+  opacity: 0.6;
+}
+
+.empty-badges h3 {
+  margin: 20px 0 8px;
+  font-size: 1.5rem;
+}
+
+.empty-badges p {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+/* Progress Specific Styles */
+.peak-card {
+  border-radius: 20px;
+  overflow: hidden;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+body.body--dark .peak-card {
+  background: linear-gradient(135deg, #1d1d1d 0%, #2d2d2d 100%);
+  border-color: rgba(255,255,255,0.05);
+}
+
+.peak-avatar {
+  border: 4px solid white;
+}
+
+body.body--dark .peak-avatar {
+  border-color: #333;
+}
+
+.diplomas-card {
+  border-radius: 20px;
+  background: white;
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+body.body--dark .diplomas-card {
+  background: #1d1d1d;
+  border-color: rgba(255,255,255,0.05);
+}
+
+.paths-text-card {
+  border-radius: 20px;
+  background: white;
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+body.body--dark .paths-text-card {
+  background: #1d1d1d;
+  border-color: rgba(255,255,255,0.05);
+}
+
+.empty-state-card {
+  background: rgba(0,0,0,0.02);
+  border-radius: 16px;
+  padding: 40px;
+  text-align: center;
+  border: 2px dashed rgba(0,0,0,0.1);
+}
+
+.empty-state-card.small {
+  padding: 20px;
+}
+
+body.body--dark .empty-state-card {
+  background: rgba(255,255,255,0.02);
+  border-color: rgba(255,255,255,0.1);
+}
+
+.path-item-text {
+  min-width: 0;
+  flex: 1;
+}
+
+.path-name-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+}
+
+.diplomas-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.diploma-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 80px;
+  text-align: center;
+}
+
+.diploma-avatar {
+  background: rgba(0,0,0,0.03);
+  margin-bottom: 8px;
+}
+
+body.body--dark .diploma-avatar {
+  background: rgba(255,255,255,0.05);
+}
+
+.diploma-name {
+  font-size: 0.75rem;
+  line-height: 1.2;
+  color: #666;
+  font-weight: 500;
+}
+
+body.body--dark .diploma-name {
+  color: #aaa;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .profile-hero {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .profile-name {
+    font-size: 2rem;
+  }
+
+  .profile-meta {
+    justify-content: center;
+  }
+
+  .stats-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .paths-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+
+  .diplomas-grid {
+    justify-content: center;
+  }
+  
+  .paths-text-card .row > div {
+    /* Single column on mobile for more horizontal space */
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+  
+  .path-name-text {
+    font-size: 0.9rem;
+  }
+}
+</style>
