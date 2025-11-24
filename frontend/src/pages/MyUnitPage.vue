@@ -243,7 +243,7 @@ const handleImageUpdate = (file) => {
 const loadUnit = async () => {
   loading.value = true;
   try {
-    const userUnitId = authStore.user?.unitId;
+    const userUnitId = authStore.user?.unit?.id;
     if (userUnitId) {
       // Fetch unit details directly
       const response = await api.get(`/units/${userUnitId}`);
