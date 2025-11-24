@@ -855,6 +855,33 @@
       </q-card>
     </q-dialog>
 
+    <!-- Award Scout Diploma Dialog -->
+    <q-dialog v-model="awardScoutDiplomaDialog">
+      <q-card style="min-width: 400px">
+        <q-card-section>
+          <div class="text-h6">{{ $t('progress.admin.awardScoutDiplomaTitle') || 'Award Scout Diploma' }}</div>
+        </q-card-section>
+
+        <q-card-section>
+          <q-select
+            v-model="selectedScoutDiploma"
+            :options="availableScoutDiplomas"
+            option-label="name"
+            option-value="id"
+            :label="$t('progress.admin.selectDiploma') || 'Select Diploma'"
+            filled
+            emit-value
+            map-options
+          />
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat :label="$t('general.cancel')" color="primary" v-close-popup />
+          <q-btn flat :label="$t('general.award')" color="primary" @click="awardScoutDiploma" :disable="!selectedScoutDiploma" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
     <!-- Award Path Dialog -->
     <q-dialog v-model="awardPathDialog">
       <q-card style="min-width: 400px">
@@ -929,10 +956,13 @@ const userProgress = ref(null);
 const activeTab = ref('bronze');
 const awardPeakDialog = ref(false);
 const awardElectiveDiplomaDialog = ref(false);
+const awardScoutDiplomaDialog = ref(false);
 const awardPathDialog = ref(false);
 const selectedElectiveDiploma = ref(null);
+const selectedScoutDiploma = ref(null);
 const selectedPath = ref(null);
-const allDiplomas = ref([]);
+const allElectiveDiplomas = ref([]);
+const allScoutDiplomas = ref([]);
 const allPaths = ref([]);
 
 const roleFilterOptions = [
@@ -1015,11 +1045,13 @@ const fetchLocations = async () => {
 
 const fetchProgressData = async () => {
   try {
-    const [diplomasRes, pathsRes] = await Promise.all([
-      api.get('/diplomas'),
+    const [electiveDiplomasRes, scoutDiplomasRes, pathsRes] = await Promise.all([
+      api.get('/elective-diplomas'),
+      api.get('/scout-diplomas'),
       api.get('/paths')
     ]);
-    allDiplomas.value = diplomasRes.data;
+    allElectiveDiplomas.value = electiveDiplomasRes.data;
+    allScoutDiplomas.value = scoutDiplomasRes.data;
     allPaths.value = pathsRes.data;
   } catch (error) {
     console.error('Error fetching progress metadata:', error);
@@ -1212,6 +1244,11 @@ const openAwardElectiveDiplomaDialog = () => {
   awardElectiveDiplomaDialog.value = true;
 };
 
+const openAwardScoutDiplomaDialog = (level) => {
+  selectedScoutDiploma.value = null;
+  awardScoutDiplomaDialog.value = true;
+};
+
 const openAwardPathDialog = () => {
   selectedPath.value = null;
   awardPathDialog.value = true;
@@ -1220,7 +1257,12 @@ const openAwardPathDialog = () => {
 // Computed options for dialogs
 const availableElectiveDiplomas = computed(() => {
   const earnedIds = userProgress.value?.electiveDiplomas?.map(d => d.id) || [];
-  return allDiplomas.value.filter(d => d.type === 'elective' && !earnedIds.includes(d.id));
+  return allElectiveDiplomas.value.filter(d => !earnedIds.includes(d.id));
+});
+
+const availableScoutDiplomas = computed(() => {
+  const earnedIds = userProgress.value?.scoutDiplomas?.map(d => d.id) || [];
+  return allScoutDiplomas.value.filter(d => !earnedIds.includes(d.id));
 });
 
 const availablePaths = computed(() => {
@@ -1231,15 +1273,15 @@ const availablePaths = computed(() => {
 // Actions
 const awardPeak = async () => {
   try {
-    // Award Promise Peak (ID 1 usually, or fetch by name)
-    // Assuming backend handles "next peak" logic or we send specific ID
-    // For "Promise", let's assume we call an endpoint to initialize progress or award specific peak
-    await api.post(`/users/${editingUserData.value.id}/progress/peak`, { peakName: 'Promise' });
+    // Award Promise Peak (ID 1 - the starting peak)
+    // The Promise peak always has ID 1 in the database
+    await api.post(`/users/${editingUserData.value.id}/progress/peak`, { peakId: 1 });
     $q.notify({ color: 'positive', message: t('progress.admin.notifications.peakAwarded'), icon: 'check' });
     awardPeakDialog.value = false;
     await fetchUserProgress(editingUserData.value.id);
   } catch (error) {
-    $q.notify({ color: 'negative', message: t('progress.admin.notifications.error'), icon: 'report_problem' });
+    console.error('Error awarding peak:', error);
+    $q.notify({ color: 'negative', message: error.response?.data?.message || t('progress.admin.notifications.error'), icon: 'report_problem' });
   }
 };
 
@@ -1268,23 +1310,24 @@ const awardPath = async () => {
 };
 
 const awardScoutDiplomaForPeak = async (peakLevel) => {
-  // Logic to award next scout diploma
-  // This might need a dialog to select which one, or auto-select based on order
-  // For now, placeholder
-  $q.notify({ message: 'Feature to select specific scout diploma coming soon', color: 'info' });
+  openAwardScoutDiplomaDialog();
+};
+
+const awardScoutDiploma = async () => {
+  if (!selectedScoutDiploma.value) return;
+  try {
+    await api.post(`/users/${editingUserData.value.id}/progress/diploma`, { diplomaId: selectedScoutDiploma.value, type: 'scout' });
+    $q.notify({ color: 'positive', message: t('progress.admin.notifications.diplomaAwarded'), icon: 'check' });
+    awardScoutDiplomaDialog.value = false;
+    await fetchUserProgress(editingUserData.value.id);
+  } catch (error) {
+    $q.notify({ color: 'negative', message: t('progress.admin.notifications.error'), icon: 'report_problem' });
+  }
 };
 
 </script>
 
 <style scoped>
-.users-page {
-  /* ... */
-}
-
-.hero-header-wrapper {
-  /* Default styles if needed */
-}
-
 @media (max-width: 768px) {
   .hero-header-wrapper {
     display: none;

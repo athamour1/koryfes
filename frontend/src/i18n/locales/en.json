@@ -43,7 +43,17 @@
         "flagHint": "Click the edit icon to upload a new flag",
         "updateSuccess": "Unit updated successfully",
         "loadError": "Failed to load unit details",
-        "updateError": "Failed to update unit"
+        "updateError": "Failed to update unit",
+        "membersTitle": "Unit Members",
+        "noMembers": "No members in this unit yet",
+        "noPeak": "No peak assigned yet",
+        "awardPromise": "Award Promise",
+        "viewProgress": "View Progress",
+        "confirmAwardTitle": "Award Promise Peak",
+        "confirmAwardMessage": "Are you sure you want to award the Promise peak to {username}? This will unlock their progress tracking.",
+        "awardSuccess": "Promise peak awarded to {username} successfully",
+        "awardError": "Failed to award promise peak",
+        "loadMembersError": "Failed to load unit members"
     },
     "dashboard": {
         "welcome": "Welcome back, {name}!",

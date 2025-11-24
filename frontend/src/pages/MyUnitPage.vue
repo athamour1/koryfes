@@ -103,31 +103,111 @@
             </q-card-section>
           </q-card>
         </div>
+
+        <!-- Unit Members Card (Leaders Only) -->
+        <div v-if="isLeader" class="col-12">
+          <q-card class="modern-card">
+            <q-card-section>
+              <div class="text-h6 q-mb-md">
+                <q-icon name="groups" class="q-mr-sm" />
+                {{ $t('myUnit.membersTitle') || 'Unit Members' }}
+              </div>
+              
+              <div v-if="loadingMembers" class="row justify-center q-pa-md">
+                <q-spinner color="primary" size="2em" />
+              </div>
+
+              <div v-else-if="unitMembers.length === 0" class="text-center q-pa-md text-grey">
+                {{ $t('myUnit.noMembers') || 'No members in this unit yet' }}
+              </div>
+
+              <q-list v-else separator>
+                <q-item v-for="member in unitMembers" :key="member.id">
+                  <q-item-section avatar>
+                    <q-avatar>
+                      <img v-if="member.profileImage" :src="getImageUrl(member.profileImage)" />
+                      <q-icon v-else name="person" />
+                    </q-avatar>
+                  </q-item-section>
+
+                  <q-item-section>
+                    <q-item-label>{{ member.username }}</q-item-label>
+                    <q-item-label caption>
+                      <q-chip 
+                        v-if="member.progress?.currentPeak" 
+                        :color="getPeakColor(member.progress.currentPeak.type)" 
+                        text-color="white" 
+                        size="sm"
+                        dense
+                      >
+                        <q-icon name="landscape" class="q-mr-xs" size="xs" />
+                        {{ member.progress.currentPeak.name }}
+                      </q-chip>
+                      <span v-else class="text-grey">
+                        {{ $t('myUnit.noPeak') || 'No peak assigned yet' }}
+                      </span>
+                    </q-item-label>
+                  </q-item-section>
+
+                  <q-item-section side>
+                    <q-btn
+                      v-if="!member.progress?.currentPeak"
+                      color="primary"
+                      icon="add_task"
+                      :label="$t('myUnit.awardPromise') || 'Award Promise'"
+                      @click="confirmAwardPromise(member)"
+                      outline
+                      dense
+                      no-caps
+                    />
+                    <q-btn
+                      v-else
+                      color="blue"
+                      icon="visibility"
+                      :label="$t('myUnit.viewProgress') || 'View Progress'"
+                      @click="viewMemberProgress(member)"
+                      outline
+                      dense
+                      no-caps
+                    />
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-card-section>
+          </q-card>
+        </div>
       </div>
     </div>
   </q-page>
 </template>
 
+
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-const { t } = useI18n();
-const isLeader = computed(() => authStore.user?.unitRole === 'leader');
+import { useRouter } from 'vue-router';
 import { useAuthStore } from 'src/stores/auth';
 import { useUnitStore } from 'src/stores/unit';
 import { api } from 'src/api';
 import { useQuasar } from 'quasar';
 import { config } from 'src/config';
 
+const { t } = useI18n();
+const router = useRouter();
 const $q = useQuasar();
 const authStore = useAuthStore();
 const unitStore = useUnitStore();
 
+const isLeader = computed(() => authStore.user?.unitRole === 'leader');
+
+
 const loading = ref(true);
 const saving = ref(false);
+const loadingMembers = ref(false);
 const unit = ref(null);
 const uploadFile = ref(null);
 const previewImage = ref(null);
+const unitMembers = ref([]);
 
 const unitForm = ref({
   name: '',
@@ -137,6 +217,21 @@ const unitForm = ref({
 const getFlagUrl = (path) => {
   if (!path) return null;
   return path.startsWith('http') ? path : `${config.apiUrl}${path}`;
+};
+
+const getImageUrl = (path) => {
+  if (!path) return null;
+  return path.startsWith('http') ? path : `${config.apiUrl}${path}`;
+};
+
+const getPeakColor = (type) => {
+  const colors = {
+    promise: 'green',
+    bronze: 'deep-orange',
+    silver: 'grey',
+    gold: 'amber'
+  };
+  return colors[type] || 'primary';
 };
 
 const handleImageUpdate = (file) => {
@@ -168,6 +263,50 @@ const loadUnit = async () => {
     });
   } finally {
     loading.value = false;
+  }
+};
+
+const loadUnitMembers = async () => {
+  if (!isLeader.value || !unit.value) return;
+  
+  loadingMembers.value = true;
+  try {
+    // Fetch all users
+    const usersResponse = await api.get('/users');
+    const allUsers = usersResponse.data;
+    
+    // Filter users by unit ID
+    const members = allUsers.filter(u => u.unit?.id === unit.value.id);
+    
+    // Fetch progress for each member
+    const membersWithProgress = await Promise.all(
+      members.map(async (member) => {
+        try {
+          const progressResponse = await api.get(`/users/${member.id}/progress`);
+          return {
+            ...member,
+            progress: progressResponse.data
+          };
+        } catch (error) {
+          console.error(`Failed to load progress for user ${member.id}`, error);
+          return {
+            ...member,
+            progress: null
+          };
+        }
+      })
+    );
+    
+    unitMembers.value = membersWithProgress;
+  } catch (error) {
+    console.error('Failed to load unit members', error);
+    $q.notify({
+      color: 'negative',
+      message: t('myUnit.loadMembersError') || 'Failed to load unit members',
+      icon: 'report_problem'
+    });
+  } finally {
+    loadingMembers.value = false;
   }
 };
 
@@ -206,8 +345,50 @@ const saveUnit = async () => {
   }
 };
 
-onMounted(() => {
-  loadUnit();
+const confirmAwardPromise = (member) => {
+  $q.dialog({
+    title: t('myUnit.confirmAwardTitle') || 'Award Promise Peak',
+    message: t('myUnit.confirmAwardMessage', { username: member.username }) || `Are you sure you want to award the Promise peak to ${member.username}? This will unlock their progress tracking.`,
+    cancel: true,
+    persistent: false
+  }).onOk(async () => {
+    await awardPromisePeak(member);
+  });
+};
+
+const awardPromisePeak = async (member) => {
+  try {
+    // Award Promise Peak (ID 1)
+    await api.post(`/users/${member.id}/progress/peak`, { peakId: 1 });
+    
+    $q.notify({
+      color: 'positive',
+      message: t('myUnit.awardSuccess', { username: member.username }) || `Promise peak awarded to ${member.username}`,
+      icon: 'check'
+    });
+    
+    // Reload members to update the display
+    await loadUnitMembers();
+  } catch (error) {
+    console.error('Failed to award promise peak', error);
+    $q.notify({
+      color: 'negative',
+      message: error.response?.data?.message || t('myUnit.awardError') || 'Failed to award promise peak',
+      icon: 'report_problem'
+    });
+  }
+};
+
+const viewMemberProgress = (member) => {
+  // Navigate to the user's profile page
+  router.push(`/users/${member.id}`);
+};
+
+onMounted(async () => {
+  await loadUnit();
+  if (isLeader.value) {
+    await loadUnitMembers();
+  }
 });
 </script>
 
