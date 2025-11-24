@@ -71,8 +71,8 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { useUnitStore } from '../stores/unit';
-import { config } from '../config';
+import { useUnitStore } from 'src/stores/unit';
+import { config } from 'src/config';
 
 const route = useRoute();
 const unitStore = useUnitStore();

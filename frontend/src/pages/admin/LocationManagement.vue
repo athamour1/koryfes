@@ -123,7 +123,7 @@
 <script setup>
 import { ref, onMounted, reactive, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { api } from '../../api';
+import { api } from 'src/api';
 import { useQuasar } from 'quasar';
 
 const $q = useQuasar();

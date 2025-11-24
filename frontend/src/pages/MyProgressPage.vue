@@ -135,11 +135,11 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useAuthStore } from '../stores/auth';
-import { useUserStore } from '../stores/user';
-import { config } from '../config';
+import { useAuthStore } from 'src/stores/auth';
+import { useUserStore } from 'src/stores/user';
+import { config } from 'src/config';
 import { date } from 'quasar';
-import AvatarDisplay from '../components/AvatarDisplay.vue';
+import AvatarDisplay from 'src/components/AvatarDisplay.vue';
 
 const authStore = useAuthStore();
 const userStore = useUserStore();

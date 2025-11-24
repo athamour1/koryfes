@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { api } from '../api';
+import { api } from 'src/api';
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
@@ -27,9 +27,9 @@ export const useAuthStore = defineStore('auth', {
                 return false;
             }
         },
-        async register(username, password, location) {
+        async register(userData) {
             try {
-                await api.post('/auth/register', { username, password, location });
+                await api.post('/auth/register', userData);
                 return { success: true };
             } catch (error) {
                 console.error('Registration failed', error);

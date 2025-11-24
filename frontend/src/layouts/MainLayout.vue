@@ -158,7 +158,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { useAuthStore } from '../stores/auth';
+import { useAuthStore } from 'src/stores/auth';
 import { useRouter, useRoute } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';

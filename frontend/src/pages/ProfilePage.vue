@@ -42,10 +42,10 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useAuthStore } from '../stores/auth';
-import { useUserStore } from '../stores/user';
+import { useAuthStore } from 'src/stores/auth';
+import { useUserStore } from 'src/stores/user';
 import { useQuasar } from 'quasar';
-import AvatarEditor from '../components/AvatarEditor.vue';
+import AvatarEditor from 'src/components/AvatarEditor.vue';
 
 const authStore = useAuthStore();
 const userStore = useUserStore();

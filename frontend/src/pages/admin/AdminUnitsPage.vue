@@ -138,11 +138,11 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useUnitStore } from '../../stores/unit';
-import { useAuthStore } from '../../stores/auth';
+import { useUnitStore } from 'src/stores/unit';
+import { useAuthStore } from 'src/stores/auth';
 import { useQuasar } from 'quasar';
-import { config } from '../../config';
-import { api } from '../../api';
+import { config } from 'src/config';
+import { api } from 'src/api';
 
 const unitStore = useUnitStore();
 const authStore = useAuthStore();
@@ -267,10 +267,6 @@ const confirmDeleteUnit = (unit) => {
 </script>
 
 <style scoped>
-.hero-header-wrapper {
-  /* Default styles if needed */
-}
-
 @media (max-width: 768px) {
   .hero-header-wrapper {
     display: none;

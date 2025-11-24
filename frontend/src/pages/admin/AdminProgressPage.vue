@@ -329,8 +329,8 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { useProgressStore } from '../../stores/progress';
-import { config } from '../../config';
+import { useProgressStore } from 'src/stores/progress';
+import { config } from 'src/config';
 
 const tab = ref('peaks');
 const progressStore = useProgressStore();

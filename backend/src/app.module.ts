@@ -7,8 +7,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
-import { BadgesModule } from './badges/badges.module';
-import { AdminModule } from './admin/admin.module';
 import { LocationsModule } from './locations/locations.module';
 import { UnitsModule } from './units/units.module';
 import { PeaksModule } from './peaks/peaks.module';
@@ -39,8 +37,6 @@ import { UserProgressModule } from './user-progress/user-progress.module';
     }]),
     UsersModule,
     AuthModule,
-    BadgesModule,
-    AdminModule,
     LocationsModule,
     UnitsModule,
     PeaksModule,

@@ -1,6 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, OneToOne, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, ManyToOne } from 'typeorm';
 import { Exclude } from 'class-transformer';
-import { UserBadge } from './user-badge.entity';
 import { Location } from '../../locations/entities/location.entity';
 import { Unit } from '../../units/entities/unit.entity';
 import { UserProgress } from '../../user-progress/user-progress.entity';
@@ -59,7 +58,7 @@ export class User {
     @Column({ nullable: true })
     profileImage: string;
 
-    @Column({ type: 'jsonb', nullable: true })
+    @Column({ type: 'simple-json', nullable: true })
     avatarConfig: Record<string, any>;
 
     @Exclude()
@@ -70,8 +69,6 @@ export class User {
     @Column({ nullable: true })
     resetPasswordExpires: Date;
 
-    @OneToMany(() => UserBadge, (userBadge) => userBadge.user, { cascade: true })
-    userBadges: UserBadge[];
 
     @OneToOne(() => UserProgress, (userProgress) => userProgress.user, { nullable: true })
     progress: UserProgress;

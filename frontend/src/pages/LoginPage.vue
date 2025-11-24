@@ -113,11 +113,11 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { useAuthStore } from '../stores/auth';
+import { useAuthStore } from 'src/stores/auth';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
-import { config } from '../config';
+import { config } from 'src/config';
 
 const authStore = useAuthStore();
 const router = useRouter();

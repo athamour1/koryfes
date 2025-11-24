@@ -887,13 +887,13 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useUserStore } from '../../stores/user';
-import { useAuthStore } from '../../stores/auth';
-import { useUnitStore } from '../../stores/unit';
-import { api } from '../../api';
+import { useUserStore } from 'src/stores/user';
+import { useAuthStore } from 'src/stores/auth';
+import { useUnitStore } from 'src/stores/unit';
+import { api } from 'src/api';
 import { useQuasar } from 'quasar';
-import { config } from '../../config';
-import AvatarDisplay from '../../components/AvatarDisplay.vue';
+import { config } from 'src/config';
+import AvatarDisplay from 'src/components/AvatarDisplay.vue';
 
 const userStore = useUserStore();
 const authStore = useAuthStore();

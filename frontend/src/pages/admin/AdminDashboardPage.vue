@@ -60,15 +60,15 @@
                 </q-item-section>
               </q-item>
 
-              <q-item clickable v-ripple @click="$router.push('/admin/badges')" class="q-pa-md">
+              <q-item clickable v-ripple @click="$router.push('/admin/progress')" class="q-pa-md">
                 <q-item-section avatar>
                   <q-avatar size="48px" class="gradient-pink text-white">
                     <q-icon name="emoji_events" size="24px" />
                   </q-avatar>
                 </q-item-section>
                 <q-item-section>
-                  <q-item-label class="text-weight-medium">{{ $t('dashboard.quickActions.awardBadge') }}</q-item-label>
-                  <q-item-label caption>{{ $t('dashboard.quickActions.awardBadgeCaption') }}</q-item-label>
+                  <q-item-label class="text-weight-medium">{{ $t('dashboard.quickActions.manageProgress') }}</q-item-label>
+                  <q-item-label caption>{{ $t('dashboard.quickActions.manageProgressCaption') }}</q-item-label>
                 </q-item-section>
                 <q-item-section side>
                   <q-icon name="chevron_right" />
@@ -132,7 +132,7 @@
                 </q-item-section>
                 <q-item-section side>
                   <q-chip dense color="amber" text-color="white" icon="military_tech">
-                    {{ scout.badges?.length || 0 }}
+                    {{ getTotalDiplomas(scout) }}
                   </q-chip>
                 </q-item-section>
               </q-item>
@@ -143,12 +143,12 @@
 
       <!-- Right Column -->
       <div class="col-12 col-md-6">
-        <!-- Badge Distribution -->
+        <!-- Progress Distribution -->
         <q-card flat bordered class="q-mb-md">
           <q-card-section>
             <div class="text-h6 q-mb-md">
               <q-icon name="pie_chart" size="24px" class="q-mr-sm" />
-              {{ $t('dashboard.distribution.title') }}
+              {{ $t('dashboard.progress.title') }}
             </div>
 
             <div class="text-center q-mb-md">
@@ -163,7 +163,7 @@
               >
                 <div class="text-h4 text-weight-bold text-primary">{{ achievementPercentage }}%</div>
               </q-circular-progress>
-              <div class="text-caption">{{ $t('dashboard.distribution.awarded') }}</div>
+              <div class="text-caption">{{ $t('dashboard.progress.completion') }}</div>
             </div>
 
             <q-list dense>
@@ -172,10 +172,10 @@
                   <q-icon name="circle" color="primary" size="12px" />
                 </q-item-section>
                 <q-item-section>
-                  <q-item-label>{{ $t('dashboard.stats.totalBadges') }}</q-item-label>
+                  <q-item-label>{{ $t('dashboard.stats.totalDiplomas') }}</q-item-label>
                 </q-item-section>
                 <q-item-section side>
-                  <q-item-label class="text-weight-bold">{{ stats.totalBadges }}</q-item-label>
+                  <q-item-label class="text-weight-bold">{{ stats.totalDiplomas }}</q-item-label>
                 </q-item-section>
               </q-item>
 
@@ -184,22 +184,22 @@
                   <q-icon name="circle" color="pink" size="12px" />
                 </q-item-section>
                 <q-item-section>
-                  <q-item-label>{{ $t('dashboard.distribution.awarded') }}</q-item-label>
+                  <q-item-label>{{ $t('dashboard.stats.pathsCompleted') }}</q-item-label>
                 </q-item-section>
                 <q-item-section side>
-                  <q-item-label class="text-weight-bold">{{ stats.awardedBadges }}</q-item-label>
+                  <q-item-label class="text-weight-bold">{{ stats.pathsCompleted }}</q-item-label>
                 </q-item-section>
               </q-item>
 
               <q-item>
                 <q-item-section avatar>
-                  <q-icon name="circle" color="grey-5" size="12px" />
+                  <q-icon name="circle" color="green" size="12px" />
                 </q-item-section>
                 <q-item-section>
-                  <q-item-label>{{ $t('dashboard.distribution.available') }}</q-item-label>
+                  <q-item-label>{{ $t('dashboard.stats.peaksReached') }}</q-item-label>
                 </q-item-section>
                 <q-item-section side>
-                  <q-item-label class="text-weight-bold">{{ stats.totalBadges - stats.awardedBadges }}</q-item-label>
+                  <q-item-label class="text-weight-bold">{{ stats.peaksReached }}</q-item-label>
                 </q-item-section>
               </q-item>
             </q-list>
@@ -260,7 +260,7 @@
                     <q-item-section avatar>
                       <q-icon name="emoji_events" />
                     </q-item-section>
-                    <q-item-section>{{ $t('dashboard.locations.badgesCount', { count: location.badgeCount }) }}</q-item-section>
+                    <q-item-section>{{ $t('dashboard.locations.diplomasCount', { count: location.diplomaCount }) }}</q-item-section>
                   </q-item>
                 </q-list>
 
@@ -284,9 +284,9 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useAuthStore } from '../../stores/auth';
-import { api } from '../../api';
-import { getAvatarUrl } from '../../utils/avatar';
+import { useAuthStore } from 'src/stores/auth';
+import { api } from 'src/api';
+import { getAvatarUrl } from 'src/utils/avatar';
 
 const authStore = useAuthStore();
 const { t } = useI18n();
@@ -294,8 +294,9 @@ const { t } = useI18n();
 const stats = ref({
   userName: authStore.user?.username || 'Admin',
   totalUsers: 0,
-  totalBadges: 0,
-  awardedBadges: 0,
+  totalDiplomas: 0,
+  pathsCompleted: 0,
+  peaksReached: 0,
   activeLocations: 0
 });
 
@@ -303,8 +304,8 @@ const topScouts = ref([]);
 const locationStats = ref([]);
 const recentActivity = ref([
   { icon: 'person_add', text: 'New scout joined TT Megarwn', time: '2 hours ago' },
-  { icon: 'emoji_events', text: 'Badge awarded to user_eleysinas_5', time: '5 hours ago' },
-  { icon: 'military_tech', text: '12 scouts earned new badges', time: 'Yesterday' },
+  { icon: 'emoji_events', text: 'Diploma earned by user_eleysinas_5', time: '5 hours ago' },
+  { icon: 'military_tech', text: '12 scouts completed paths', time: 'Yesterday' },
   { icon: 'location_on', text: 'TT Salaminas updated', time: '2 days ago' },
 ]);
 
@@ -318,15 +319,15 @@ const mainStats = computed(() => [
   },
   {
     icon: 'workspace_premium',
-    label: t('dashboard.stats.totalBadges'),
-    value: stats.value.totalBadges,
+    label: t('dashboard.stats.totalDiplomas'),
+    value: stats.value.totalDiplomas,
     change: '+5%',
     trend: 'up'
   },
   {
     icon: 'emoji_events',
-    label: t('dashboard.stats.badgesAwarded'),
-    value: stats.value.awardedBadges,
+    label: t('dashboard.stats.pathsCompleted'),
+    value: stats.value.pathsCompleted,
     change: '+24%',
     trend: 'up'
   },
@@ -340,11 +341,18 @@ const mainStats = computed(() => [
 ]);
 
 const achievementPercentage = computed(() => {
-  if (!stats.value.totalBadges) return 0;
-  const totalPossible = stats.value.totalUsers * stats.value.totalBadges;
+  if (!stats.value.totalUsers) return 0;
+  const totalPossible = stats.value.totalUsers * 20; // Assume avg 20 diplomas available
   if (totalPossible === 0) return 0;
-  return Math.round((stats.value.awardedBadges / totalPossible) * 100);
+  return Math.round((stats.value.totalDiplomas / totalPossible) * 100);
 });
+
+const getTotalDiplomas = (user) => {
+  if (!user.progress) return 0;
+  const scoutCount = user.progress.scoutDiplomas?.length || 0;
+  const electiveCount = user.progress.electiveDiplomas?.length || 0;
+  return scoutCount + electiveCount;
+};
 
 const getActivityColor = (icon) => {
   const colorMap = {
@@ -363,34 +371,41 @@ const fetchDashboardData = async () => {
     const users = usersRes.data;
     stats.value.totalUsers = users.filter(u => u.role === 'user').length;
     
-    // Fetch badges
-    const badgesRes = await api.get('/badges');
-    stats.value.totalBadges = badgesRes.data.length;
+    // Calculate progress stats
+    stats.value.totalDiplomas = users.reduce((sum, user) => {
+      if (!user.progress) return sum;
+      const scoutCount = user.progress.scoutDiplomas?.length || 0;
+      const electiveCount = user.progress.electiveDiplomas?.length || 0;
+      return sum + scoutCount + electiveCount;
+    }, 0);
     
-    // Calculate awarded badges
-    stats.value.awardedBadges = users.reduce((sum, user) => sum + (user.badges?.length || 0), 0);
+    stats.value.pathsCompleted = users.reduce((sum, user) => {
+      return sum + (user.progress?.completedPaths?.length || 0);
+    }, 0);
+    
+    stats.value.peaksReached = users.filter(u => u.progress?.currentPeak).length;
     
     // Fetch locations
     const locationsRes = await api.get('/locations');
     const locations = locationsRes.data;
     stats.value.activeLocations = locations.length;
     
-    // Top scouts (users with most badges)
+    // Top scouts (users with most diplomas)
     topScouts.value = users
       .filter(u => u.role === 'user')
-      .sort((a, b) => (b.badges?.length || 0) - (a.badges?.length || 0))
+      .sort((a, b) => getTotalDiplomas(b) - getTotalDiplomas(a))
       .slice(0, 5);
     
     // Location stats
     locationStats.value = locations.map(loc => {
       const locationUsers = users.filter(u => u.location?.id === loc.id && u.role === 'user');
-      const locationBadges = locationUsers.reduce((sum, u) => sum + (u.badges?.length || 0), 0);
+      const locationDiplomas = locationUsers.reduce((sum, u) => sum + getTotalDiplomas(u), 0);
       return {
         id: loc.id,
         name: loc.name,
         userCount: locationUsers.length,
-        badgeCount: locationBadges,
-        progress: locationUsers.length > 0 ? Math.round((locationBadges / (locationUsers.length * stats.value.totalBadges)) * 100) : 0
+        diplomaCount: locationDiplomas,
+        progress: locationUsers.length > 0 ? Math.round((locationDiplomas / (locationUsers.length * 20)) * 100) : 0
       };
     });
   } catch (error) {

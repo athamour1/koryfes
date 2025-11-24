@@ -113,11 +113,11 @@ import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 const { t } = useI18n();
 const isLeader = computed(() => authStore.user?.unitRole === 'leader');
-import { useAuthStore } from '../stores/auth';
-import { useUnitStore } from '../stores/unit';
-import { api } from '../api';
+import { useAuthStore } from 'src/stores/auth';
+import { useUnitStore } from 'src/stores/unit';
+import { api } from 'src/api';
 import { useQuasar } from 'quasar';
-import { config } from '../config';
+import { config } from 'src/config';
 
 const $q = useQuasar();
 const authStore = useAuthStore();

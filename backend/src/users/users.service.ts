@@ -2,8 +2,6 @@ import { Injectable, ConflictException, InternalServerErrorException, OnModuleIn
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
 import { User, UserRole, UnitRole } from './entities/user.entity';
-import { UserBadge } from './entities/user-badge.entity';
-import { BadgesService } from '../badges/badges.service';
 import { LocationsService } from '../locations/locations.service';
 import * as bcrypt from 'bcrypt';
 
@@ -14,9 +12,6 @@ export class UsersService implements OnModuleInit {
     constructor(
         @InjectRepository(User)
         private usersRepository: Repository<User>,
-        @InjectRepository(UserBadge)
-        private userBadgeRepository: Repository<UserBadge>,
-        private badgesService: BadgesService,
         private locationsService: LocationsService,
     ) { }
 
@@ -50,7 +45,8 @@ export class UsersService implements OnModuleInit {
 
     async create(userData: Partial<User> & { locationName?: string }): Promise<any> {
         // Handle location lookup if provided as string name
-        let locationEntity = userData.location;
+        // Handle location lookup if provided as string name
+        let locationEntity = userData.location || null;
         if (userData.locationName) {
             // Find or create location
             let location = await this.locationsService.findByName(userData.locationName);
@@ -95,8 +91,6 @@ export class UsersService implements OnModuleInit {
         const user = await this.usersRepository.findOne({
             where: { username },
             relations: [
-                'userBadges',
-                'userBadges.badge',
                 'location',
                 'unit',
                 'progress',
@@ -106,15 +100,13 @@ export class UsersService implements OnModuleInit {
                 'progress.electiveDiplomas'
             ]
         });
-        return this.transformUser(user);
+        return user;
     }
 
     async findOne(id: number): Promise<User | undefined> {
         const user = await this.usersRepository.findOne({
             where: { id },
             relations: [
-                'userBadges',
-                'userBadges.badge',
                 'location',
                 'unit',
                 'progress',
@@ -124,7 +116,7 @@ export class UsersService implements OnModuleInit {
                 'progress.electiveDiplomas'
             ]
         });
-        return this.transformUser(user);
+        return user;
     }
 
     async findAll(locationId?: number, name?: string): Promise<User[]> {
@@ -138,8 +130,6 @@ export class UsersService implements OnModuleInit {
         const users = await this.usersRepository.find({
             where,
             relations: [
-                'userBadges',
-                'userBadges.badge',
                 'location',
                 'unit',
                 'progress',
@@ -149,49 +139,17 @@ export class UsersService implements OnModuleInit {
                 'progress.electiveDiplomas'
             ]
         });
-        return users.map(user => this.transformUser(user));
+        return users;
     }
 
     async getAllIncludingAdmins(): Promise<User[]> {
         const users = await this.usersRepository.find({
-            relations: ['userBadges', 'userBadges.badge', 'location']
+            relations: ['location']
         });
-        return users.map(user => this.transformUser(user));
+        return users;
     }
 
-    async assignBadge(userId: number, badgeId: number, acquiredAt?: Date): Promise<User> {
-        const user = await this.usersRepository.findOne({ where: { id: userId } });
-        const badge = await this.badgesService.findOne(badgeId);
 
-        // Check if already assigned
-        const existing = await this.userBadgeRepository.findOne({
-            where: { user: { id: userId }, badge: { id: badgeId } }
-        });
-
-        if (!existing) {
-            const userBadge = this.userBadgeRepository.create({
-                user,
-                badge,
-                acquiredAt: acquiredAt || new Date()
-            });
-            await this.userBadgeRepository.save(userBadge);
-        }
-
-        return this.findOne(userId);
-    }
-
-    async removeBadge(userId: number, badgeId: number): Promise<User> {
-        await this.userBadgeRepository.delete({ user: { id: userId }, badge: { id: badgeId } });
-        return this.findOne(userId);
-    }
-
-    async updateBadgeDate(userId: number, badgeId: number, date: Date): Promise<User> {
-        await this.userBadgeRepository.update(
-            { user: { id: userId }, badge: { id: badgeId } },
-            { acquiredAt: date }
-        );
-        return this.findOne(userId);
-    }
 
     async update(id: number, updateData: Partial<User> & { locationName?: string }): Promise<any> {
         if (updateData.locationName) {
@@ -266,23 +224,6 @@ export class UsersService implements OnModuleInit {
             }
         }
         return null;
-    }
-
-    // Helper to transform User entity to match frontend expectations (flattening userBadges to badges with acquiredAt)
-    private transformUser(user: User): any {
-        if (!user) return user;
-        const plainUser = { ...user };
-        if (plainUser.userBadges) {
-            plainUser['badges'] = plainUser.userBadges.map(ub => ({
-                ...ub.badge,
-                acquiredAt: ub.acquiredAt
-            }));
-            delete plainUser.userBadges;
-        }
-        if (plainUser.unit) {
-            plainUser['unitId'] = plainUser.unit.id;
-        }
-        return plainUser;
     }
 }
 
