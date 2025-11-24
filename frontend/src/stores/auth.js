@@ -3,8 +3,9 @@ import { api } from 'src/api';
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
-        user: null,
-        token: localStorage.getItem('token') || null,
+        user: JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user')) || null,
+        token: localStorage.getItem('token') || sessionStorage.getItem('token') || null,
+        expiresAt: localStorage.getItem('expiresAt') || sessionStorage.getItem('expiresAt') || null,
         isAdmin: false, // Legacy, keep for now or derive from role
     }),
     getters: {
@@ -14,13 +15,24 @@ export const useAuthStore = defineStore('auth', {
         isCaptain: (state) => state.user?.role === 'admin',
     },
     actions: {
-        async login(username, password) {
+        async login(username, password, rememberMe = false) {
             try {
-                const response = await api.post('/auth/login', { username, password });
+                const response = await api.post('/auth/login', { username, password, rememberMe });
                 this.token = response.data.access_token;
                 this.user = response.data.user;
+                this.expiresAt = response.data.expires_at;
                 this.isAdmin = response.data.user.isAdmin; // Legacy
-                localStorage.setItem('token', this.token);
+
+                if (rememberMe) {
+                    localStorage.setItem('token', this.token);
+                    localStorage.setItem('user', JSON.stringify(this.user));
+                    localStorage.setItem('expiresAt', this.expiresAt);
+                } else {
+                    sessionStorage.setItem('token', this.token);
+                    sessionStorage.setItem('user', JSON.stringify(this.user));
+                    sessionStorage.setItem('expiresAt', this.expiresAt);
+                }
+
                 return true;
             } catch (error) {
                 console.error('Login failed', error);
@@ -72,7 +84,25 @@ export const useAuthStore = defineStore('auth', {
             this.token = '';
             this.user = null;
             this.isAdmin = false;
+            this.expiresAt = null;
             localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('expiresAt');
+            sessionStorage.removeItem('token');
+            sessionStorage.removeItem('user');
+            sessionStorage.removeItem('expiresAt');
+        },
+        checkAuth() {
+            if (!this.token) return false;
+
+            if (this.expiresAt) {
+                const expirationDate = new Date(this.expiresAt);
+                if (new Date() > expirationDate) {
+                    this.logout();
+                    return false;
+                }
+            }
+            return true;
         },
     },
 });

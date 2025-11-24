@@ -31,6 +31,9 @@ export default defineRouter(function (/* { store, ssrContext } */) {
   Router.beforeEach(async (to, from, next) => {
     const authStore = useAuthStore();
 
+    // Check token expiration
+    authStore.checkAuth();
+
     // Check if route requires auth
     if (to.meta.requiresAuth) {
       // If no token, redirect to login

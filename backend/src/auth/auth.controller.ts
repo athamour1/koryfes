@@ -16,7 +16,7 @@ export class AuthController {
         if (!user) {
             throw new UnauthorizedException('Invalid credentials');
         }
-        return this.authService.login(user);
+        return this.authService.login(user, req.rememberMe);
     }
 
     @Post('register')

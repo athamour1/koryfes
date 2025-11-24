@@ -47,6 +47,9 @@
                 class="q-mb-md"
                 :rules="[val => !!val || $t('auth.form.rules.passwordRequired')]"
               />
+              <div class="row items-center q-mb-md">
+                <q-checkbox v-model="rememberMe" :label="$t('auth.login.rememberMe')" dark dense color="primary" />
+              </div>
               <q-btn 
                 :label="$t('auth.login.button')" 
                 type="submit" 
@@ -126,6 +129,7 @@ const { t } = useI18n();
 
 const tab = ref('login');
 const loginForm = ref({ username: '', password: '' });
+const rememberMe = ref(false);
 const registerForm = ref({ username: '', password: '', location: '' });
 const mouseX = ref(50);
 const mouseY = ref(50);
@@ -168,7 +172,7 @@ const passwordRules = computed(() => {
 
 const handleLogin = async () => {
   try {
-    const success = await authStore.login(loginForm.value.username, loginForm.value.password);
+    const success = await authStore.login(loginForm.value.username, loginForm.value.password, rememberMe.value);
     
     if (!success) {
       $q.notify({

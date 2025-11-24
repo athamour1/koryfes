@@ -19,7 +19,7 @@ export class AuthService {
         return null;
     }
 
-    async login(user: any) {
+    async login(user: any, rememberMe: boolean = false) {
         const payload = {
             username: user.username,
             sub: user.id,
@@ -28,8 +28,21 @@ export class AuthService {
             unitId: user.unit?.id,
             unitRole: user.unitRole
         };
+
+        const expiresIn = rememberMe ? '7d' : '60m';
+        const accessToken = this.jwtService.sign(payload, { expiresIn });
+
+        // Calculate absolute expiration time for frontend usage
+        const expirationDate = new Date();
+        if (rememberMe) {
+            expirationDate.setDate(expirationDate.getDate() + 7);
+        } else {
+            expirationDate.setMinutes(expirationDate.getMinutes() + 60);
+        }
+
         return {
-            access_token: this.jwtService.sign(payload),
+            access_token: accessToken,
+            expires_at: expirationDate.toISOString(),
             user: {
                 id: user.id,
                 username: user.username,

@@ -379,6 +379,7 @@
             "title": "Welcome Back",
             "subtitle": "Sign in to continue",
             "button": "Login",
+            "rememberMe": "Stay logged in",
             "success": "Login successful",
             "invalid": "Invalid username or password"
         },
