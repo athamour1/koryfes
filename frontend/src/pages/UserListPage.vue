@@ -32,76 +32,83 @@
     <!-- User Cards Grid -->
     <div class="container">
       <div class="cards-grid">
-        <div
+        <q-card
           v-for="user in filteredUsers"
           :key="user.id"
           class="user-card"
+          flat
+          bordered
         >
-          <div class="card-header" :key="`avatar-card header-${user.id}`">
-            <div class="user-avatar-wrapper shadow-2" :key="`avatar-div-${user.id}`">
-              <AvatarDisplay :config="user.avatarConfig" size="80px" :key="`avatar-${user.id}`" />
-            </div>
+          <!-- Card Header with Avatar and User Info -->
+          <q-card-section class="card-header">
+            <div style="display: flex; align-items: center; gap: 16px; width: 100%;">
+              <div class="user-avatar-wrapper shadow-2" :key="`avatar-div-${user.id}`" style="flex-shrink: 0;">
+                <AvatarDisplay :config="user.avatarConfig" size="80px" :key="`avatar-${user.id}`" />
+              </div>
 
-            <div class="user-info">
-              <h3 class="user-name">{{ user.username }}</h3>
-              <div class="user-location">
-                <q-icon name="place" size="16px" />
-                {{ user.location?.name || $t('userListPage.noLocation') }}
+              <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px;">
+                <h3 class="user-name" style="margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ user.username }}</h3>
+                <div class="user-location" style="display: flex; align-items: center; gap: 4px; font-size: 0.95rem; opacity: 0.7;">
+                  <q-icon name="place" size="16px" />
+                  {{ user.location?.name || $t('userListPage.noLocation') }}
+                </div>
               </div>
             </div>
-          </div>
+          </q-card-section>
 
-          <!-- Unit & Role Card -->
-          <div class="unit-role-card">
-            <div class="unit-section">
-              <div class="text-caption text-grey-7">{{ $t('userListPage.unitLabel') }}</div>
-              <div class="text-weight-bold">{{ user.unit?.name || '-' }}</div>
+          <!-- Unit & Role Section -->
+          <q-card-section class="q-pt-none">
+            <div style="display: flex; border: 1px solid rgba(0, 0, 0, 0.1); border-radius: 12px; overflow: hidden; background: rgba(0, 0, 0, 0.02);">
+              <div style="flex: 1; padding: 12px; text-align: center; display: flex; flex-direction: column; justify-content: center;">
+                <div class="text-caption text-grey-7">{{ $t('userListPage.unitLabel') }}</div>
+                <div class="text-weight-bold">{{ user.unit?.name || '-' }}</div>
+              </div>
+              <div style="width: 1px; background: rgba(0, 0, 0, 0.1);"></div>
+              <div style="flex: 1; padding: 12px; text-align: center; display: flex; flex-direction: column; justify-content: center;">
+                <div class="text-caption text-grey-7">{{ $t('userListPage.roleLabel') }}</div>
+                <div class="text-weight-bold">{{ formatUnitRole(user.unitRole) }}</div>
+              </div>
             </div>
-            <div class="unit-divider"></div>
-            <div class="role-section">
-              <div class="text-caption text-grey-7">{{ $t('userListPage.roleLabel') }}</div>
-              <div class="text-weight-bold">{{ formatUnitRole(user.unitRole) }}</div>
-            </div>
-          </div>
+          </q-card-section>
 
-          <q-separator class="card-separator" />
+          <q-separator />
 
           <!-- Progress Section -->
-          <div class="badges-section">
-            <h4 class="badges-title">
+          <q-card-section style="flex-grow: 1; display: flex; flex-direction: column;">
+            <h4 style="font-size: 1rem; font-weight: 600; margin: 0 0 16px; display: flex; align-items: center; gap: 8px;">
               <q-icon name="trending_up" size="18px" />
               {{ $t('progress.admin.currentPeak') || 'Current Peak' }}
             </h4>
 
-            <div v-if="user.progress?.currentPeak" class="row items-center q-gutter-md">
+            <div v-if="user.progress?.currentPeak" style="display: flex; align-items: center; gap: 16px;">
               <q-avatar size="50px" class="badge-avatar">
                 <img :src="`${config.apiUrl}${user.progress.currentPeak.image}`" style="object-fit: cover" />
               </q-avatar>
-              <div>
-                <div class="text-weight-bold text-subtitle1">{{ user.progress.currentPeak.name }}</div>
+              <div style="flex: 1; min-width: 0;">
+                <div class="text-weight-bold text-subtitle1" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ user.progress.currentPeak.name }}</div>
                 <div class="text-caption text-grey-7">{{ $t('progress.admin.peaks.' + user.progress.currentPeak.name.toLowerCase()) }}</div>
               </div>
             </div>
 
-            <div v-else class="no-badges">
+            <div v-else class="no-badges" style="text-align: center; padding: 20px; opacity: 0.5;">
               <q-icon name="landscape" size="40px" color="grey-5" />
-              <p>{{ $t('progress.admin.noPeak') || 'No Peak Earned Yet' }}</p>
+              <p style="margin: 8px 0 0; font-size: 0.95rem;">{{ $t('progress.admin.noPeak') || 'No Peak Earned Yet' }}</p>
             </div>
-          </div>
+          </q-card-section>
 
           <!-- View Profile Button -->
-          <div class="card-footer">
+          <q-card-actions style="padding: 12px 16px; border-top: 1px solid rgba(0, 0, 0, 0.05);">
             <q-btn
               flat
               dense
               color="primary"
               :label="$t('userListPage.viewProfile')"
               icon-right="arrow_forward"
-              class="view-profile-btn"
+              style="width: 100%; font-weight: 600;"
               @click="$router.push(`/user/${user.id}`)"
             />
-          </div>
-        </div>
+          </q-card-actions>
+        </q-card>
       </div>
 
       <!-- Empty State -->
@@ -240,15 +247,13 @@ body.body--dark .location-filter :deep(.q-field__control) {
 }
 
 .user-card {
-  border: 4px solid rgba(0, 0, 0, 0.1);
-  border-radius: 20px;
-  padding: 24px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  border-radius: 20px !important;
+  border-width: 4px !important;
 }
 
 .user-card::before {
@@ -265,7 +270,7 @@ body.body--dark .location-filter :deep(.q-field__control) {
 
 .user-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15) !important;
 }
 
 .user-card:hover::before {
@@ -274,10 +279,7 @@ body.body--dark .location-filter :deep(.q-field__control) {
 
 /* Card Header */
 .card-header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 20px;
+  padding: 16px !important;
 }
 
 .user-avatar-wrapper {
@@ -291,129 +293,13 @@ body.body--dark .location-filter :deep(.q-field__control) {
   justify-content: center;
 }
 
-.user-info {
-  flex: 1;
-}
-
 .user-name {
   font-size: 1.3rem;
   font-weight: 600;
-  margin: 0 0 4px;
 }
 
-.user-location {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  opacity: 0.7;
-  font-size: 0.95rem;
-}
 
-.user-unit {
-  display: none;
-}
-
-.unit-role-card {
-  display: flex;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 12px;
-  margin-bottom: 20px;
-  background: rgba(0, 0, 0, 0.02);
-  overflow: hidden;
-}
-
-body.body--dark .unit-role-card {
-  border-color: rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.unit-section,
-.role-section {
-  flex: 1;
-  padding: 12px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.unit-divider {
-  width: 1px;
-  background: rgba(0, 0, 0, 0.1);
-}
-
-body.body--dark .unit-divider {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-/* Stats Row */
-.stats-row {
-  display: flex;
-  justify-content: center;
-  padding: 0 0 16px;
-  margin-bottom: 16px;
-}
-
-.stat-item {
-  text-align: center;
-  flex: 1;
-}
-
-.stat-value {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--q-primary);
-  margin-bottom: 4px;
-}
-
-.stat-label {
-  font-size: 0.85rem;
-  opacity: 0.6;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.stat-divider {
-  width: 1px;
-  opacity: 0.1;
-  margin: 0 16px;
-}
-
-.card-separator {
-  margin: 0 -24px 20px;
-}
-
-/* Badges Section */
-.badges-section {
-  margin-bottom: 20px;
-  flex-grow: 1;
-}
-
-.badges-title {
-  font-size: 1rem;
-  font-weight: 600;
-  margin: 0 0 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.badges-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
-  gap: 12px;
-  justify-items: center;
-}
-
-.badge-item {
-  cursor: pointer;
-  transition: transform 0.2s;
-}
-
-.badge-item:hover {
-  transform: scale(1.1);
-}
-
+/* Badge Avatar */
 .badge-avatar {
   background: transparent;
   border: none;
@@ -431,65 +317,6 @@ body.body--dark .badge-avatar {
   border-radius: 8px;
 }
 
-.more-badges {
-  cursor: pointer;
-}
-
-.more-avatar {
-  background: linear-gradient(135deg, var(--q-primary) 0%, var(--q-secondary) 100%);
-  color: white;
-  font-weight: 700;
-  font-size: 0.9rem;
-}
-
-.more-count {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-}
-
-.no-badges {
-  text-align: center;
-  padding: 40px 20px;
-  opacity: 0.5;
-  padding: 20px;
-}
-
-.no-badges p {
-  margin: 8px 0 0;
-  font-size: 0.95rem;
-}
-
-/* Card Footer */
-.card-footer {
-  display: flex;
-  justify-content: center;
-  padding-top: 12px;
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-body.body--dark .card-footer {
-  border-top-color: rgba(255, 255, 255, 0.1);
-}
-
-.view-profile-btn {
-  width: 100%;
-  font-weight: 600;
-}
-
-/* Badge Tooltip */
-.badge-tooltip {
-  background: rgba(0, 0, 0, 0.9);
-  border-radius: 8px;
-  padding: 12px;
-  max-width: 200px;
-}
-
-.tooltip-content strong {
-  display: block;
-  margin-bottom: 4px;
-}
 
 /* Empty State */
 .empty-state {

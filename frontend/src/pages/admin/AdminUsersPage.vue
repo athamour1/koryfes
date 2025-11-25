@@ -114,8 +114,16 @@
 
       <template v-slot:body-cell-profileImage="props">
         <q-td :props="props">
-          <div class="avatar-wrapper">
+          <div class="avatar-wrapper" style="display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 40px; height: 40px;">
             <AvatarDisplay :config="props.row.avatarConfig" size="40px" :key="`avatar-${props.row.id}`" />
+          </div>
+        </q-td>
+      </template>
+      
+      <template v-slot:body-cell-username="props">
+        <q-td :props="props">
+          <div style="overflow: hidden; white-space: nowrap; font-size: 0.875rem;">
+            {{ props.row.username }}
           </div>
         </q-td>
       </template>
@@ -915,8 +923,8 @@ const $q = useQuasar();
 const { t } = useI18n();
 
 const columns = computed(() => [
-  { name: 'profileImage', label: '', field: 'profileImage', align: 'center', style: 'width: 50px' },
-  { name: 'username', label: t('adminUsers.columns.username'), field: 'username', sortable: true, align: 'left' },
+  { name: 'profileImage', label: '', field: 'profileImage', align: 'center', style: 'width: 60px; min-width: 60px; max-width: 60px;' },
+  { name: 'username', label: t('adminUsers.columns.username'), field: 'username', sortable: true, align: 'left', style: 'width: 40%;' },
   { name: 'role', label: t('adminUsers.columns.role'), field: 'role', sortable: true, align: 'center' },
   { name: 'location', label: t('adminUsers.columns.location'), field: row => row.location?.name || '-', sortable: true, align: 'left' },
   { name: 'unit', label: t('adminUsers.columns.unit'), field: row => row.unit?.name || '-', sortable: true, align: 'left' },
