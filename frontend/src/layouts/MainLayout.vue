@@ -152,7 +152,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useAuthStore } from 'src/stores/auth';
 import { useRouter, useRoute } from 'vue-router';
 import { useQuasar } from 'quasar';
@@ -170,6 +170,13 @@ const drawer = ref($q.screen.gt.sm);
 // Check if current route is login or register
 const isAuthPage = computed(() => {
   return route.path === '/login' || route.path === '/register' || route.path === '/';
+});
+
+// Watch for authentication changes and open drawer on login
+watch(() => authStore.isAuthenticated, (isAuthenticated) => {
+  if (isAuthenticated && !isAuthPage.value) {
+    drawer.value = true;
+  }
 });
 
 // Page Title Logic
