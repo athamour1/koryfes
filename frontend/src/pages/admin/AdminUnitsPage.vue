@@ -27,12 +27,12 @@
       :loading="loading"
     >
       <template v-slot:top-right>
-        <q-input borderless dense debounce="300" v-model="filter" :placeholder="$t('adminUnits.searchPlaceholder')">
+        <q-input borderless dense debounce="300" v-model="filter" :placeholder="$t('adminUnits.searchPlaceholder')" data-cy="search-input">
           <template v-slot:append>
             <q-icon name="search" />
           </template>
         </q-input>
-        <q-btn color="primary" icon="add" :label="$t('adminUnits.createButton')" class="q-ml-md" @click="openCreateDialog" />
+        <q-btn color="primary" icon="add" :label="$t('adminUnits.createButton')" class="q-ml-md" @click="openCreateDialog" data-cy="create-unit-btn" />
       </template>
 
       <template v-slot:body-cell-flag="props">
@@ -46,13 +46,14 @@
 
       <template v-slot:body-cell-actions="props">
         <q-td :props="props">
-          <q-btn flat dense color="primary" icon="edit" @click="openEditDialog(props.row)" />
+          <q-btn flat dense color="primary" icon="edit" @click="openEditDialog(props.row)" data-cy="edit-btn" />
           <q-btn 
             flat 
             dense 
             color="negative" 
             icon="delete" 
             @click="confirmDeleteUnit(props.row)" 
+            data-cy="delete-btn"
           />
         </q-td>
       </template>
@@ -103,7 +104,7 @@
               </div>
             </div>
 
-            <q-input filled v-model="unitForm.name" :label="$t('adminUnits.form.name')" :rules="[val => !!val || $t('adminUnits.form.required')]" />
+            <q-input filled v-model="unitForm.name" :label="$t('adminUnits.form.name')" :rules="[val => !!val || $t('adminUnits.form.required')]" data-cy="unit-name-input" />
             <q-input filled v-model="unitForm.description" :label="$t('adminUnits.form.description')" type="textarea" autogrow />
             
             <!-- Location Selection (Super Admin Only) -->
@@ -118,6 +119,7 @@
               map-options
               :label="$t('adminUnits.form.location')"
               :rules="[val => !!val || $t('adminUnits.form.locationRequired')]"
+              data-cy="location-select"
             >
               <template v-slot:prepend>
                 <q-icon name="location_on" />
@@ -126,7 +128,7 @@
 
             <div class="row justify-end q-gutter-sm">
               <q-btn :label="$t('general.cancel')" flat v-close-popup />
-              <q-btn :label="isEditing ? $t('general.save') : $t('general.create')" type="submit" color="primary" :loading="loading" />
+              <q-btn :label="isEditing ? $t('general.save') : $t('general.create')" type="submit" color="primary" :loading="loading" data-cy="save-unit-btn" />
             </div>
           </q-form>
         </q-card-section>

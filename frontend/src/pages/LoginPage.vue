@@ -36,6 +36,7 @@
                 dark
                 class="q-mb-md"
                 :rules="[val => !!val || $t('auth.form.rules.usernameRequired')]"
+                data-cy="username-input"
               />
               <q-input 
                 v-model="loginForm.password" 
@@ -46,6 +47,7 @@
                 dark
                 class="q-mb-md"
                 :rules="[val => !!val || $t('auth.form.rules.passwordRequired')]"
+                data-cy="password-input"
               />
               <div class="row items-center q-mb-md">
                 <q-checkbox v-model="rememberMe" :label="$t('auth.login.rememberMe')" dark dense color="primary" />
@@ -57,6 +59,7 @@
                 class="full-width" 
                 size="md"
                 unelevated
+                data-cy="login-btn"
               />
             </q-form>
           </q-card-section>

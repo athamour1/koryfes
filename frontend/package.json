@@ -1,43 +1,50 @@
 {
-  "name": "guide-badges-quasar",
-  "version": "0.0.1",
-  "description": "Track your guide progress and badges",
-  "productName": "Guide Badges",
-  "author": "Thanos Mourtzoukos <thanosmour.tk@gmail.com>",
-  "type": "module",
-  "private": true,
-  "scripts": {
-    "test": "echo \"No test specified\" && exit 0",
-    "dev": "quasar dev",
-    "build": "quasar build",
-    "postinstall": "quasar prepare"
-  },
-  "dependencies": {
-    "@quasar/extras": "^1.16.4",
-    "axios": "^1.13.2",
-    "pinia": "^3.0.4",
-    "quasar": "^2.16.0",
-    "register-service-worker": "^1.7.2",
-    "vue": "^3.5.22",
-    "vue-i18n": "^11.2.1",
-    "vue-router": "^4.0.0"
-  },
-  "devDependencies": {
-    "@quasar/app-vite": "^2.1.0",
-    "autoprefixer": "^10.4.2",
-    "postcss": "^8.4.14",
-    "vite-plugin-vue-devtools": "^8.0.5",
-    "workbox-build": "^7.4.0",
-    "workbox-cacheable-response": "^7.4.0",
-    "workbox-core": "^7.4.0",
-    "workbox-expiration": "^7.4.0",
-    "workbox-precaching": "^7.4.0",
-    "workbox-routing": "^7.4.0",
-    "workbox-strategies": "^7.4.0"
-  },
-  "engines": {
-    "node": "^28 || ^26 || ^24 || ^22 || ^20",
-    "npm": ">= 6.13.4",
-    "yarn": ">= 1.21.1"
-  }
+    "name": "guide-badges-quasar",
+    "version": "0.0.1",
+    "description": "Track your guide progress and badges",
+    "productName": "Guide Badges",
+    "author": "Thanos Mourtzoukos <thanosmour.tk@gmail.com>",
+    "type": "module",
+    "private": true,
+    "scripts": {
+        "test": "echo \"See package.json => scripts for available tests.\" && exit 0",
+        "dev": "quasar dev",
+        "build": "quasar build",
+        "postinstall": "quasar prepare",
+        "test:e2e": "cross-env NODE_ENV=test start-test \"quasar dev\" http-get://127.0.0.1:5173 \"cypress open --e2e\"",
+        "test:e2e:ci": "cross-env NODE_ENV=test start-test \"quasar dev\" http-get://127.0.0.1:5173 \"cypress run --e2e\"",
+        "test:component": "cross-env NODE_ENV=test cypress open --component",
+        "test:component:ci": "cross-env NODE_ENV=test cypress run --component"
+    },
+    "dependencies": {
+        "@quasar/extras": "^1.16.4",
+        "axios": "^1.13.2",
+        "pinia": "^3.0.4",
+        "quasar": "^2.16.0",
+        "register-service-worker": "^1.7.2",
+        "vue": "^3.5.22",
+        "vue-i18n": "^11.2.1",
+        "vue-router": "^4.0.0"
+    },
+    "devDependencies": {
+        "@quasar/app-vite": "^2.1.0",
+        "@quasar/quasar-app-extension-testing-e2e-cypress": "^6.2.1",
+        "autoprefixer": "^10.4.2",
+        "postcss": "^8.4.14",
+        "vite-plugin-vue-devtools": "^8.0.5",
+        "workbox-build": "^7.4.0",
+        "workbox-cacheable-response": "^7.4.0",
+        "workbox-core": "^7.4.0",
+        "workbox-expiration": "^7.4.0",
+        "workbox-precaching": "^7.4.0",
+        "workbox-routing": "^7.4.0",
+        "workbox-strategies": "^7.4.0",
+        "cypress": "^14.2.1",
+        "eslint-plugin-cypress": "^3.6.0"
+    },
+    "engines": {
+        "node": "^28 || ^26 || ^24 || ^22 || ^20",
+        "npm": ">= 6.13.4",
+        "yarn": ">= 1.21.1"
+    }
 }

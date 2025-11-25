@@ -37,20 +37,20 @@
       :width="250"
       :breakpoint="768"
       bordered
-      v-if="authStore.isAuthenticated"
+      v-if="authStore.isAuthenticated && !isAuthPage"
     >
       <q-list>
         <q-item-label header>{{ $t('navigation.header') }}</q-item-label>
 
         <template v-if="authStore.isAuthenticated">
-          <q-item clickable v-ripple to="/my-progress" v-if="!authStore.isAdmin">
+          <q-item clickable v-ripple to="/my-progress" v-if="!authStore.isAdmin" data-cy="nav-my-progress">
             <q-item-section avatar>
               <q-icon name="emoji_events" />
             </q-item-section>
             <q-item-section>{{ $t('navigation.myProgress') }}</q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple to="/users">
+          <q-item clickable v-ripple to="/users" data-cy="nav-users">
             <q-item-section avatar>
               <q-icon name="people" />
             </q-item-section>
@@ -62,6 +62,7 @@
             v-ripple 
             to="/my-unit" 
             v-if="authStore.user?.role === 'user' && authStore.user?.unitRole === 'leader'"
+            data-cy="nav-my-unit"
           >
             <q-item-section avatar>
               <q-icon name="groups" />
@@ -69,7 +70,7 @@
             <q-item-section>{{ $t('navigation.myUnit') }}</q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple to="/profile">
+          <q-item clickable v-ripple to="/profile" data-cy="nav-profile">
             <q-item-section avatar>
               <q-icon name="person" />
             </q-item-section>
@@ -81,14 +82,14 @@
             <q-separator class="q-my-md" />
             <q-item-label header>{{ $t('navigation.administration') }}</q-item-label>
 
-            <q-item clickable v-ripple to="/admin/dashboard">
+            <q-item clickable v-ripple to="/admin/dashboard" data-cy="nav-admin-dashboard">
               <q-item-section avatar>
                 <q-icon name="dashboard" />
               </q-item-section>
               <q-item-section>{{ $t('navigation.dashboard') }}</q-item-section>
             </q-item>
 
-            <q-item clickable v-ripple to="/admin/units">
+            <q-item clickable v-ripple to="/admin/units" data-cy="nav-admin-units">
               <q-item-section avatar>
                 <q-icon name="groups" />
               </q-item-section>
@@ -97,21 +98,21 @@
               </q-item-section>
             </q-item>
 
-            <q-item clickable v-ripple to="/admin/users">
+            <q-item clickable v-ripple to="/admin/users" data-cy="nav-admin-users">
               <q-item-section avatar>
                 <q-icon name="admin_panel_settings" />
               </q-item-section>
               <q-item-section>{{ $t('navigation.adminUsers') }}</q-item-section>
             </q-item>
 
-            <q-item clickable v-ripple to="/admin/progress" v-if="authStore.isSuperAdmin">
+            <q-item clickable v-ripple to="/admin/progress" v-if="authStore.isSuperAdmin" data-cy="nav-admin-progress">
               <q-item-section avatar>
                 <q-icon name="trending_up" />
               </q-item-section>
               <q-item-section>{{ $t('navigation.progress') }}</q-item-section>
             </q-item>
 
-            <q-item clickable v-ripple to="/admin/locations" v-if="authStore.isSuperAdmin">
+            <q-item clickable v-ripple to="/admin/locations" v-if="authStore.isSuperAdmin" data-cy="nav-admin-locations">
               <q-item-section avatar>
                 <q-icon name="location_on" />
               </q-item-section>
@@ -124,7 +125,7 @@
           <!-- User Info Header -->
           <q-item-label header class="text-weight-bold">{{ authStore.user?.username || 'User' }}</q-item-label>
 
-          <q-item clickable v-ripple @click="logout" class="text-negative">
+          <q-item clickable v-ripple @click="logout" class="text-negative" data-cy="nav-logout">
             <q-item-section avatar>
               <q-icon name="logout" color="negative" />
             </q-item-section>

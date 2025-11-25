@@ -16,11 +16,11 @@
         <!-- Stats Cards -->
         <div class="row q-col-gutter-md q-mt-lg">
           <div class="col-12 col-sm-6 col-md-3" v-for="(stat, index) in mainStats" :key="index">
-            <q-card flat class="text-white" style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px);">
+            <q-card flat class="text-white" style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px);" :data-cy="'stat-card-' + index">
               <q-card-section class="text-center">
                 <q-icon :name="stat.icon" size="48px" class="q-mb-sm" />
-                <div class="text-h3 text-weight-bold">{{ stat.value }}</div>
-                <div class="text-subtitle2">{{ stat.label }}</div>
+                <div class="text-h3 text-weight-bold" :data-cy="'stat-value-' + index">{{ stat.value }}</div>
+                <div class="text-subtitle2" :data-cy="'stat-label-' + index">{{ stat.label }}</div>
                 <q-chip dense :icon="stat.trend === 'up' ? 'trending_up' : 'trending_flat'" 
                         :color="stat.trend === 'up' ? 'positive' : 'grey'" 
                         text-color="white" size="sm" class="q-mt-sm">
@@ -45,7 +45,7 @@
               {{ $t('dashboard.quickActions.title') }}
             </div>
             <q-list separator>
-              <q-item clickable v-ripple @click="$router.push('/admin/users')" class="q-pa-md">
+              <q-item clickable v-ripple @click="$router.push('/admin/users')" class="q-pa-md" data-cy="quick-action-add-guide">
                 <q-item-section avatar>
                   <q-avatar size="48px" class="gradient-purple text-white">
                     <q-icon name="person_add" size="24px" />
@@ -60,7 +60,7 @@
                 </q-item-section>
               </q-item>
 
-              <q-item clickable v-ripple @click="$router.push('/admin/progress')" class="q-pa-md">
+              <q-item clickable v-ripple @click="$router.push('/admin/progress')" class="q-pa-md" data-cy="quick-action-manage-progress">
                 <q-item-section avatar>
                   <q-avatar size="48px" class="gradient-pink text-white">
                     <q-icon name="emoji_events" size="24px" />
@@ -75,7 +75,7 @@
                 </q-item-section>
               </q-item>
 
-              <q-item clickable v-ripple @click="$router.push('/admin/locations')" class="q-pa-md">
+              <q-item clickable v-ripple @click="$router.push('/admin/locations')" class="q-pa-md" data-cy="quick-action-manage-locations">
                 <q-item-section avatar>
                   <q-avatar size="48px" class="gradient-blue text-white">
                     <q-icon name="location_on" size="24px" />

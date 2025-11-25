@@ -28,9 +28,13 @@ api.interceptors.response.use(
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             localStorage.removeItem('expiresAt');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('refreshExpiresAt');
             sessionStorage.removeItem('token');
             sessionStorage.removeItem('user');
             sessionStorage.removeItem('expiresAt');
+            sessionStorage.removeItem('refreshToken');
+            sessionStorage.removeItem('refreshExpiresAt');
 
             // Redirect to login page
             // Using window.location to ensure a clean redirect

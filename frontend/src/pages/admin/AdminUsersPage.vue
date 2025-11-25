@@ -34,7 +34,7 @@
               
               <!-- Search -->
               <div class="col-12 col-sm-auto">
-                <q-input outlined dense debounce="300" v-model="filter" :placeholder="$t('adminUsers.searchPlaceholder')" class="search-input">
+                <q-input outlined dense debounce="300" v-model="filter" :placeholder="$t('adminUsers.searchPlaceholder')" class="search-input" data-cy="search-input">
                   <template v-slot:append>
                     <q-icon name="search" />
                   </template>
@@ -68,6 +68,7 @@
                   clearable
                   options-dense
                   class="filter-select"
+                  data-cy="location-filter"
                 />
               </div>
 
@@ -106,7 +107,7 @@
 
             <!-- Right side: Actions -->
             <div class="col-12 col-md-auto text-right q-mt-sm q-mt-md-none">
-              <q-btn color="primary" icon="add" :label="$t('adminUsers.actions.create')" @click="openCreateDialog" class="full-width-mobile" />
+              <q-btn color="primary" icon="add" :label="$t('adminUsers.actions.create')" @click="openCreateDialog" class="full-width-mobile" data-cy="create-user-btn" />
             </div>
           </div>
         </div>
@@ -166,8 +167,11 @@
       <template v-slot:body-cell-actions="props">
         <q-td :props="props">
           <div class="row justify-end no-wrap">
-            <q-btn flat dense round color="primary" icon="edit" @click="openEditDialog(props.row)">
+            <q-btn flat dense round color="primary" icon="edit" @click="openEditDialog(props.row)" data-cy="edit-btn">
               <q-tooltip>{{ $t('adminUsers.actions.edit') }}</q-tooltip>
+            </q-btn>
+            <q-btn flat dense round color="info" icon="visibility" :to="'/user/' + props.row.id" data-cy="view-profile-btn">
+              <q-tooltip>{{ $t('adminUsers.actions.viewProfile') }}</q-tooltip>
             </q-btn>
             <q-btn 
               flat 
@@ -205,8 +209,8 @@
         </q-card-section>
         <q-card-section>
           <q-form @submit="createUser" class="q-gutter-md">
-            <q-input filled v-model="newUser.username" :label="$t('adminUsers.form.username')" :rules="[val => !!val || $t('adminUsers.form.required')]" />
-            <q-input filled v-model="newUser.password" :label="$t('adminUsers.form.password')" type="password" :rules="[val => !!val || $t('adminUsers.form.required')]" />
+            <q-input filled v-model="newUser.username" :label="$t('adminUsers.form.username')" :rules="[val => !!val || $t('adminUsers.form.required')]" data-cy="username-input" />
+            <q-input filled v-model="newUser.password" :label="$t('adminUsers.form.password')" type="password" :rules="[val => !!val || $t('adminUsers.form.required')]" data-cy="password-input" />
             
             <!-- Role Selection (Super Admin only) -->
             <q-select
@@ -263,7 +267,7 @@
 
             <div class="row justify-end q-gutter-sm">
               <q-btn :label="$t('general.cancel')" flat v-close-popup />
-              <q-btn :label="$t('general.create')" type="submit" color="primary" />
+              <q-btn :label="$t('general.create')" type="submit" color="primary" data-cy="save-user-btn" />
             </div>
           </q-form>
         </q-card-section>

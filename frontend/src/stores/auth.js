@@ -94,11 +94,15 @@ export const useAuthStore = defineStore('auth', {
                 this.refreshToken = response.data.refresh_token; // Rotated token
                 this.refreshExpiresAt = response.data.refresh_expires_at;
 
-                // Update storage
-                localStorage.setItem('token', this.token);
-                localStorage.setItem('expiresAt', this.expiresAt);
-                localStorage.setItem('refreshToken', this.refreshToken);
-                localStorage.setItem('refreshExpiresAt', this.refreshExpiresAt);
+                // Update storage - use same storage type as original login
+                // Refresh tokens are always in localStorage, so if we have a refresh token, user chose rememberMe
+                const storage = localStorage.getItem('refreshToken') ? localStorage : sessionStorage;
+                storage.setItem('token', this.token);
+                storage.setItem('expiresAt', this.expiresAt);
+                if (storage === localStorage) {
+                    localStorage.setItem('refreshToken', this.refreshToken);
+                    localStorage.setItem('refreshExpiresAt', this.refreshExpiresAt);
+                }
 
                 // Schedule next refresh
                 this.scheduleTokenRefresh();
@@ -195,6 +199,8 @@ export const useAuthStore = defineStore('auth', {
             sessionStorage.removeItem('token');
             sessionStorage.removeItem('user');
             sessionStorage.removeItem('expiresAt');
+            sessionStorage.removeItem('refreshToken');
+            sessionStorage.removeItem('refreshExpiresAt');
         },
         checkAuth() {
             if (!this.token) return false;

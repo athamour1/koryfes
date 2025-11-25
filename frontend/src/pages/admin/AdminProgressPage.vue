@@ -23,10 +23,10 @@
           align="justify"
           narrow-indicator
         >
-          <q-tab name="peaks" icon="landscape" label="Peaks" />
-          <q-tab name="guideDiplomas" icon="school" label="Guide Diplomas" />
-          <q-tab name="electiveDiplomas" icon="stars" label="Elective Diplomas" />
-          <q-tab name="paths" icon="route" label="Paths" />
+          <q-tab name="peaks" icon="landscape" label="Peaks" data-cy="tab-peaks" />
+          <q-tab name="guideDiplomas" icon="school" label="Guide Diplomas" data-cy="tab-guide-diplomas" />
+          <q-tab name="electiveDiplomas" icon="stars" label="Elective Diplomas" data-cy="tab-elective-diplomas" />
+          <q-tab name="paths" icon="route" label="Paths" data-cy="tab-paths" />
         </q-tabs>
 
         <q-separator />
@@ -55,7 +55,7 @@
 
               <template v-slot:body-cell-actions="props">
                 <q-td :props="props">
-                  <q-btn flat dense color="primary" icon="edit" @click="openEditPeakDialog(props.row)" />
+                  <q-btn flat dense color="primary" icon="edit" @click="openEditPeakDialog(props.row)" data-cy="edit-peak-btn" />
                 </q-td>
               </template>
             </q-table>
@@ -84,7 +84,7 @@
 
               <template v-slot:body-cell-actions="props">
                 <q-td :props="props">
-                  <q-btn flat dense color="primary" icon="edit" @click="openEditGuideDiplomaDialog(props.row)" />
+                  <q-btn flat dense color="primary" icon="edit" @click="openEditGuideDiplomaDialog(props.row)" data-cy="edit-guide-diploma-btn" />
                 </q-td>
               </template>
             </q-table>
@@ -102,6 +102,7 @@
                 v-model="electiveDiplomaSearch" 
                 placeholder="Search diplomas..."
                 style="min-width: 250px"
+                data-cy="search-elective-diploma"
               >
                 <template v-slot:append>
                   <q-icon name="search" />
@@ -127,7 +128,7 @@
 
               <template v-slot:body-cell-actions="props">
                 <q-td :props="props">
-                  <q-btn flat dense color="primary" icon="edit" @click="openEditElectiveDiplomaDialog(props.row)" />
+                  <q-btn flat dense color="primary" icon="edit" @click="openEditElectiveDiplomaDialog(props.row)" data-cy="edit-elective-diploma-btn" />
                 </q-td>
               </template>
             </q-table>
@@ -145,6 +146,7 @@
                 v-model="pathSearch" 
                 placeholder="Search paths..."
                 style="min-width: 250px"
+                data-cy="search-path"
               >
                 <template v-slot:append>
                   <q-icon name="search" />
@@ -178,7 +180,7 @@
 
               <template v-slot:body-cell-actions="props">
                 <q-td :props="props">
-                  <q-btn flat dense color="primary" icon="edit" @click="openEditPathDialog(props.row)" />
+                  <q-btn flat dense color="primary" icon="edit" @click="openEditPathDialog(props.row)" data-cy="edit-path-btn" />
                 </q-td>
               </template>
             </q-table>
@@ -217,7 +219,7 @@
 
         <q-card-actions align="right">
           <q-btn flat label="Cancel" color="grey" v-close-popup />
-          <q-btn flat label="Save" color="primary" @click="submitPeak" />
+          <q-btn flat label="Save" color="primary" @click="submitPeak" data-cy="save-peak-btn" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -252,7 +254,7 @@
 
         <q-card-actions align="right">
           <q-btn flat label="Cancel" color="grey" v-close-popup />
-          <q-btn flat label="Save" color="primary" @click="submitGuideDiploma" />
+          <q-btn flat label="Save" color="primary" @click="submitGuideDiploma" data-cy="save-guide-diploma-btn" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -267,7 +269,7 @@
         <q-separator />
 
         <q-card-section class="q-gutter-md">
-          <q-input filled v-model="electiveDiplomaForm.name" label="Name *" :rules="[val => !!val || 'Name is required']" />
+          <q-input filled v-model="electiveDiplomaForm.name" label="Name *" :rules="[val => !!val || 'Name is required']" data-cy="elective-diploma-name-input" />
           
           <q-input filled v-model="electiveDiplomaForm.description" label="Description" type="textarea" rows="3" />
           
@@ -287,7 +289,7 @@
 
         <q-card-actions align="right">
           <q-btn flat label="Cancel" color="grey" v-close-popup />
-          <q-btn flat label="Save" color="primary" @click="submitElectiveDiploma" />
+          <q-btn flat label="Save" color="primary" @click="submitElectiveDiploma" data-cy="save-elective-diploma-btn" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -302,7 +304,7 @@
         <q-separator />
 
         <q-card-section class="q-gutter-md">
-          <q-input filled v-model="pathForm.name" label="Name *" :rules="[val => !!val || 'Name is required']" />
+          <q-input filled v-model="pathForm.name" label="Name *" :rules="[val => !!val || 'Name is required']" data-cy="path-name-input" />
           
           <q-select 
             filled 
@@ -320,7 +322,7 @@
 
         <q-card-actions align="right">
           <q-btn flat label="Cancel" color="grey" v-close-popup />
-          <q-btn flat label="Save" color="primary" @click="submitPath" />
+          <q-btn flat label="Save" color="primary" @click="submitPath" data-cy="save-path-btn" />
         </q-card-actions>
       </q-card>
     </q-dialog>

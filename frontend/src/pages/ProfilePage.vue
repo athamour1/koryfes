@@ -22,9 +22,47 @@
 
         <q-separator />
 
+        <!-- Profile Details Section -->
+        <q-card-section class="q-pa-lg">
+          <div class="row q-col-gutter-md">
+            <div class="col-12 col-md-6">
+              <q-input 
+                filled 
+                v-model="profileForm.firstName" 
+                :label="$t('profilePage.firstName')" 
+                :readonly="!isEditing"
+                data-cy="first-name-input"
+              />
+            </div>
+            <div class="col-12 col-md-6">
+              <q-input 
+                filled 
+                v-model="profileForm.lastName" 
+                :label="$t('profilePage.lastName')" 
+                :readonly="!isEditing"
+                data-cy="last-name-input"
+              />
+            </div>
+          </div>
+        </q-card-section>
+
+        <q-separator />
+
         <!-- Actions -->
         <q-card-actions class="q-pa-lg col-auto" align="right">
           <q-btn 
+            v-if="!isEditing"
+            :label="$t('profilePage.editButton')" 
+            color="secondary" 
+            unelevated
+            @click="isEditing = true"
+            icon="edit"
+            class="save-btn q-mr-sm"
+            size="md"
+            data-cy="edit-profile-btn"
+          />
+          <q-btn 
+            v-if="isEditing"
             :label="$t('profilePage.saveButton')" 
             color="primary" 
             unelevated
@@ -32,6 +70,7 @@
             icon="save"
             class="save-btn"
             size="md"
+            data-cy="save-profile-btn"
           />
         </q-card-actions>
       </q-card>
@@ -78,12 +117,21 @@ const defaultAvatarConfig = {
 };
 
 const avatarConfig = ref({});
+const profileForm = ref({
+  firstName: '',
+  lastName: ''
+});
+const isEditing = ref(false);
 
 onMounted(async () => {
   await authStore.fetchProfile();
   if (authStore.user) {
     // Merge saved config with defaults to ensure all properties exist
     avatarConfig.value = { ...defaultAvatarConfig, ...(authStore.user.avatarConfig || {}) };
+    profileForm.value = {
+      firstName: authStore.user.firstName || '',
+      lastName: authStore.user.lastName || ''
+    };
   } else {
     // Use defaults if no user
     avatarConfig.value = { ...defaultAvatarConfig };
@@ -92,7 +140,9 @@ onMounted(async () => {
 
 const updateProfile = async () => {
   const success = await userStore.updateProfile({ 
-    avatarConfig: avatarConfig.value
+    avatarConfig: avatarConfig.value,
+    firstName: profileForm.value.firstName,
+    lastName: profileForm.value.lastName
   });
   
   if (success) {
@@ -103,6 +153,7 @@ const updateProfile = async () => {
       position: 'top'
     });
     await authStore.fetchProfile();
+    isEditing.value = false;
   } else {
     $q.notify({ 
       color: 'negative', 

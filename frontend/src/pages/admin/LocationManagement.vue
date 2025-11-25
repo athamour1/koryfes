@@ -27,12 +27,12 @@
         >
           <template v-slot:top-right>
             <div class="row q-gutter-sm items-center">
-              <q-input outlined dense debounce="300" v-model="filter" :placeholder="$t('locationManagement.searchPlaceholder')">
+              <q-input outlined dense debounce="300" v-model="filter" :placeholder="$t('locationManagement.searchPlaceholder')" data-cy="search-input">
                 <template v-slot:append>
                   <q-icon name="search" />
                 </template>
               </q-input>
-              <q-btn color="primary" icon="add" :label="$t('locationManagement.addButton')" @click="showAddDialog = true" />
+              <q-btn color="primary" icon="add" :label="$t('locationManagement.addButton')" @click="showAddDialog = true" data-cy="create-location-btn" />
             </div>
           </template>
           <template v-slot:body-cell-id="props">
@@ -61,6 +61,7 @@
                 color="primary" 
                 icon="edit" 
                 @click="editLocation(props.row)"
+                data-cy="edit-btn"
               >
                 <q-tooltip>{{ $t('locationManagement.tooltips.edit') }}</q-tooltip>
               </q-btn>
@@ -71,6 +72,7 @@
                 color="negative" 
                 icon="delete" 
                 @click="confirmDelete(props.row)"
+                data-cy="delete-btn"
               >
                 <q-tooltip>{{ $t('locationManagement.tooltips.delete') }}</q-tooltip>
               </q-btn>
@@ -98,6 +100,7 @@
             autofocus 
             @keyup.enter="saveLocation"
             :rules="[val => !!val || $t('locationManagement.form.required')]"
+            data-cy="location-name-input"
           >
             <template v-slot:prepend>
               <q-icon name="place" />
@@ -113,6 +116,7 @@
             unelevated
             @click="saveLocation"
             icon="save"
+            data-cy="save-location-btn"
           />
         </q-card-actions>
       </q-card>
