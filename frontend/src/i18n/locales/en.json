@@ -229,6 +229,7 @@
         "title": "Profile Settings",
         "subtitle": "Manage your profile information",
         "saveButton": "Save Changes",
+        "nameEditNote": "Name and surname can only be edited by administrators from the User Management page.",
         "notifications": {
             "updateSuccess": "Profile updated",
             "updateError": "Update failed"

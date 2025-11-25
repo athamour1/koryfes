@@ -319,6 +319,10 @@
 
               <q-input filled v-model="editingUserData.username" :label="$t('adminUsers.form.username')" dense class="q-mb-sm" />
               
+              <q-input filled v-model="editingUserData.firstName" :label="$t('adminUsers.form.firstName')" dense class="q-mb-sm" />
+              
+              <q-input filled v-model="editingUserData.lastName" :label="$t('adminUsers.form.lastName')" dense class="q-mb-sm" />
+              
               <q-select
                 v-if="authStore.isSuperAdmin"
                 filled
