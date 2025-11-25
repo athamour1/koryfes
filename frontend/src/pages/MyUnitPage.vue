@@ -49,7 +49,7 @@
                   :rules="[val => !!val || $t('myUnit.descriptionRequired')]"
                 />
 
-                <div class="row justify-end">
+                <div v-if="isLeader" class="row justify-end">
                   <q-btn
                     :label="$t('general.save')"
                     type="submit"
@@ -104,7 +104,7 @@
           </q-card>
         </div>
 
-        <!-- Unit Members Card (Leaders Only) -->
+        <!-- Unit Members Card - Only for Leaders and Deputies -->
         <div v-if="isLeader" class="col-12">
           <q-card class="modern-card">
             <q-card-section>
@@ -187,7 +187,10 @@ const $q = useQuasar();
 const authStore = useAuthStore();
 const unitStore = useUnitStore();
 
-const isLeader = computed(() => authStore.user?.unitRole === 'leader');
+const isLeader = computed(() => {
+  const role = authStore.user?.unitRole;
+  return role === 'leader' || role === 'deputy_leader';
+});
 
 
 const loading = ref(true);
@@ -256,7 +259,7 @@ const loadUnit = async () => {
 };
 
 const loadUnitMembers = async () => {
-  if (!isLeader.value || !unit.value) return;
+  if (!unit.value) return;
   
   loadingMembers.value = true;
   try {
@@ -343,6 +346,7 @@ const viewMemberProgress = (member) => {
 
 onMounted(async () => {
   await loadUnit();
+  // Only load members if user is a leader or deputy
   if (isLeader.value) {
     await loadUnitMembers();
   }

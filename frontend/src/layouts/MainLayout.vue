@@ -57,13 +57,7 @@
             <q-item-section>{{ $t('navigation.users') }}</q-item-section>
           </q-item>
 
-          <q-item 
-            clickable 
-            v-ripple 
-            to="/my-unit" 
-            v-if="authStore.user?.role === 'user' && authStore.user?.unitRole === 'leader'"
-            data-cy="nav-my-unit"
-          >
+          <q-item clickable v-ripple to="/my-unit" v-if="authStore.user?.role === 'user' && authStore.user?.unit?.id" exact-active-class="active-link" active-class="active-link">
             <q-item-section avatar>
               <q-icon name="groups" />
             </q-item-section>

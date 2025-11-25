@@ -94,12 +94,12 @@ export default defineRouter(function (/* { store, ssrContext } */) {
       return;
     }
 
-    // Unit Leader check for My Unit page
+    // Unit Member check for My Unit page
     if (to.path === '/my-unit') {
-      if (authStore.user?.unitRole === 'leader') {
-        next();
+      if (authStore.user?.unit?.id) {
+        next(); // Allow all unit members
       } else {
-        next('/my-progress'); // Redirect non-leaders
+        next('/my-progress'); // Redirect users without a unit
       }
       return;
     }

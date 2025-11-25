@@ -5,6 +5,7 @@ import { extname } from 'path';
 import { UsersService } from './users.service';
 import { AuthGuard } from '@nestjs/passport';
 import { UserProgressService } from '../user-progress/user-progress.service';
+import { UnitRole } from './entities/user.entity';
 
 @Controller('users')
 export class UsersController {
@@ -191,12 +192,25 @@ export class UsersController {
     @UseGuards(AuthGuard('jwt'))
     @Get(':id/progress')
     async getUserProgress(@Param('id') id: string, @Request() req) {
-        // Only admins or the user themselves can view progress
-        if (req.user.userId !== +id && req.user.role !== 'admin' && req.user.role !== 'super_admin') {
-            throw new UnauthorizedException('Insufficient permissions');
+        const targetUserId = +id;
+        const requestingUser = await this.usersService.findOne(req.user.userId);
+        const targetUser = await this.usersService.findOne(targetUserId);
+
+        // Allow if:
+        // 1. User viewing their own progress
+        // 2. Admin or Super Admin
+        // 3. Unit leader/deputy viewing member of their unit
+        const isSelf = req.user.userId === targetUserId;
+        const isAdmin = req.user.role === 'admin' || req.user.role === 'super_admin';
+        const isUnitLeader = requestingUser?.unitRole === UnitRole.LEADER || requestingUser?.unitRole === UnitRole.DEPUTY_LEADER;
+        const sameUnit = requestingUser?.unit?.id && targetUser?.unit?.id &&
+            requestingUser.unit.id === targetUser.unit.id;
+
+        if (!isSelf && !isAdmin && !(isUnitLeader && sameUnit)) {
+            throw new UnauthorizedException('Insufficient permissions to view this user\'s progress');
         }
 
-        return this.userProgressService.getUserProgress(+id);
+        return this.userProgressService.getUserProgress(targetUserId);
     }
 
     @UseGuards(AuthGuard('jwt'))
