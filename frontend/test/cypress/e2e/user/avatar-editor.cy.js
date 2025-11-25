@@ -9,7 +9,7 @@ describe('Regular User - Avatar Editor', () => {
         cy.contains('Skin').should('be.visible');
         cy.contains('Eyes').should('be.visible');
         cy.contains('Hair').should('be.visible');
-        cy.contains('Clothing').should('be.visible');
+        // Note: Clothing option has been removed as all avatars now have white shirts
     });
 
     it('should change avatar appearance', () => {

@@ -105,7 +105,7 @@ const defaultAvatarConfig = {
   facialHair: 'none',
   hair: 'none',
   hairColor: 'white',
-  clothing: 'none',
+  clothing: 'shirt',
   clothingColor: 'white',
   clothingGraphic: 'none',
   accessory: 'none',

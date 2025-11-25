@@ -239,66 +239,6 @@
           </q-select>
         </div>
       </div>
-
-      <!-- 5. Outfit Category -->
-      <div class="category-card">
-        <div class="category-header">
-          <q-icon name="checkroom" size="24px" />
-          <span>{{ $t('avatar.outfit') }}</span>
-        </div>
-        <div class="options-grid">
-          <q-select
-            v-model="localConfig.clothing"
-            :options="getOptions('clothing')"
-            :label="$t('avatar.clothing')"
-            filled
-            dense
-            emit-value
-            map-options
-            @update:model-value="updateConfig"
-          >
-            <template v-slot:prepend>
-              <q-icon name="checkroom" />
-            </template>
-          </q-select>
-
-          <q-select
-            v-model="localConfig.clothingColor"
-            :options="getColorOptions('clothingColor')"
-            :label="$t('avatar.clothingColor')"
-            filled
-            dense
-            emit-value
-            map-options
-            @update:model-value="updateConfig"
-          >
-            <template v-slot:prepend>
-              <q-icon name="palette" />
-            </template>
-          </q-select>
-
-          <q-select
-            v-model="localConfig.scarfColor"
-            :options="getColorOptions('scarfColor')"
-            :label="$t('avatar.scarfColor')"
-            filled
-            dense
-            emit-value
-            map-options
-            @update:model-value="updateConfig"
-          >
-            <template v-slot:prepend>
-              <q-icon name="palette" />
-            </template>
-          </q-select>
-          
-          <div class="scarf-info full-width">
-            <q-icon name="info" size="20px" color="primary" />
-            <span class="text-caption text-grey-7">{{ $t('avatar.scarfInfo') }}</span>
-          </div>
-        </div>
-      </div>
-
     </div>
   </div>
 </template>
@@ -391,6 +331,7 @@ const randomize = () => {
   const newConfig = { ...localConfig.value }; // Start with current config to preserve body
   for (const [key, values] of Object.entries(availableOptions)) {
     if (key === 'body') continue; // Skip body/gender randomization
+    if (key === 'clothing' || key === 'clothingColor') continue; // Skip clothing randomization
     const randomIndex = Math.floor(Math.random() * values.length);
     newConfig[key] = values[randomIndex];
   }
@@ -398,6 +339,10 @@ const randomize = () => {
   newConfig['withLashes'] = Math.random() < 0.5;
   newConfig['faceMask'] = Math.random() < 0.3; // Less likely
   newConfig['mask'] = true; // Always show circle mask
+  
+  // Force white shirt as default
+  newConfig['clothing'] = 'shirt';
+  newConfig['clothingColor'] = 'white';
   
   localConfig.value = newConfig;
   updateConfig();
