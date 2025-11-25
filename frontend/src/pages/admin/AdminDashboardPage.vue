@@ -1,37 +1,28 @@
 <template>
   <q-page class="q-pa-md">
     <!-- Header Section -->
-    <q-card class="gradient-purple text-white q-mb-lg" flat>
-      <q-card-section class="q-pa-xl">
-        <div class="text-center welcome-section">
-          <div class="text-h3 text-weight-bold q-mb-sm">
-            <span class="wave">👋</span>
-            {{ $t('dashboard.welcome', { name: stats.userName }) }}
-          </div>
-          <div class="text-h6 text-weight-light" style="opacity: 0.9;">
-            {{ $t('dashboard.subtitle') }}
-          </div>
-        </div>
+    <PageHeader 
+      :title="$t('dashboard.welcome', { name: stats.userName })"
+      :subtitle="$t('dashboard.subtitle')"
+    />
 
-        <!-- Stats Cards -->
-        <div class="row q-col-gutter-md q-mt-lg">
-          <div class="col-12 col-sm-6 col-md-3" v-for="(stat, index) in mainStats" :key="index">
-            <q-card flat class="text-white" style="background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(10px);" :data-cy="'stat-card-' + index">
-              <q-card-section class="text-center">
-                <q-icon :name="stat.icon" size="48px" class="q-mb-sm" />
-                <div class="text-h3 text-weight-bold" :data-cy="'stat-value-' + index">{{ stat.value }}</div>
-                <div class="text-subtitle2" :data-cy="'stat-label-' + index">{{ stat.label }}</div>
-                <q-chip dense :icon="stat.trend === 'up' ? 'trending_up' : 'trending_flat'" 
-                        :color="stat.trend === 'up' ? 'positive' : 'grey'" 
-                        text-color="white" size="sm" class="q-mt-sm">
-                  {{ stat.change }}
-                </q-chip>
-              </q-card-section>
-            </q-card>
-          </div>
-        </div>
-      </q-card-section>
-    </q-card>
+    <!-- Stats Cards -->
+    <div class="row q-col-gutter-md q-mb-lg">
+      <div class="col-12 col-sm-6 col-md-3" v-for="(stat, index) in mainStats" :key="index">
+        <q-card flat bordered :data-cy="'stat-card-' + index">
+          <q-card-section class="text-center">
+            <q-icon :name="stat.icon" size="48px" class="q-mb-sm" color="primary" />
+            <div class="text-h3 text-weight-bold" :data-cy="'stat-value-' + index">{{ stat.value }}</div>
+            <div class="text-subtitle2" :data-cy="'stat-label-' + index">{{ stat.label }}</div>
+            <q-chip dense :icon="stat.trend === 'up' ? 'trending_up' : 'trending_flat'" 
+                    :color="stat.trend === 'up' ? 'positive' : 'grey'" 
+                    text-color="white" size="sm" class="q-mt-sm">
+              {{ stat.change }}
+            </q-chip>
+          </q-card-section>
+        </q-card>
+      </div>
+    </div>
 
     <!-- Main Content -->
     <div class="row q-col-gutter-md">
@@ -287,6 +278,7 @@ import { useI18n } from 'vue-i18n';
 import { useAuthStore } from 'src/stores/auth';
 import { api } from 'src/api';
 import { getAvatarUrl } from 'src/utils/avatar';
+import PageHeader from 'src/components/PageHeader.vue';
 
 const authStore = useAuthStore();
 const { t } = useI18n();
@@ -431,14 +423,5 @@ onMounted(() => {
   20% { transform: rotate(-8deg); }
   40% { transform: rotate(-4deg); }
   50% { transform: rotate(10deg); }
-}
-
-@media (max-width: 768px) {
-  .welcome-section {
-    display: none;
-  }
-  .q-card-section.q-pa-xl {
-    padding: 16px !important;
-  }
 }
 </style>

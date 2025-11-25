@@ -1,18 +1,14 @@
 <template>
   <q-page class="locations-page">
     <!-- Hero Header -->
-    <div class="q-pa-md hero-header-wrapper">
-      <div class="gradient-purple text-white q-pa-lg q-mb-lg" style="border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 1200px; margin: 0 auto;">
-        <div class="text-center" style="max-width: 800px; margin: 0 auto;">
-          <q-icon name="location_on" size="48px" class="q-mb-sm" />
-          <div class="text-h4 text-weight-bold q-mb-sm">{{ $t('locationManagement.title') }}</div>
-          <div class="text-body1" style="opacity: 0.9;">{{ $t('locationManagement.subtitle') }}</div>
-        </div>
-      </div>
-    </div>
+    <PageHeader 
+      icon="location_on"
+      :title="$t('locationManagement.title')"
+      :subtitle="$t('locationManagement.subtitle')"
+    />
 
     <!-- Content -->
-    <div class="q-pa-lg" style="max-width: 1200px; margin: 0 auto;">
+    <div class="q-pa-md" style="max-width: 1200px; margin: 0 auto;">
       <q-card flat bordered>
         <q-table
           :title="$t('locationManagement.tableTitle')"
@@ -129,6 +125,7 @@ import { ref, onMounted, reactive, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { api } from 'src/api';
 import { useQuasar } from 'quasar';
+import PageHeader from 'src/components/PageHeader.vue';
 
 const $q = useQuasar();
 const { t } = useI18n();
@@ -221,13 +218,5 @@ onMounted(fetchLocations);
   min-height: 100vh;
 }
 
-.hero-header-wrapper {
-  /* Default styles if needed */
-}
 
-@media (max-width: 768px) {
-  .hero-header-wrapper {
-    display: none;
-  }
-}
 </style>

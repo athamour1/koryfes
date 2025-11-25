@@ -1,15 +1,11 @@
 <template>
   <q-page class="profile-page column no-wrap" style="height: calc(100vh - 50px); overflow: hidden;">
     <!-- Hero Header -->
-    <div class="profile-header-wrapper col-auto">
-      <div class="gradient-purple text-white profile-header-content" style="border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 1400px; margin: 0 auto;">
-        <div class="text-center" style="max-width: 600px; margin: 0 auto;">
-          <q-icon name="person" size="48px" class="q-mb-sm" />
-          <div class="text-h4 text-weight-bold">{{ $t('profilePage.title') }}</div>
-          <div class="text-body1" style="opacity: 0.9;">{{ $t('profilePage.subtitle') }}</div>
-        </div>
-      </div>
-    </div>
+    <PageHeader 
+      icon="person"
+      :title="$t('profilePage.title')"
+      :subtitle="$t('profilePage.subtitle')"
+    />
 
     <!-- Profile Content -->
     <div class="profile-content-wrapper col column" style="max-width: 1200px; margin: 0 auto; width: 100%; overflow: hidden;">
@@ -85,6 +81,7 @@ import { useAuthStore } from 'src/stores/auth';
 import { useUserStore } from 'src/stores/user';
 import { useQuasar } from 'quasar';
 import AvatarEditor from 'src/components/AvatarEditor.vue';
+import PageHeader from 'src/components/PageHeader.vue';
 
 const authStore = useAuthStore();
 const userStore = useUserStore();
@@ -245,16 +242,8 @@ body.body--dark .avatar-section {
     width: 100%;
   }
 
-  .profile-header-wrapper {
-    display: none;
-  }
-
   .profile-content-wrapper {
     padding: 0 12px 12px 12px;
-  }
-  
-  .text-h4 {
-    font-size: 1.5rem;
   }
 }
 </style>

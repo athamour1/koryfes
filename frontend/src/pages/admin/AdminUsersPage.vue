@@ -1,18 +1,14 @@
 <template>
   <q-page class="users-page">
     <!-- Hero Header -->
-    <div class="q-pa-md hero-header-wrapper">
-      <div class="gradient-purple text-white q-pa-lg q-mb-lg" style="border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 1400px; margin: 0 auto;">
-        <div class="text-center" style="max-width: 800px; margin: 0 auto;">
-          <q-icon name="people" size="48px" class="q-mb-sm" />
-          <div class="text-h4 text-weight-bold q-mb-sm">{{ $t('adminUsers.title') }}</div>
-          <div class="text-body1" style="opacity: 0.9;">{{ $t('adminUsers.subtitle') }}</div>
-        </div>
-      </div>
-    </div>
+    <PageHeader 
+      icon="people"
+      :title="$t('adminUsers.title')"
+      :subtitle="$t('adminUsers.subtitle')"
+    />
 
     <!-- Content -->
-    <div class="q-pa-lg" style="max-width: 1400px; margin: 0 auto;">
+    <div class="q-pa-md" style="max-width: 1400px; margin: 0 auto;">
 
       <q-card flat bordered>
         <q-table
@@ -919,6 +915,7 @@ import { api } from 'src/api';
 import { useQuasar } from 'quasar';
 import { config } from 'src/config';
 import AvatarDisplay from 'src/components/AvatarDisplay.vue';
+import PageHeader from 'src/components/PageHeader.vue';
 
 const userStore = useUserStore();
 const authStore = useAuthStore();

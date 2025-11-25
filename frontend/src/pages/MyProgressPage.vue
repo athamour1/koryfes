@@ -1,38 +1,14 @@
 <template>
   <q-page class="user-profile-page">
     <!-- Hero Header -->
-    <div class="q-pa-md hero-header-wrapper">
-      <div class="gradient-purple text-white q-pa-lg q-mb-lg" style="border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 1400px; margin: 0 auto;">
-        <div class="profile-hero">
-          <div class="profile-avatar-wrapper shadow-10">
-            <AvatarDisplay :config="user?.avatarConfig" size="120px" />
-          </div>
-          
-          <div class="profile-info">
-            <h1 class="profile-name">{{ user?.username }}</h1>
-            <div class="text-subtitle1 text-grey-5 q-mb-md">
-              <q-icon name="place" size="sm" class="q-mr-xs" />
-              {{ user?.location?.name || $t('userProfilePage.noLocation') }}
-            </div>
-
-            <div class="unit-role-card-hero q-mt-md">
-              <div class="unit-section">
-                <div class="text-caption text-white-7">{{ $t('userListPage.unitLabel') || 'Unit' }}</div>
-                <div class="text-weight-bold">{{ user?.unit?.name || '-' }}</div>
-              </div>
-              <div class="unit-divider-hero"></div>
-              <div class="role-section">
-                <div class="text-caption text-white-7">{{ $t('userListPage.roleLabel') || 'Role' }}</div>
-                <div class="text-weight-bold">{{ formatUnitRole(user?.unitRole) }}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <PageHeader 
+      icon="insights"
+      :title="user?.username || 'My Progress'"
+      :subtitle="user?.location?.name || $t('userProfilePage.noLocation')"
+    />
 
     <!-- Progress Section -->
-    <div class="q-pa-lg" style="max-width: 1400px; margin: 0 auto;">
+    <div class="q-pa-md" style="max-width: 1400px; margin: 0 auto;">
       <q-card flat bordered>
           <div class="section-header">
             <h2>
@@ -140,6 +116,7 @@ import { useUserStore } from 'src/stores/user';
 import { config } from 'src/config';
 import { date } from 'quasar';
 import AvatarDisplay from 'src/components/AvatarDisplay.vue';
+import PageHeader from 'src/components/PageHeader.vue';
 
 const authStore = useAuthStore();
 const userStore = useUserStore();
@@ -379,19 +356,6 @@ body.body--dark .diploma-name {
 
 /* Responsive */
 @media (max-width: 768px) {
-  .hero-header-wrapper {
-    display: none;
-  }
-
-  .profile-hero {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .profile-name {
-    font-size: 2rem;
-  }
-
   .diplomas-grid {
     justify-content: center;
   }

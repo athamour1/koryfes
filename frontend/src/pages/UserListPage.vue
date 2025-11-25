@@ -1,13 +1,14 @@
 <template>
   <q-page class="social-feed-page">
     <!-- Header Section -->
-    <div class="feed-header">
-      <div class="container">
-        <h1 class="feed-title">{{ $t('userListPage.title') }}</h1>
-        <p class="feed-subtitle">{{ $t('userListPage.subtitle') }}</p>
-
+    <PageHeader 
+      icon="people"
+      :title="$t('userListPage.title')"
+      :subtitle="$t('userListPage.subtitle')"
+    >
+      <template #extra>
         <!-- Search Bar -->
-        <div class="search-section">
+        <div class="search-section q-mt-md">
           <q-input
             v-model="filterName"
             outlined
@@ -15,6 +16,8 @@
             :placeholder="$t('userListPage.searchPlaceholder')"
             class="search-input"
             @update:model-value="fetchUsers"
+            dark
+            dense
           >
             <template v-slot:prepend>
               <q-icon name="search" />
@@ -23,11 +26,9 @@
               <q-icon name="close" class="cursor-pointer" @click="filterName = ''; fetchUsers()" />
             </template>
           </q-input>
-
-
         </div>
-      </div>
-    </div>
+      </template>
+    </PageHeader>
 
     <!-- User Cards Grid -->
     <div class="container">
@@ -128,6 +129,7 @@ import { useUserStore } from 'src/stores/user';
 import { useAuthStore } from 'src/stores/auth';
 import { config } from 'src/config';
 import AvatarDisplay from 'src/components/AvatarDisplay.vue';
+import PageHeader from 'src/components/PageHeader.vue';
 
 const userStore = useUserStore();
 const authStore = useAuthStore();
@@ -185,57 +187,24 @@ onMounted(async () => {
   padding: 0 20px;
 }
 
-/* Header */
-.feed-header {
-  background: linear-gradient(135deg, var(--q-primary) 0%, var(--q-secondary) 100%);
-  padding: 60px 20px 80px;
-  margin-bottom: -40px;
-  position: relative;
-  border-radius: 24px;
-}
-
-.feed-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: white;
-  margin: 0 0 8px;
-  text-align: center;
-}
-
-.feed-subtitle {
-  font-size: 1.1rem;
-  color: rgba(255, 255, 255, 0.9);
-  margin: 0 0 40px;
-  text-align: center;
-}
-
+/* Search section within header */
 .search-section {
   display: flex;
   gap: 16px;
-  max-width: 800px;
+  max-width: 600px;
   margin: 0 auto;
   flex-wrap: wrap;
 }
 
 .search-input {
-  flex: 2;
+  flex: 1;
   min-width: 250px;
 }
 
-.location-filter {
-  flex: 1;
-  min-width: 200px;
-}
-
-.search-input :deep(.q-field__control),
-.location-filter :deep(.q-field__control) {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  background: white;
-}
-
-body.body--dark .search-input :deep(.q-field__control),
-body.body--dark .location-filter :deep(.q-field__control) {
-  background: var(--q-dark);
+.search-input :deep(.q-field__control) {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
 }
 
 /* Cards Grid */
@@ -243,7 +212,7 @@ body.body--dark .location-filter :deep(.q-field__control) {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 24px;
-  margin-top: 60px;
+  margin-top: 20px;
 }
 
 .user-card {
@@ -335,29 +304,17 @@ body.body--dark .badge-avatar {
 
 /* Responsive */
 @media (max-width: 768px) {
-  .feed-title,
-  .feed-subtitle {
-    display: none;
-  }
-
-  .feed-header {
-    padding: 20px 20px 40px;
-    margin-bottom: 0;
-  }
-
   .search-section {
     flex-direction: column;
   }
 
-  .search-input,
-  .location-filter {
+  .search-input {
     width: 100%;
   }
 
   .cards-grid {
     grid-template-columns: 1fr;
     gap: 16px;
-    margin-top: 20px;
   }
 
   .user-card {

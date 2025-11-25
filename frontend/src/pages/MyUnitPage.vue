@@ -1,20 +1,11 @@
 <template>
   <q-page class="q-pa-md admin-page">
     <!-- Hero Section -->
-    <div class="page-hero">
-      <div class="page-hero-background"></div>
-      <div class="page-hero-content">
-        <div class="row items-center justify-center">
-          <div>
-            <h1 class="page-title text-center">
-              <q-icon name="groups" />
-              {{ $t('myUnit.title') }}
-            </h1>
-            <div class="page-subtitle">{{ $t('myUnit.subtitle') }}</div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <PageHeader 
+      icon="groups"
+      :title="$t('myUnit.title')"
+      :subtitle="$t('myUnit.subtitle')"
+    />
 
     <div class="page-content">
       <div v-if="loading" class="row justify-center q-pa-xl">
@@ -180,6 +171,7 @@ import { useUnitStore } from 'src/stores/unit';
 import { api } from 'src/api';
 import { useQuasar } from 'quasar';
 import { config } from 'src/config';
+import PageHeader from 'src/components/PageHeader.vue';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -356,14 +348,4 @@ onMounted(async () => {
 <style scoped>
 /* Reuse global admin styles */
 @import '../css/admin-pages.css';
-.page-hero {
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-@media (max-width: 768px) {
-  .page-hero {
-    display: none;
-  }
-}
 </style>

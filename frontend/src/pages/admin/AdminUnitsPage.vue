@@ -1,18 +1,14 @@
 <template>
   <q-page class="units-page">
     <!-- Hero Header -->
-    <div class="q-pa-md hero-header-wrapper">
-      <div class="gradient-purple text-white q-pa-lg q-mb-lg" style="border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 1200px; margin: 0 auto;">
-        <div class="text-center" style="max-width: 800px; margin: 0 auto;">
-          <q-icon name="groups" size="48px" class="q-mb-sm" />
-          <div class="text-h4 text-weight-bold q-mb-sm">{{ $t('adminUnits.title') }}</div>
-          <div class="text-body1" style="opacity: 0.9;">{{ $t('adminUnits.subtitle') }}</div>
-        </div>
-      </div>
-    </div>
+    <PageHeader 
+      icon="groups"
+      :title="$t('adminUnits.title')"
+      :subtitle="$t('adminUnits.subtitle')"
+    />
 
     <!-- Content -->
-    <div class="q-pa-lg" style="max-width: 1200px; margin: 0 auto;">
+    <div class="q-pa-md" style="max-width: 1200px; margin: 0 auto;">
 
       <q-card flat bordered>
         <q-table
@@ -145,6 +141,7 @@ import { useAuthStore } from 'src/stores/auth';
 import { useQuasar } from 'quasar';
 import { config } from 'src/config';
 import { api } from 'src/api';
+import PageHeader from 'src/components/PageHeader.vue';
 
 const unitStore = useUnitStore();
 const authStore = useAuthStore();
@@ -269,9 +266,4 @@ const confirmDeleteUnit = (unit) => {
 </script>
 
 <style scoped>
-@media (max-width: 768px) {
-  .hero-header-wrapper {
-    display: none;
-  }
-}
 </style>
