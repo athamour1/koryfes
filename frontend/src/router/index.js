@@ -34,6 +34,19 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     // Check token expiration before any navigation
     const isAuthValid = authStore.checkAuth();
 
+    // Redirect authenticated users away from login/register pages
+    const authPages = ['/login', '/register', '/'];
+    if (authPages.includes(to.path) && authStore.token && isAuthValid) {
+      // User is authenticated and trying to access login/register
+      // Redirect to appropriate page based on role
+      if (authStore.isAdmin) {
+        next('/admin/dashboard');
+      } else {
+        next('/my-progress');
+      }
+      return;
+    }
+
     // If checkAuth determined token is expired, it already called logout
     // In this case, redirect to login if not already going there
     if (!isAuthValid && to.meta.requiresAuth && to.path !== '/login') {

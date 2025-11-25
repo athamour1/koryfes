@@ -3,10 +3,10 @@ import { api } from 'src/api';
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
-        user: JSON.parse(localStorage.getItem('user') || sessionStorage.getItem('user')) || null,
-        token: localStorage.getItem('token') || sessionStorage.getItem('token') || null,
+        user: JSON.parse(localStorage.getItem('user')) || null,
+        token: localStorage.getItem('token') || null,
         refreshToken: localStorage.getItem('refreshToken') || null,
-        expiresAt: localStorage.getItem('expiresAt') || sessionStorage.getItem('expiresAt') || null,
+        expiresAt: localStorage.getItem('expiresAt') || null,
         refreshExpiresAt: localStorage.getItem('refreshExpiresAt') || null,
         isAdmin: false, // Legacy, keep for now or derive from role
         refreshTimer: null, // Timer for automatic token refresh
@@ -28,12 +28,14 @@ export const useAuthStore = defineStore('auth', {
                 this.expiresAt = response.data.expires_at;
                 this.isAdmin = response.data.user.isAdmin; // Legacy
 
-                const storage = rememberMe ? localStorage : sessionStorage;
-                storage.setItem('token', this.token);
-                storage.setItem('user', JSON.stringify(this.user));
-                storage.setItem('expiresAt', this.expiresAt);
+                // Always store access token in localStorage for cross-tab support
+                // Whether rememberMe is true or false, users can use multiple tabs
+                // The difference is whether we store refresh token (for auto-renewal)
+                localStorage.setItem('token', this.token);
+                localStorage.setItem('user', JSON.stringify(this.user));
+                localStorage.setItem('expiresAt', this.expiresAt);
 
-                // Store refresh token if remember me is enabled
+                // Store refresh token ONLY if remember me is enabled
                 if (rememberMe && response.data.refresh_token) {
                     this.refreshToken = response.data.refresh_token;
                     this.refreshExpiresAt = response.data.refresh_expires_at;
@@ -42,6 +44,12 @@ export const useAuthStore = defineStore('auth', {
 
                     // Start automatic token refresh
                     this.scheduleTokenRefresh();
+                } else {
+                    // If not remembering, ensure no refresh token is stored
+                    this.refreshToken = null;
+                    this.refreshExpiresAt = null;
+                    localStorage.removeItem('refreshToken');
+                    localStorage.removeItem('refreshExpiresAt');
                 }
 
                 return true;
@@ -94,15 +102,11 @@ export const useAuthStore = defineStore('auth', {
                 this.refreshToken = response.data.refresh_token; // Rotated token
                 this.refreshExpiresAt = response.data.refresh_expires_at;
 
-                // Update storage - use same storage type as original login
-                // Refresh tokens are always in localStorage, so if we have a refresh token, user chose rememberMe
-                const storage = localStorage.getItem('refreshToken') ? localStorage : sessionStorage;
-                storage.setItem('token', this.token);
-                storage.setItem('expiresAt', this.expiresAt);
-                if (storage === localStorage) {
-                    localStorage.setItem('refreshToken', this.refreshToken);
-                    localStorage.setItem('refreshExpiresAt', this.refreshExpiresAt);
-                }
+                // Update localStorage
+                localStorage.setItem('token', this.token);
+                localStorage.setItem('expiresAt', this.expiresAt);
+                localStorage.setItem('refreshToken', this.refreshToken);
+                localStorage.setItem('refreshExpiresAt', this.refreshExpiresAt);
 
                 // Schedule next refresh
                 this.scheduleTokenRefresh();
@@ -154,8 +158,7 @@ export const useAuthStore = defineStore('auth', {
                 this.isAdmin = response.data.isAdmin;
 
                 // Update storage with fresh user data
-                const storage = localStorage.getItem('token') ? localStorage : sessionStorage;
-                storage.setItem('user', JSON.stringify(this.user));
+                localStorage.setItem('user', JSON.stringify(this.user));
             } catch (error) {
                 console.error('Fetch profile failed', error);
                 // Only logout if it's an auth error (401)
@@ -190,17 +193,12 @@ export const useAuthStore = defineStore('auth', {
             this.refreshToken = null;
             this.refreshExpiresAt = null;
 
-            // Clear storage
+            // Clear localStorage
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             localStorage.removeItem('expiresAt');
             localStorage.removeItem('refreshToken');
             localStorage.removeItem('refreshExpiresAt');
-            sessionStorage.removeItem('token');
-            sessionStorage.removeItem('user');
-            sessionStorage.removeItem('expiresAt');
-            sessionStorage.removeItem('refreshToken');
-            sessionStorage.removeItem('refreshExpiresAt');
         },
         checkAuth() {
             if (!this.token) return false;

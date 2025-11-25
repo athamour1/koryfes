@@ -8,7 +8,7 @@ export const api = axios.create({
 
 // Request interceptor - Add JWT token to requests
 api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const token = localStorage.getItem('token');
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }
@@ -24,17 +24,12 @@ api.interceptors.response.use(
     (error) => {
         // Handle 401 Unauthorized errors
         if (error.response && error.response.status === 401) {
-            // Clear all auth data
+            // Clear all auth data from localStorage
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             localStorage.removeItem('expiresAt');
             localStorage.removeItem('refreshToken');
             localStorage.removeItem('refreshExpiresAt');
-            sessionStorage.removeItem('token');
-            sessionStorage.removeItem('user');
-            sessionStorage.removeItem('expiresAt');
-            sessionStorage.removeItem('refreshToken');
-            sessionStorage.removeItem('refreshExpiresAt');
 
             // Redirect to login page
             // Using window.location to ensure a clean redirect
