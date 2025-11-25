@@ -56,11 +56,13 @@ export class UsersService implements OnModuleInit {
             locationEntity = location;
         }
 
-        const hashedPassword = await bcrypt.hash(userData.password, 10);
+        // Hash password if provided and not already hashed
+        if (userData.password && !userData.password.startsWith('$2b$')) {
+            userData.password = await bcrypt.hash(userData.password, 10);
+        }
 
         const user = this.usersRepository.create({
             ...userData,
-            password: hashedPassword,
             location: locationEntity,
             role: userData.role || UserRole.USER,
             isAdmin: userData.role === UserRole.SUPER_ADMIN || userData.role === UserRole.ADMIN,

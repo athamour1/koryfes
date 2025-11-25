@@ -119,7 +119,7 @@ provide('theme', {
     <g
       :mask="mask ? 'url(#mask)' : undefined"
     >
-      <BgCircle v-if="mask" />
+      <!-- <BgCircle v-if="mask" /> -->
 
       <Hat 
         position="back" 

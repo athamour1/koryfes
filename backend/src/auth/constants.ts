@@ -1,3 +1,3 @@
 export class jwtConstants {
-    static secret = 'secretKey'; // In production, use environment variable
+    static secret = process.env.JWT_SECRET || 'secretKey-dev-only-change-in-production';
 }

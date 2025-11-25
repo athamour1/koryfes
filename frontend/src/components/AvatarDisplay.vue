@@ -1,5 +1,5 @@
 <template>
-  <div class="avatar-display" :style="{ width: size }">
+  <div class="avatar-display" :style="{ width: size, height: size }">
     <Avatar v-bind="avatarConfig" />
   </div>
 </template>

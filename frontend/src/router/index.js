@@ -31,8 +31,15 @@ export default defineRouter(function (/* { store, ssrContext } */) {
   Router.beforeEach(async (to, from, next) => {
     const authStore = useAuthStore();
 
-    // Check token expiration
-    authStore.checkAuth();
+    // Check token expiration before any navigation
+    const isAuthValid = authStore.checkAuth();
+
+    // If checkAuth determined token is expired, it already called logout
+    // In this case, redirect to login if not already going there
+    if (!isAuthValid && to.meta.requiresAuth && to.path !== '/login') {
+      next('/login');
+      return;
+    }
 
     // Check if route requires auth
     if (to.meta.requiresAuth) {
@@ -47,7 +54,8 @@ export default defineRouter(function (/* { store, ssrContext } */) {
         try {
           await authStore.fetchProfile();
         } catch (error) {
-          // If fetching profile fails (e.g. invalid token), redirect to login
+          // If fetching profile fails, the 401 interceptor will handle logout
+          // Just redirect to login here
           next('/login');
           return;
         }

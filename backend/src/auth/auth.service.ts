@@ -1,13 +1,19 @@
 import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, LessThan } from 'typeorm';
+import { RefreshToken } from './entities/refresh-token.entity';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class AuthService {
     constructor(
         private usersService: UsersService,
         private jwtService: JwtService,
+        @InjectRepository(RefreshToken)
+        private refreshTokenRepository: Repository<RefreshToken>,
     ) { }
 
     async validateUser(username: string, pass: string): Promise<any> {
@@ -17,6 +23,10 @@ export class AuthService {
             return result;
         }
         return null;
+    }
+
+    private generateRefreshToken(): string {
+        return crypto.randomBytes(64).toString('hex');
     }
 
     async login(user: any, rememberMe: boolean = false) {
@@ -29,18 +39,14 @@ export class AuthService {
             unitRole: user.unitRole
         };
 
-        const expiresIn = rememberMe ? '7d' : '60m';
-        const accessToken = this.jwtService.sign(payload, { expiresIn });
+        // Access token: short-lived (15 minutes)
+        const accessToken = this.jwtService.sign(payload);
 
-        // Calculate absolute expiration time for frontend usage
+        // Calculate access token expiration
         const expirationDate = new Date();
-        if (rememberMe) {
-            expirationDate.setDate(expirationDate.getDate() + 7);
-        } else {
-            expirationDate.setMinutes(expirationDate.getMinutes() + 60);
-        }
+        expirationDate.setMinutes(expirationDate.getMinutes() + 15);
 
-        return {
+        const response: any = {
             access_token: accessToken,
             expires_at: expirationDate.toISOString(),
             user: {
@@ -48,11 +54,101 @@ export class AuthService {
                 username: user.username,
                 location: user.location,
                 role: user.role,
-                isAdmin: user.isAdmin, // Keep for legacy frontend compat if needed
+                isAdmin: user.isAdmin,
                 unitId: user.unit?.id,
                 unitRole: user.unitRole
             }
         };
+
+        // Only generate refresh token if user wants to stay logged in
+        if (rememberMe) {
+            const refreshToken = this.generateRefreshToken();
+            const refreshExpiresAt = new Date();
+            refreshExpiresAt.setDate(refreshExpiresAt.getDate() + 30); // 30 days
+
+            // Store refresh token in database
+            await this.refreshTokenRepository.save({
+                token: refreshToken,
+                user: { id: user.id },
+                expiresAt: refreshExpiresAt,
+            });
+
+            response.refresh_token = refreshToken;
+            response.refresh_expires_at = refreshExpiresAt.toISOString();
+        }
+
+        return response;
+    }
+
+    async refreshAccessToken(refreshToken: string) {
+        // Find refresh token in database
+        const storedToken = await this.refreshTokenRepository.findOne({
+            where: { token: refreshToken },
+            relations: ['user', 'user.location', 'user.unit'],
+        });
+
+        if (!storedToken) {
+            throw new UnauthorizedException('Invalid refresh token');
+        }
+
+        // Check if token has expired
+        if (new Date() > storedToken.expiresAt) {
+            // Delete expired token
+            await this.refreshTokenRepository.remove(storedToken);
+            throw new UnauthorizedException('Refresh token expired');
+        }
+
+        // Generate new access token
+        const user = storedToken.user;
+        const payload = {
+            username: user.username,
+            sub: user.id,
+            role: user.role,
+            locationId: user.location?.id,
+            unitId: user.unit?.id,
+            unitRole: user.unitRole
+        };
+
+        const accessToken = this.jwtService.sign(payload);
+        const expirationDate = new Date();
+        expirationDate.setMinutes(expirationDate.getMinutes() + 15);
+
+        // Token rotation: generate new refresh token
+        const newRefreshToken = this.generateRefreshToken();
+        const refreshExpiresAt = new Date();
+        refreshExpiresAt.setDate(refreshExpiresAt.getDate() + 30);
+
+        // Delete old refresh token and create new one (rotation)
+        await this.refreshTokenRepository.remove(storedToken);
+        await this.refreshTokenRepository.save({
+            token: newRefreshToken,
+            user: { id: user.id },
+            expiresAt: refreshExpiresAt,
+        });
+
+        return {
+            access_token: accessToken,
+            expires_at: expirationDate.toISOString(),
+            refresh_token: newRefreshToken,
+            refresh_expires_at: refreshExpiresAt.toISOString(),
+        };
+    }
+
+    async revokeRefreshToken(refreshToken: string) {
+        const storedToken = await this.refreshTokenRepository.findOne({
+            where: { token: refreshToken },
+        });
+
+        if (storedToken) {
+            await this.refreshTokenRepository.remove(storedToken);
+        }
+    }
+
+    async cleanupExpiredTokens() {
+        // Delete all expired refresh tokens
+        await this.refreshTokenRepository.delete({
+            expiresAt: LessThan(new Date()),
+        });
     }
 
     async register(createUserDto: any) {
