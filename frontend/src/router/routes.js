@@ -8,7 +8,7 @@ const routes = [
         redirect: '/login'
       },
       { path: 'login', component: () => import('pages/LoginPage.vue'), meta: { titleKey: 'auth.login.tab' } },
-      { path: 'register', component: () => import('pages/RegisterPage.vue'), meta: { titleKey: 'auth.register.tab' } },
+
       { path: 'forgot-password', component: () => import('pages/ForgotPasswordPage.vue'), meta: { titleKey: 'auth.forgotPassword.title' } },
       { path: 'reset-password', component: () => import('pages/ResetPasswordPage.vue'), meta: { titleKey: 'auth.resetPassword.title' } },
       { path: 'profile', component: () => import('pages/ProfilePage.vue'), meta: { requiresAuth: true, titleKey: 'navigation.profile' } },

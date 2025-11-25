@@ -3,28 +3,12 @@
     <div class="interactive-bg" :style="bgStyle"></div>
     
     <q-card style="width: 100%; max-width: 400px; margin: 16px; z-index: 1; backdrop-filter: blur(10px); background: rgba(30, 30, 40, 0.85); border: 1px solid rgba(255,255,255,0.1);">
-      <!-- Toggle Tabs -->
-      <q-tabs
-        v-model="tab"
-        dense
-        class="text-grey-5"
-        active-color="white"
-        indicator-color="primary"
-        align="justify"
-      >
-        <q-tab name="login" :label="$t('auth.login.tab')" />
-        <q-tab name="register" :label="$t('auth.register.tab')" />
-      </q-tabs>
+      <q-card-section class="text-center q-pb-none">
+        <div class="text-h4 text-weight-bold text-grey-4">{{ $t('auth.login.title') }}</div>
+        <div class="text-subtitle2 text-grey-4">{{ $t('auth.login.subtitle') }}</div>
+      </q-card-section>
 
-      <q-separator color="grey-8" />
 
-      <q-tab-panels v-model="tab" animated class="bg-transparent text-white">
-        <!-- Login Panel -->
-        <q-tab-panel name="login">
-          <q-card-section class="text-center q-pb-none">
-            <div class="text-h4 text-weight-bold">{{ $t('auth.login.title') }}</div>
-            <div class="text-subtitle2 text-grey-4">{{ $t('auth.login.subtitle') }}</div>
-          </q-card-section>
 
           <q-card-section>
             <q-form @submit="handleLogin">
@@ -50,7 +34,7 @@
                 data-cy="password-input"
               />
               <div class="row items-center q-mb-md">
-                <q-checkbox v-model="rememberMe" :label="$t('auth.login.rememberMe')" dark dense color="primary" />
+                <q-checkbox v-model="rememberMe" :label="$t('auth.login.rememberMe')" dark dense color="primary" class="text-grey-4" />
               </div>
               <q-btn 
                 :label="$t('auth.login.button')" 
@@ -63,56 +47,9 @@
               />
             </q-form>
           </q-card-section>
-        </q-tab-panel>
-
-        <!-- Register Panel -->
-        <q-tab-panel name="register">
-          <q-card-section class="text-center q-pb-none">
-            <div class="text-h4 text-weight-bold">{{ $t('auth.register.title') }}</div>
-            <div class="text-subtitle2 text-grey-4">{{ $t('auth.register.subtitle') }}</div>
-          </q-card-section>
-
-          <q-card-section>
-            <q-form @submit="handleRegister">
-              <q-input 
-                v-model="registerForm.username" 
-                :label="$t('auth.form.username')" 
-                outlined 
-                dense 
-                dark
-                class="q-mb-md"
-                :rules="usernameRules"
-              />
-              <q-input 
-                v-model="registerForm.password" 
-                :label="$t('auth.form.password')" 
-                type="password" 
-                outlined 
-                dense 
-                dark
-                class="q-mb-md"
-                :rules="passwordRules"
-              />
-              <q-input 
-                v-model="registerForm.location" 
-                :label="$t('auth.form.location')" 
-                outlined 
-                dense 
-                dark
-                class="q-mb-md"
-              />
-              <q-btn 
-                :label="$t('auth.register.button')" 
-                type="submit" 
-                color="primary" 
-                class="full-width" 
-                size="md"
-                unelevated
-              />
-            </q-form>
-          </q-card-section>
-        </q-tab-panel>
-      </q-tab-panels>
+      <q-card-section v-if="stagingMessage" class="text-center q-pt-none text-warning">
+        <div class="text-caption text-orange">{{ stagingMessage }}</div>
+      </q-card-section>
     </q-card>
   </q-page>
 </template>
@@ -133,7 +70,7 @@ const { t } = useI18n();
 const tab = ref('login');
 const loginForm = ref({ username: '', password: '' });
 const rememberMe = ref(false);
-const registerForm = ref({ username: '', password: '', location: '' });
+const stagingMessage = config.stagingMessage;
 const mouseX = ref(50);
 const mouseY = ref(50);
 
@@ -149,29 +86,7 @@ const handleMouseMove = (event) => {
   mouseY.value = (clientY / innerHeight) * 100;
 };
 
-// Validation rules for register
-const usernameRules = computed(() => {
-  if (config.isProd) {
-    return [
-      val => !!val || t('auth.form.rules.usernameRequired'),
-      val => /.+@.+\..+/.test(val) || t('auth.form.rules.validEmail')
-    ];
-  }
-  return [val => !!val || t('auth.form.rules.usernameRequired')];
-});
 
-const passwordRules = computed(() => {
-  if (config.isProd) {
-    return [
-      val => !!val || t('auth.form.rules.passwordRequired'),
-      val => val.length >= 8 || t('auth.form.rules.passwordLength'),
-      val => /[A-Z]/.test(val) || t('auth.form.rules.passwordUpper'),
-      val => /[a-z]/.test(val) || t('auth.form.rules.passwordLower'),
-      val => /[0-9]/.test(val) || t('auth.form.rules.passwordNumber')
-    ];
-  }
-  return [val => !!val || t('auth.form.rules.passwordRequired')];
-});
 
 const handleLogin = async () => {
   try {
@@ -205,26 +120,7 @@ const handleLogin = async () => {
   }
 };
 
-const handleRegister = async () => {
-  try {
-    await authStore.register(registerForm.value);
-    $q.notify({
-      color: 'positive',
-      message: t('auth.register.success'),
-      icon: 'check'
-    });
-    tab.value = 'login';
-    loginForm.value.username = registerForm.value.username;
-    registerForm.value = { username: '', password: '', location: '' };
-  } catch (error) {
-    console.error('Registration failed', error);
-    $q.notify({
-      color: 'negative',
-      message: t('auth.register.failed'),
-      icon: 'report_problem'
-    });
-  }
-};
+
 </script>
 
 <style scoped>
