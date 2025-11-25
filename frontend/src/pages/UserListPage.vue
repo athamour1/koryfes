@@ -5,6 +5,7 @@
       icon="people"
       :title="$t('userListPage.title')"
       :subtitle="$t('userListPage.subtitle')"
+      class="user-list-page-header"
     >
       <template #extra>
         <!-- Search Bar -->
@@ -304,8 +305,11 @@ body.body--dark .badge-avatar {
 
 /* Responsive */
 @media (max-width: 768px) {
+  /* PageHeader mobile behavior is now handled in PageHeader component itself */
+  /* Just adjust search layout for mobile */
   .search-section {
     flex-direction: column;
+    margin-top: 0 !important;
   }
 
   .search-input {

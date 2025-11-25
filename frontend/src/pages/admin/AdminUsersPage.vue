@@ -319,10 +319,6 @@
 
               <q-input filled v-model="editingUserData.username" :label="$t('adminUsers.form.username')" dense class="q-mb-sm" />
               
-              <q-input filled v-model="editingUserData.firstName" :label="$t('adminUsers.form.firstName')" dense class="q-mb-sm" />
-              
-              <q-input filled v-model="editingUserData.lastName" :label="$t('adminUsers.form.lastName')" dense class="q-mb-sm" />
-              
               <q-select
                 v-if="authStore.isSuperAdmin"
                 filled
@@ -1374,6 +1370,8 @@ const awardGuideDiploma = async () => {
 </script>
 
 <style scoped>
+/* On mobile, keep the PageHeader hidden (already handled by PageHeader component) */
+/* The search functionality is already visible in the table's top slot */
 @media (max-width: 768px) {
   .hero-header-wrapper {
     display: none;

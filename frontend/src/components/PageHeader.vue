@@ -2,10 +2,12 @@
   <div class="page-header-wrapper">
     <div class="page-header-content gradient-purple text-white">
       <div class="text-center page-header-inner">
-        <q-icon v-if="icon" :name="icon" size="32px" class="q-mb-xs" />
+        <q-icon v-if="icon" :name="icon" size="32px" class="q-mb-xs header-icon" />
         <div class="page-header-title">{{ title }}</div>
         <div v-if="subtitle" class="page-header-subtitle">{{ subtitle }}</div>
-        <slot name="extra"></slot>
+        <div class="header-extra">
+          <slot name="extra"></slot>
+        </div>
       </div>
     </div>
   </div>
@@ -61,6 +63,28 @@ defineProps({
 
 /* Mobile styles */
 @media (max-width: 768px) {
+  /* Show wrapper if there's content in the extra slot, hide otherwise */
+  .page-header-wrapper {
+    display: block;
+  }
+
+  /* Hide title, subtitle, and icon on mobile */
+  .page-header-title,
+  .page-header-subtitle,
+  .header-icon {
+    display: none !important;
+  }
+
+  /* Keep extra slot content visible (e.g., search) */
+  .header-extra {
+    display: block !important;
+  }
+
+  /* If extra slot is empty, hide the entire wrapper */
+  .page-header-wrapper:has(.header-extra:empty) {
+    display: none;
+  }
+
   .page-header-content {
     padding: 12px;
   }
@@ -71,10 +95,6 @@ defineProps({
 
   .page-header-subtitle {
     font-size: 0.875rem;
-  }
-
-  .page-header-wrapper :deep(.q-icon) {
-    font-size: 24px !important;
   }
 }
 </style>
