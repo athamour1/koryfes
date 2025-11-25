@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="hHh lpR fFf">
+  <q-layout view="hHh Lpr fFf">
     <q-header elevated class="bg-primary rounded-header" v-if="!isAuthPage">
       <q-toolbar>
         <q-btn
