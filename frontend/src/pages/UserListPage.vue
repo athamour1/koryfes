@@ -159,20 +159,20 @@ const formatUnitRole = (unitRole) => {
   }
 };
 
-onMounted(async () => {
-  await fetchUsers();
-  // Debug: Log avatar configs to verify different data
-  console.log('[UserListPage] First 5 users avatarConfigs:');
-  const regularUsers = userStore.users.filter(u => u.role === 'user').slice(0, 5);
-  regularUsers.forEach((user, index) => {
-    console.log(`User ${index + 1} (${user.username}):`, {
-      skin: user.avatarConfig?.skin,
-      hair: user.avatarConfig?.hair,
-      eyes: user.avatarConfig?.eyes,
-      fullConfig: user.avatarConfig
-    });
-  });
-});
+// onMounted(async () => {
+//   await fetchUsers();
+//   // Debug: Log avatar configs to verify different data
+//   console.log('[UserListPage] First 5 users avatarConfigs:');
+//   const regularUsers = userStore.users.filter(u => u.role === 'user').slice(0, 5);
+//   regularUsers.forEach((user, index) => {
+//     console.log(`User ${index + 1} (${user.username}):`, {
+//       skin: user.avatarConfig?.skin,
+//       hair: user.avatarConfig?.hair,
+//       eyes: user.avatarConfig?.eyes,
+//       fullConfig: user.avatarConfig
+//     });
+//   });
+// });
 </script>
 
 <style scoped>

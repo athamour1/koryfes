@@ -1,6 +1,6 @@
 <template>
   <q-layout view="hHh lpR fFf">
-    <q-header elevated class="bg-primary" v-if="!isAuthPage">
+    <q-header elevated class="bg-primary rounded-header" v-if="!isAuthPage">
       <q-toolbar>
         <q-btn
           flat
@@ -202,3 +202,11 @@ const logout = () => {
   drawer.value = false;
 };
 </script>
+
+<style scoped>
+.rounded-header {
+  border-radius: 0 0 16px 16px;
+  overflow: hidden;
+  padding: 0 16px;
+}
+</style>
