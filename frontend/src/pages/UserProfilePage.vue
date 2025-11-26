@@ -28,7 +28,7 @@
               {{ user?.location?.name || $t('userProfilePage.noLocation') }}
             </div>
 
-            <div v-if="!isViewerAdmin" class="unit-role-card-hero q-mt-md">
+            <div v-if="!isAdmin" class="unit-role-card-hero q-mt-md">
               <div class="unit-section">
                 <div class="text-caption text-white-7">{{ $t('userListPage.unitLabel') || 'Unit' }}</div>
                 <div class="text-weight-bold">{{ user?.unit?.name || '-' }}</div>
@@ -45,7 +45,7 @@
     </div>
 
     <!-- Progress Section -->
-    <div v-if="!isViewerAdmin" class="q-pa-lg" style="max-width: 1400px; margin: 0 auto;">
+    <div v-if="!isAdmin" class="q-pa-lg" style="max-width: 1400px; margin: 0 auto;">
       <q-card flat bordered>
         <q-card-section>
           <div class="section-header">
@@ -163,9 +163,9 @@ const authStore = useAuthStore();
 const { t } = useI18n();
 const user = ref(null);
 
-// Check if the current viewer is an admin or superadmin
-const isViewerAdmin = computed(() => {
-  return authStore.isAdmin || authStore.isSuperAdmin;
+// Check if the user being displayed is an admin or super admin
+const isAdmin = computed(() => {
+  return user.value?.role === 'admin' || user.value?.role === 'super_admin';
 });
 
 const formatDate = (dateString) => {

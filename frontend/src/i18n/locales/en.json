@@ -342,6 +342,9 @@
             "goldTab": "Gold Peak",
             "extraTab": "Extra",
             "extraStageInfo": "This stage allows awarding unlimited elective diplomas after completing the Gold peak.",
+            "noEarnedGuideDiplomas": "No Guide Diplomas Yet",
+            "noEarnedElectiveDiplomas": "No Elective Diplomas Yet",
+            "noEarnedPaths": "No Paths Completed Yet",
             "notifications": {
                 "peakAwarded": "Peak awarded successfully",
                 "pathAwarded": "Path awarded successfully",
