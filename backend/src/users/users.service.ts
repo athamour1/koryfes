@@ -61,12 +61,20 @@ export class UsersService implements OnModuleInit {
             userData.password = await bcrypt.hash(userData.password, 10);
         }
 
+        // Generate avatar config with appropriate scarf color based on location type
+        let avatarConfig = userData.avatarConfig || generateRandomAvatarConfig();
+        if (locationEntity && !userData.avatarConfig) {
+            // Set scarf color based on location type
+            const scarfColor = this.locationsService.getDefaultScarfColor(locationEntity.type);
+            avatarConfig.scarfColor = scarfColor;
+        }
+
         const user = this.usersRepository.create({
             ...userData,
             location: locationEntity,
             role: userData.role || UserRole.USER,
             isAdmin: userData.role === UserRole.SUPER_ADMIN || userData.role === UserRole.ADMIN,
-            avatarConfig: userData.avatarConfig || generateRandomAvatarConfig(),
+            avatarConfig,
         });
 
         // Enforce unique Leader/Deputy Leader per unit

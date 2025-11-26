@@ -201,10 +201,26 @@
         },
         "form": {
             "name": "Location Name",
-            "required": "Location name is required"
+            "required": "Location name is required",
+            "type": "Location Type",
+            "latitude": "Latitude",
+            "longitude": "Longitude",
+            "coordinates": "Coordinates",
+            "coordinatesHint": "Optional GPS coordinates for mapping",
+            "createdAt": "Created At"
+        },
+        "map": {
+            "clickToPlace": "Click on the map to place a pin",
+            "dragToMove": "Drag the pin to adjust location"
+        },
+        "types": {
+            "guides": "Guides",
+            "navalGuides": "Naval Guides"
         },
         "columns": {
             "name": "Name",
+            "type": "Type",
+            "coordinates": "Coordinates",
             "actions": "Actions"
         },
         "tooltips": {
