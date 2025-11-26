@@ -44,11 +44,19 @@ const routes = [
         meta: { requiresAuth: true, requiresAdmin: true, titleKey: 'navigation.progress' }
       },
 
+
       // Super Admin Routes
       {
         path: 'admin/locations',
         component: () => import('pages/admin/LocationManagement.vue'),
         meta: { requiresAuth: true, requiresSuperAdmin: true, titleKey: 'navigation.locations' }
+      },
+
+      // Temporary Scarf Test Route
+      {
+        path: 'scarf-test',
+        component: () => import('pages/ScarfTestPage.vue'),
+        meta: { requiresAuth: false }
       },
 
       // 404 - Catch All

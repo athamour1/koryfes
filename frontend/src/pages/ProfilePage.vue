@@ -307,7 +307,7 @@ const { t } = useI18n();
 
 // Default avatar configuration
 const defaultAvatarConfig = {
-  mask: true,
+  mask: false,
   skin: 'light',
   body: 'chest',
   braStraps: true,
@@ -397,7 +397,7 @@ const randomize = () => {
   }
   newConfig['withLashes'] = Math.random() < 0.5;
   newConfig['faceMask'] = Math.random() < 0.3;
-  newConfig['mask'] = true;
+  newConfig['mask'] = false;
   newConfig['clothing'] = 'shirt';
   newConfig['clothingColor'] = 'white';
   

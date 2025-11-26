@@ -21,7 +21,7 @@ const props = defineProps({
 
 // Default configuration matching Avatar component props
 const defaultConfig = {
-  mask: true,
+  mask: false, // Changed to false to show full avatar without circular mask
   skin: 'light',
   body: 'chest',
   braStraps: true,
