@@ -294,22 +294,6 @@
                 <q-avatar size="120px" class="shadow-3">
                   <AvatarDisplay :config="editingUserData.avatarConfig" size="120px" :key="`avatar-edit-${editingUserData.id}`" />
                 </q-avatar>
-                <q-btn
-                  round
-                  color="primary"
-                  icon="edit"
-                  size="sm"
-                  class="absolute-bottom-right"
-                  style="bottom: 5px; right: 5px;"
-                  @click="$refs.fileInput.pickFiles()"
-                />
-                <q-file
-                  ref="fileInput"
-                  v-model="uploadImageFile"
-                  style="display: none"
-                  accept=".jpg, .png, .jpeg"
-                  @update:model-value="handleImageUpdate"
-                />
               </div>
               
               <div class="text-h6 q-mb-xs">{{ editingUserData.username }}</div>
@@ -943,7 +927,7 @@ const createDialog = ref(false);
 const editDialog = ref(false);
 const newUser = ref({ username: '', password: '', role: 'user', locationName: '', unitId: null, unitRole: null });
 const editingUserData = ref({});
-const uploadImageFile = ref(null);
+
 const locationOptions = ref([]);
 
 // Progress related state
@@ -1090,7 +1074,7 @@ const openEditDialog = async (user) => {
     locationName: user.location?.name,
     unit: user.unit ? { id: user.unit.id, name: user.unit.name } : null
   };
-  uploadImageFile.value = null;
+
   
   if (user.role === 'user') {
     await fetchUserProgress(user.id);
@@ -1123,22 +1107,7 @@ const createUser = async () => {
   }
 };
 
-const handleImageUpdate = async (file) => {
-  if (file) {
-    const success = await userStore.uploadProfileImage(editingUserData.value.id, file);
-    if (success) {
-      $q.notify({ color: 'positive', message: t('adminUsers.notifications.imageUpdateSuccess'), icon: 'check' });
-      // Refresh user data
-      await userStore.fetchUsers();
-      const updatedUser = userStore.users.find(u => u.id === editingUserData.value.id);
-      if (updatedUser) {
-        editingUserData.value.profileImage = updatedUser.profileImage;
-      }
-    } else {
-      $q.notify({ color: 'negative', message: t('adminUsers.notifications.imageUpdateError'), icon: 'report_problem' });
-    }
-  }
-};
+
 
 const saveUserChanges = async () => {
   try {

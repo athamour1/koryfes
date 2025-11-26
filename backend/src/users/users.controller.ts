@@ -109,50 +109,7 @@ export class UsersController {
 
 
 
-    @UseGuards(AuthGuard('jwt'))
-    @Post('profile/image')
-    @UseInterceptors(FileInterceptor('file', {
-        storage: diskStorage({
-            destination: './uploads/profile-images',
-            filename: (req, file, cb) => {
-                const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('');
-                return cb(null, `${randomName}${extname(file.originalname)}`);
-            }
-        })
-    }))
-    uploadProfileImage(@Request() req, @UploadedFile() file: any) {
-        return this.usersService.updateProfileImage(req.user.userId, `/uploads/profile-images/${file.filename}`);
-    }
 
-    @UseGuards(AuthGuard('jwt'))
-    @Post(':id/image')
-    @UseInterceptors(FileInterceptor('file', {
-        storage: diskStorage({
-            destination: './uploads/profile-images',
-            filename: (req, file, cb) => {
-                const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('');
-                return cb(null, `${randomName}${extname(file.originalname)}`);
-            }
-        })
-    }))
-    async uploadUserImage(@Param('id') id: string, @Request() req, @UploadedFile() file: any) {
-        if (!req.user.isAdmin && req.user.role !== 'super_admin' && req.user.role !== 'admin') {
-            throw new UnauthorizedException('Only admins can upload user images');
-        }
-
-        // If Admin (not Super Admin), verify user is in same location
-        if (req.user.role === 'admin') {
-            const targetUser = await this.usersService.findOne(+id);
-            if (!targetUser) {
-                throw new UnauthorizedException('User not found');
-            }
-            if (targetUser.location?.id !== req.user.locationId) {
-                throw new UnauthorizedException('You can only upload images for users in your location');
-            }
-        }
-
-        return this.usersService.updateProfileImage(+id, `/uploads/profile-images/${file.filename}`);
-    }
 
     @UseGuards(AuthGuard('jwt'))
     @Delete(':id')

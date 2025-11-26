@@ -62,32 +62,7 @@ export const useUserStore = defineStore('user', {
                 return false;
             }
         },
-        async uploadProfileImage(file) {
-            try {
-                const formData = new FormData();
-                formData.append('file', file);
-                await api.post('/users/profile/image', formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
-                return true;
-            } catch (error) {
-                console.error('Upload profile image failed', error);
-                return false;
-            }
-        },
-        async uploadUserImage(userId, file) {
-            try {
-                const formData = new FormData();
-                formData.append('file', file);
-                await api.post(`/users/${userId}/image`, formData, {
-                    headers: { 'Content-Type': 'multipart/form-data' }
-                });
-                return true;
-            } catch (error) {
-                console.error('Upload user image failed', error);
-                return false;
-            }
-        },
+
         async createUser(userData) {
             try {
                 const response = await api.post('/users', userData);

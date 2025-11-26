@@ -190,10 +190,7 @@ export class UsersService implements OnModuleInit {
         };
     }
 
-    async updateProfileImage(id: number, imagePath: string): Promise<User> {
-        await this.usersRepository.update(id, { profileImage: imagePath });
-        return this.findOne(id);
-    }
+
 
     async findByResetToken(token: string): Promise<User | undefined> {
         return this.usersRepository.findOne({ where: { resetPasswordToken: token } });

@@ -111,7 +111,7 @@
                 </q-item-section>
                 <q-item-section avatar>
                   <q-avatar size="40px">
-                    <img :src="getAvatarUrl(guide.username, guide.profileImage)" />
+                    <img :src="getAvatarUrl(guide.username)" />
                   </q-avatar>
                 </q-item-section>
                 <q-item-section>

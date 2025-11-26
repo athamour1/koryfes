@@ -116,8 +116,7 @@
                 <q-item v-for="member in unitMembers" :key="member.id">
                   <q-item-section avatar>
                     <q-avatar>
-                      <img v-if="member.profileImage" :src="getImageUrl(member.profileImage)" />
-                      <q-icon v-else name="person" />
+                      <AvatarDisplay :config="member.avatarConfig" size="40px" />
                     </q-avatar>
                   </q-item-section>
 
@@ -172,6 +171,7 @@ import { api } from 'src/api';
 import { useQuasar } from 'quasar';
 import { config } from 'src/config';
 import PageHeader from 'src/components/PageHeader.vue';
+import AvatarDisplay from 'src/components/AvatarDisplay.vue';
 
 const { t } = useI18n();
 const router = useRouter();
