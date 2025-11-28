@@ -80,7 +80,7 @@
 
     <!-- Add/Edit Dialog -->
     <q-dialog v-model="showAddDialog">
-      <q-card style="min-width: 700px; max-width: 900px">
+      <q-card style="width: 700px; max-width: 90vw;">
         <q-card-section class="gradient-blue text-white">
           <div class="text-h6">
             <q-icon name="location_city" size="24px" class="q-mr-sm" />
@@ -126,51 +126,6 @@
               v-model="mapCoordinates"
             />
           </div>
-
-          <!-- Manual Coordinate Inputs (Read-only, auto-filled from map) -->
-          <div class="row q-col-gutter-md q-mb-md">
-            <div class="col-6">
-              <q-input
-                filled
-                :model-value="locationForm.latitude ? locationForm.latitude.toFixed(7) : ''"
-                :label="$t('locationManagement.form.latitude')"
-                readonly
-                dense
-                data-cy="location-latitude-input"
-              >
-                <template v-slot:prepend>
-                  <q-icon name="my_location" />
-                </template>
-              </q-input>
-            </div>
-            <div class="col-6">
-              <q-input
-                filled
-                :model-value="locationForm.longitude ? locationForm.longitude.toFixed(7) : ''"
-                :label="$t('locationManagement.form.longitude')"
-                readonly
-                dense
-                data-cy="location-longitude-input"
-              >
-                <template v-slot:prepend>
-                  <q-icon name="place" />
-                </template>
-              </q-input>
-            </div>
-          </div>
-
-          <q-input
-            v-if="isEditing && locationForm.createdAt"
-            filled
-            :model-value="new Date(locationForm.createdAt).toLocaleString()"
-            :label="$t('locationManagement.form.createdAt')"
-            readonly
-            class="q-mb-md"
-          >
-            <template v-slot:prepend>
-              <q-icon name="schedule" />
-            </template>
-          </q-input>
         </q-card-section>
 
         <q-card-actions align="right" class="q-pa-md">
@@ -225,7 +180,6 @@ const mapCoordinates = computed({
 const columns = computed(() => [
   { name: 'name', label: t('locationManagement.columns.name'), field: 'name', sortable: true, align: 'left' },
   { name: 'type', label: t('locationManagement.columns.type'), field: row => t(`locationManagement.types.${row.type === 'naval-guides' ? 'navalGuides' : 'guides'}`), sortable: true, align: 'left' },
-  { name: 'coordinates', label: t('locationManagement.columns.coordinates'), field: row => row.latitude && row.longitude ? `${row.latitude}, ${row.longitude}` : '-', align: 'left' },
   { name: 'actions', label: t('locationManagement.columns.actions'), field: 'actions', align: 'right' },
 ]);
 
@@ -278,8 +232,8 @@ const editLocation = (location) => {
   locationForm.id = location.id;
   locationForm.name = location.name;
   locationForm.type = location.type || 'guides';
-  locationForm.latitude = location.latitude;
-  locationForm.longitude = location.longitude;
+  locationForm.latitude = location.latitude ? Number(location.latitude) : null;
+  locationForm.longitude = location.longitude ? Number(location.longitude) : null;
   locationForm.createdAt = location.createdAt;
   isEditing.value = true;
   showAddDialog.value = true;
