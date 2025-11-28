@@ -199,7 +199,7 @@
 
     <!-- Create User Dialog -->
     <q-dialog v-model="createDialog">
-      <q-card style="min-width: 400px">
+      <q-card style="width: 400px; max-width: 95vw">
         <q-card-section>
           <div class="text-h6">{{ $t('adminUsers.dialog.createTitle') }}</div>
         </q-card-section>
@@ -272,7 +272,7 @@
 
     <!-- Edit User Dialog -->
     <q-dialog v-model="editDialog" @hide="activeTab = 'bronze'">
-      <q-card style="min-width: 1000px; border-radius: 20px; overflow: hidden;">
+      <q-card style="width: 1000px; max-width: 95vw; border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; max-height: 90vh;">
         <!-- Header with Gradient -->
         <q-card-section class="text-white q-pa-lg" style="background: linear-gradient(135deg, var(--q-primary) 0%, var(--q-secondary) 100%);">
           <div class="row items-center no-wrap">
@@ -286,7 +286,7 @@
           </div>
         </q-card-section>
 
-        <q-card-section class="q-pa-lg">
+        <q-card-section class="q-pa-lg scroll">
           <div class="row q-col-gutter-lg">
             <!-- Left Column: Profile Info -->
             <div class="col-12 text-center" :class="editingUserData.role === 'user' ? 'col-md-5' : 'col-md-12'">
@@ -788,7 +788,7 @@
 
     <!-- Award Peak Dialog -->
     <q-dialog v-model="awardPeakDialog">
-      <q-card style="min-width: 350px">
+      <q-card style="width: 350px; max-width: 95vw">
         <q-card-section>
           <div class="text-h6">{{ $t('progress.admin.awardPeakTitle') }}</div>
         </q-card-section>
@@ -808,7 +808,7 @@
 
     <!-- Award Elective Diploma Dialog -->
     <q-dialog v-model="awardElectiveDiplomaDialog">
-      <q-card style="min-width: 400px">
+      <q-card style="width: 400px; max-width: 95vw">
         <q-card-section>
           <div class="text-h6">{{ $t('progress.admin.awardElectiveDiplomaTitle') }}</div>
         </q-card-section>
@@ -835,7 +835,7 @@
 
     <!-- Award Guide Diploma Dialog -->
     <q-dialog v-model="awardGuideDiplomaDialog">
-      <q-card style="min-width: 400px">
+      <q-card style="width: 400px; max-width: 95vw">
         <q-card-section>
           <div class="text-h6">{{ $t('progress.admin.awardGuideDiplomaTitle') || 'Award Guide Diploma' }}</div>
         </q-card-section>
@@ -862,7 +862,7 @@
 
     <!-- Award Path Dialog -->
     <q-dialog v-model="awardPathDialog">
-      <q-card style="min-width: 400px">
+      <q-card style="width: 400px; max-width: 95vw">
         <q-card-section>
           <div class="text-h6">{{ $t('progress.admin.awardPathTitle') }}</div>
         </q-card-section>

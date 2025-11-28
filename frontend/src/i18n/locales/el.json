@@ -2,7 +2,7 @@
     "general": {
         "save": "Αποθήκευση Αλλαγών",
         "cancel": "Ακύρωση",
-        "award": "Απόδοση",
+        "award": "Απονομή",
         "back": "Πίσω",
         "create": "Δημιουργία"
     },
@@ -215,7 +215,7 @@
         },
         "types": {
             "guides": "Οδηγοί",
-            "navalGuides": "Ναυτοπρόσκοποι"
+            "navalGuides": "Ναυτοδηγοί"
         },
         "columns": {
             "name": "Όνομα",
@@ -341,13 +341,13 @@
             "diplomas": {
                 "title": "Πτυχία",
                 "guide": "Πτυχία Οδηγού",
-                "elective": "Ελεύθερα Πτυχία"
+                "elective": "Πτυχία"
             },
-            "awardPromisePeak": "Απόδοση Υπόσχεσης",
+            "awardPromisePeak": "Απονομή Υπόσχεσης",
             "awardPeakTitle": "Διαχείριση Προόδου",
-            "awardPathTitle": "Απόδοση Μονοπατιού",
-            "awardGuideDiplomaTitle": "Απόδοση Διπλώματος Οδηγού",
-            "awardElectiveDiplomaTitle": "Απόδοση Ελεύθερου Διπλώματος",
+            "awardPathTitle": "Απονομή Μονοπατιού",
+            "awardGuideDiplomaTitle": "Απονομή Πτυχίο Οδηγισμού",
+            "awardElectiveDiplomaTitle": "Απονομή Πτυχίου",
             "promiseInfo": "Η Υπόσχεση είναι το πρώτο βήμα στο ταξίδι προόδου του χρήστη.",
             "awardPeakConfirm": "Να απονεμηθεί η Υπόσχεση στο χρήστη; Αυτό θα ξεκλειδώσει τη δυνατότητα να κερδίσει μονοπάτια και Πτυχία.",
             "selectPath": "Επιλέξτε ένα μονοπάτι",
@@ -358,7 +358,7 @@
             "extraTab": "Έξτρα",
             "extraStageInfo": "Αυτό το στάδιο επιτρέπει την απονομή απεριόριστων ελεύθερων διπλωμάτων μετά την ολοκλήρωση της Χρυσής Κορυφής.",
             "noEarnedGuideDiplomas": "Δεν υπάρχουν Πτυχία Οδηγού ακόμα",
-            "noEarnedElectiveDiplomas": "Δεν υπάρχουν Ελεύθερα Πτυχία ακόμα",
+            "noEarnedElectiveDiplomas": "Δεν υπάρχουν Πτυχία ακόμα",
             "noEarnedPaths": "Δεν έχουν ολοκληρωθεί Μονοπάτια ακόμα",
             "notifications": {
                 "peakAwarded": "Η κορυφή απονεμήθηκε επιτυχώς",
