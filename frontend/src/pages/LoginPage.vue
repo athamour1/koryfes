@@ -25,14 +25,22 @@
               <q-input 
                 v-model="loginForm.password" 
                 :label="$t('auth.form.password')" 
-                type="password" 
+                :type="isPwd ? 'password' : 'text'" 
                 outlined 
                 dense 
                 dark
                 class="q-mb-md"
                 :rules="[val => !!val || $t('auth.form.rules.passwordRequired')]"
                 data-cy="password-input"
-              />
+              >
+                <template v-slot:append>
+                  <q-icon
+                    :name="isPwd ? 'visibility_off' : 'visibility'"
+                    class="cursor-pointer"
+                    @click="isPwd = !isPwd"
+                  />
+                </template>
+              </q-input>
               <div class="row items-center q-mb-md">
                 <q-checkbox v-model="rememberMe" :label="$t('auth.login.rememberMe')" dark dense color="primary" class="text-grey-4" />
               </div>
@@ -70,6 +78,7 @@ const { t } = useI18n();
 const tab = ref('login');
 const loginForm = ref({ username: '', password: '' });
 const rememberMe = ref(false);
+const isPwd = ref(true);
 const stagingMessage = config.stagingMessage;
 const mouseX = ref(50);
 const mouseY = ref(50);
