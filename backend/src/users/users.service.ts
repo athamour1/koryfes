@@ -20,8 +20,9 @@ export class UsersService implements OnModuleInit {
         const adminPassword = process.env.ADMIN_PASSWORD;
 
         if (adminUsername && adminPassword) {
-            const adminExists = await this.usersRepository.findOne({ where: { username: adminUsername } });
-            if (!adminExists) {
+            let adminUser = await this.usersRepository.findOne({ where: { username: adminUsername } });
+
+            if (!adminUser) {
                 // Ensure Admin HQ location exists
                 let adminLocation = await this.locationsService.findByName('Admin HQ');
                 if (!adminLocation) {
@@ -29,7 +30,7 @@ export class UsersService implements OnModuleInit {
                 }
 
                 const hashedPassword = await bcrypt.hash(adminPassword, 10);
-                const adminUser = this.usersRepository.create({
+                adminUser = this.usersRepository.create({
                     username: adminUsername,
                     password: hashedPassword,
                     location: adminLocation,
@@ -39,6 +40,12 @@ export class UsersService implements OnModuleInit {
                 });
                 await this.usersRepository.save(adminUser);
                 console.log(`Admin user '${adminUsername}' created.`);
+            } else {
+                // Update password to match environment variable
+                const hashedPassword = await bcrypt.hash(adminPassword, 10);
+                adminUser.password = hashedPassword;
+                await this.usersRepository.save(adminUser);
+                console.log(`Admin user '${adminUsername}' password updated from environment variable.`);
             }
         }
     }

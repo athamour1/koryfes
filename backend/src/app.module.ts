@@ -28,7 +28,7 @@ import { UserProgressModule } from './user-progress/user-progress.module';
       synchronize: true,
     }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'uploads'),
+      rootPath: join(process.cwd(), 'uploads'),
       serveRoot: '/uploads',
     }),
     ThrottlerModule.forRoot([{

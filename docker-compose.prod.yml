@@ -14,7 +14,7 @@ services:
       - "5432:5432"
 
   backend:
-    image: ${REGISTRY_URL:-localhost}/guide-badges-backend:${TAG:-latest}
+    image: thanosmourtk/korifes-backend:26.11.25-beta
     restart: always
     ports:
       - "${PORT:-3000}:3000"
@@ -36,10 +36,14 @@ services:
       - ./uploads:/usr/src/app/uploads
 
   frontend:
-    image: ${REGISTRY_URL:-localhost}/guide-badges-frontend:${TAG:-latest}
+    image: thanosmourtk/korifes-frontend:26.11.25-beta
     restart: always
     ports:
       - "8080:80"
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-/api}
+      VITE_ENV: ${VITE_ENV:-production}
+      VITE_STAGING_MESSAGE: ${VITE_STAGING_MESSAGE:-}
     depends_on:
       - backend
 
