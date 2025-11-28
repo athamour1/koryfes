@@ -8,18 +8,17 @@
     />
 
     <!-- Profile Content -->
-    <div class="q-pa-md" style="max-width: 1400px; margin: 0 auto;">
-      <q-card flat bordered class="rounded-borders">
-        <q-card-section class="q-pa-lg">
-          <!-- Two Column Layout: Avatar Left, Options Right on Desktop -->
-          <!-- Stacked on Mobile -->
-          <div class="row q-col-gutter-lg">
+    <div class="q-pa-sm" style="height: calc(100vh - 140px); max-width: 1400px; margin: 0 auto;">
+      <q-card flat bordered class="rounded-borders fit">
+        <q-card-section class="q-pa-sm fit">
+          <!-- Custom Flex Layout: Column on Mobile, Row on Desktop -->
+          <div class="profile-container fit">
             
             <!-- LEFT COLUMN: Avatar + Randomize Button -->
-            <div class="col-12 col-md-4">
-              <div class="column items-center q-gutter-md">
+            <div class="profile-left column">
+              <div class="column items-center q-gutter-sm">
                 <!-- Avatar Preview Card -->
-                <q-card flat bordered class="rounded-borders q-pa-lg">
+                <q-card flat bordered class="rounded-borders q-pa-md">
                   <AvatarDisplay :config="avatarConfig" :size="avatarSize" />
                 </q-card>
                 
@@ -32,262 +31,283 @@
                   @click="randomize" 
                   unelevated
                   class="full-width"
+                  size="sm"
                 />
               </div>
             </div>
 
             <!-- RIGHT COLUMN: Customization Options + Save Button -->
-            <div class="col-12 col-md-8">
-              <div class="column q-gutter-md">
-                
-                <!-- 1. Identity Category -->
-                <q-card flat bordered class="rounded-borders">
-                  <q-card-section>
-                    <div class="row items-center q-mb-md">
-                      <q-icon name="fingerprint" size="24px" color="primary" class="q-mr-sm" />
-                      <span class="text-h6 text-primary">{{ $t('avatar.identity') }}</span>
-                    </div>
-                    <div class="row q-col-gutter-md">
-                      <!-- Gender Toggle -->
-                      <div class="col-12">
-                        <div class="text-caption text-grey-7 q-mb-sm">{{ $t('avatar.gender') }}</div>
-                        <q-btn-toggle
-                          v-model="gender"
-                          toggle-color="primary"
-                          :options="[
-                            {label: $t('avatar.boy'), value: 'chest', icon: 'male'},
-                            {label: $t('avatar.girl'), value: 'breasts', icon: 'female'}
-                          ]"
-                          spread
-                          no-caps
-                          unelevated
-                        />
+            <div class="profile-right column no-wrap">
+              <!-- Scrollable Options Area -->
+              <q-scroll-area class="col q-pr-sm">
+                <div class="column">
+                  
+                  <!-- 1. Identity Category -->
+                  <q-card flat bordered class="rounded-borders q-mb-sm">
+                    <q-card-section class="q-pa-sm">
+                      <div class="row items-center q-mb-sm">
+                        <q-icon name="fingerprint" size="20px" color="primary" class="q-mr-sm" />
+                        <span class="text-subtitle1 text-primary">{{ $t('avatar.identity') }}</span>
                       </div>
-                      <!-- Skin Tone -->
-                      <div class="col-12 col-sm-6">
-                        <q-select
-                          v-model="avatarConfig.skin"
-                          :options="getOptions('skin')"
-                          :label="$t('avatar.skinTone')"
-                          filled
-                          dense
-                          emit-value
-                          map-options
-                        >
-                          <template v-slot:prepend>
-                            <q-icon name="palette" />
-                          </template>
-                        </q-select>
+                      <div class="row q-col-gutter-sm">
+                        <!-- Gender Toggle -->
+                        <div class="col-12">
+                          <div class="text-caption text-grey-7 q-mb-xs">{{ $t('avatar.gender') }}</div>
+                          <q-btn-toggle
+                            v-model="gender"
+                            toggle-color="primary"
+                            :options="[
+                              {label: $t('avatar.boy'), value: 'chest', icon: 'male'},
+                              {label: $t('avatar.girl'), value: 'breasts', icon: 'female'}
+                            ]"
+                            spread
+                            no-caps
+                            unelevated
+                            dense
+                            size="sm"
+                          />
+                        </div>
+                        <!-- Skin Tone -->
+                        <div class="col-12 col-sm-6">
+                          <q-select
+                            v-model="avatarConfig.skin"
+                            :options="getOptions('skin')"
+                            :label="$t('avatar.skinTone')"
+                            filled
+                            dense
+                            emit-value
+                            map-options
+                            options-dense
+                          >
+                            <template v-slot:prepend>
+                              <q-icon name="palette" size="xs" />
+                            </template>
+                          </q-select>
+                        </div>
                       </div>
-                    </div>
-                  </q-card-section>
-                </q-card>
+                    </q-card-section>
+                  </q-card>
 
-                <!-- 2. Face Category -->
-                <q-card flat bordered class="rounded-borders">
-                  <q-card-section>
-                    <div class="row items-center q-mb-md">
-                      <q-icon name="face" size="24px" color="primary" class="q-mr-sm" />
-                      <span class="text-h6 text-primary">{{ $t('avatar.face') }}</span>
-                    </div>
-                    <div class="row q-col-gutter-md">
-                      <div class="col-12 col-sm-6">
-                        <q-select
-                          v-model="avatarConfig.eye"
-                          :options="getOptions('eye')"
-                          :label="$t('avatar.eyes')"
-                          filled
-                          dense
-                          emit-value
-                          map-options
-                        >
-                          <template v-slot:prepend>
-                            <q-icon name="visibility" />
-                          </template>
-                        </q-select>
+                  <!-- 2. Face Category -->
+                  <q-card flat bordered class="rounded-borders q-mb-sm">
+                    <q-card-section class="q-pa-sm">
+                      <div class="row items-center q-mb-sm">
+                        <q-icon name="face" size="20px" color="primary" class="q-mr-sm" />
+                        <span class="text-subtitle1 text-primary">{{ $t('avatar.face') }}</span>
                       </div>
-                      <div class="col-12 col-sm-6">
-                        <q-select
-                          v-model="avatarConfig.eyebrows"
-                          :options="getOptions('eyebrows')"
-                          :label="$t('avatar.eyebrows')"
-                          filled
-                          dense
-                          emit-value
-                          map-options
-                        >
-                          <template v-slot:prepend>
-                            <q-icon name="remove" />
-                          </template>
-                        </q-select>
+                      <div class="row q-col-gutter-sm">
+                        <div class="col-12 col-sm-6">
+                          <q-select
+                            v-model="avatarConfig.eye"
+                            :options="getOptions('eye')"
+                            :label="$t('avatar.eyes')"
+                            filled
+                            dense
+                            emit-value
+                            map-options
+                            options-dense
+                          >
+                            <template v-slot:prepend>
+                              <q-icon name="visibility" size="xs" />
+                            </template>
+                          </q-select>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                          <q-select
+                            v-model="avatarConfig.eyebrows"
+                            :options="getOptions('eyebrows')"
+                            :label="$t('avatar.eyebrows')"
+                            filled
+                            dense
+                            emit-value
+                            map-options
+                            options-dense
+                          >
+                            <template v-slot:prepend>
+                              <q-icon name="remove" size="xs" />
+                            </template>
+                          </q-select>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                          <q-select
+                            v-model="avatarConfig.mouth"
+                            :options="getOptions('mouth')"
+                            :label="$t('avatar.mouth')"
+                            filled
+                            dense
+                            emit-value
+                            map-options
+                            options-dense
+                          >
+                            <template v-slot:prepend>
+                              <q-icon name="sentiment_satisfied" size="xs" />
+                            </template>
+                          </q-select>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                          <q-select
+                            v-model="avatarConfig.lipColor"
+                            :options="getColorOptions('lipColor')"
+                            :label="$t('avatar.lipColor')"
+                            filled
+                            dense
+                            emit-value
+                            map-options
+                            options-dense
+                          >
+                            <template v-slot:prepend>
+                              <q-icon name="colorize" size="xs" />
+                            </template>
+                          </q-select>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                          <q-toggle
+                            v-model="avatarConfig.withLashes"
+                            :label="$t('avatar.lashes')"
+                            color="primary"
+                            dense
+                          />
+                        </div>
+                        <div class="col-12 col-sm-6">
+                          <q-toggle
+                            v-model="avatarConfig.faceMask"
+                            :label="$t('avatar.faceMask')"
+                            color="primary"
+                            dense
+                          />
+                        </div>
                       </div>
-                      <div class="col-12 col-sm-6">
-                        <q-select
-                          v-model="avatarConfig.mouth"
-                          :options="getOptions('mouth')"
-                          :label="$t('avatar.mouth')"
-                          filled
-                          dense
-                          emit-value
-                          map-options
-                        >
-                          <template v-slot:prepend>
-                            <q-icon name="sentiment_satisfied" />
-                          </template>
-                        </q-select>
-                      </div>
-                      <div class="col-12 col-sm-6">
-                        <q-select
-                          v-model="avatarConfig.lipColor"
-                          :options="getColorOptions('lipColor')"
-                          :label="$t('avatar.lipColor')"
-                          filled
-                          dense
-                          emit-value
-                          map-options
-                        >
-                          <template v-slot:prepend>
-                            <q-icon name="colorize" />
-                          </template>
-                        </q-select>
-                      </div>
-                      <div class="col-12 col-sm-6">
-                        <q-toggle
-                          v-model="avatarConfig.withLashes"
-                          :label="$t('avatar.lashes')"
-                          color="primary"
-                        />
-                      </div>
-                      <div class="col-12 col-sm-6">
-                        <q-toggle
-                          v-model="avatarConfig.faceMask"
-                          :label="$t('avatar.faceMask')"
-                          color="primary"
-                        />
-                      </div>
-                    </div>
-                  </q-card-section>
-                </q-card>
+                    </q-card-section>
+                  </q-card>
 
-                <!-- 3. Hair Category -->
-                <q-card flat bordered class="rounded-borders">
-                  <q-card-section>
-                    <div class="row items-center q-mb-md">
-                      <q-icon name="face_retouching_natural" size="24px" color="primary" class="q-mr-sm" />
-                      <span class="text-h6 text-primary">{{ $t('avatar.hair') }}</span>
-                    </div>
-                    <div class="row q-col-gutter-md">
-                      <div class="col-12 col-sm-6">
-                        <q-select
-                          v-model="avatarConfig.hair"
-                          :options="getOptions('hair')"
-                          :label="$t('avatar.hairStyle')"
-                          filled
-                          dense
-                          emit-value
-                          map-options
-                        >
-                          <template v-slot:prepend>
-                            <q-icon name="face" />
-                          </template>
-                        </q-select>
+                  <!-- 3. Hair Category -->
+                  <q-card flat bordered class="rounded-borders q-mb-sm">
+                    <q-card-section class="q-pa-sm">
+                      <div class="row items-center q-mb-sm">
+                        <q-icon name="face_retouching_natural" size="20px" color="primary" class="q-mr-sm" />
+                        <span class="text-subtitle1 text-primary">{{ $t('avatar.hair') }}</span>
                       </div>
-                      <div class="col-12 col-sm-6">
-                        <q-select
-                          v-model="avatarConfig.hairColor"
-                          :options="getColorOptions('hairColor')"
-                          :label="$t('avatar.hairColor')"
-                          filled
-                          dense
-                          emit-value
-                          map-options
-                        >
-                          <template v-slot:prepend>
-                            <q-icon name="palette" />
-                          </template>
-                        </q-select>
+                      <div class="row q-col-gutter-sm">
+                        <div class="col-12 col-sm-6">
+                          <q-select
+                            v-model="avatarConfig.hair"
+                            :options="getOptions('hair')"
+                            :label="$t('avatar.hairStyle')"
+                            filled
+                            dense
+                            emit-value
+                            map-options
+                            options-dense
+                          >
+                            <template v-slot:prepend>
+                              <q-icon name="face" size="xs" />
+                            </template>
+                          </q-select>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                          <q-select
+                            v-model="avatarConfig.hairColor"
+                            :options="getColorOptions('hairColor')"
+                            :label="$t('avatar.hairColor')"
+                            filled
+                            dense
+                            emit-value
+                            map-options
+                            options-dense
+                          >
+                            <template v-slot:prepend>
+                              <q-icon name="palette" size="xs" />
+                            </template>
+                          </q-select>
+                        </div>
                       </div>
-                    </div>
-                  </q-card-section>
-                </q-card>
+                    </q-card-section>
+                  </q-card>
 
-                <!-- 4. Headwear Category -->
-                <q-card flat bordered class="rounded-borders">
-                  <q-card-section>
-                    <div class="row items-center q-mb-md">
-                      <q-icon name="checkroom" size="24px" color="primary" class="q-mr-sm" />
-                      <span class="text-h6 text-primary">{{ $t('avatar.headwear') }}</span>
-                    </div>
-                    <div class="row q-col-gutter-md">
-                      <div class="col-12 col-sm-6">
-                        <q-select
-                          v-model="avatarConfig.hat"
-                          :options="getOptions('hat')"
-                          :label="$t('avatar.hat')"
-                          filled
-                          dense
-                          emit-value
-                          map-options
-                        >
-                          <template v-slot:prepend>
-                            <q-icon name="checkroom" />
-                          </template>
-                        </q-select>
+                  <!-- 4. Headwear Category -->
+                  <q-card flat bordered class="rounded-borders q-mb-sm">
+                    <q-card-section class="q-pa-sm">
+                      <div class="row items-center q-mb-sm">
+                        <q-icon name="checkroom" size="20px" color="primary" class="q-mr-sm" />
+                        <span class="text-subtitle1 text-primary">{{ $t('avatar.headwear') }}</span>
                       </div>
-                      <div class="col-12 col-sm-6">
-                        <q-select
-                          v-model="avatarConfig.hatColor"
-                          :options="getColorOptions('hatColor')"
-                          :label="$t('avatar.hatColor')"
-                          filled
-                          dense
-                          emit-value
-                          map-options
-                        >
-                          <template v-slot:prepend>
-                            <q-icon name="palette" />
-                          </template>
-                        </q-select>
+                      <div class="row q-col-gutter-sm">
+                        <div class="col-12 col-sm-6">
+                          <q-select
+                            v-model="avatarConfig.hat"
+                            :options="getOptions('hat')"
+                            :label="$t('avatar.hat')"
+                            filled
+                            dense
+                            emit-value
+                            map-options
+                            options-dense
+                          >
+                            <template v-slot:prepend>
+                              <q-icon name="checkroom" size="xs" />
+                            </template>
+                          </q-select>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                          <q-select
+                            v-model="avatarConfig.hatColor"
+                            :options="getColorOptions('hatColor')"
+                            :label="$t('avatar.hatColor')"
+                            filled
+                            dense
+                            emit-value
+                            map-options
+                            options-dense
+                          >
+                            <template v-slot:prepend>
+                              <q-icon name="palette" size="xs" />
+                            </template>
+                          </q-select>
+                        </div>
+                        <div class="col-12 col-sm-6">
+                          <q-select
+                            v-model="avatarConfig.accessory"
+                            :options="getOptions('accessory')"
+                            :label="$t('avatar.accessory')"
+                            filled
+                            dense
+                            emit-value
+                            map-options
+                            options-dense
+                          >
+                            <template v-slot:prepend>
+                              <q-icon name="face_retouching_natural" size="xs" />
+                            </template>
+                          </q-select>
+                        </div>
                       </div>
-                      <div class="col-12 col-sm-6">
-                        <q-select
-                          v-model="avatarConfig.accessory"
-                          :options="getOptions('accessory')"
-                          :label="$t('avatar.accessory')"
-                          filled
-                          dense
-                          emit-value
-                          map-options
-                        >
-                          <template v-slot:prepend>
-                            <q-icon name="face_retouching_natural" />
-                          </template>
-                        </q-select>
-                      </div>
-                    </div>
-                  </q-card-section>
-                </q-card>
-
-                <!-- Save Button -->
-                <div class="row justify-end">
-                  <q-btn 
-                    :label="$t('profilePage.saveButton')" 
-                    color="primary" 
-                    unelevated
-                    @click="updateProfile"
-                    icon="save"
-                    size="lg"
-                    class="q-px-xl"
-                    data-cy="save-profile-btn"
-                  />
+                    </q-card-section>
+                  </q-card>
                 </div>
-                
+              </q-scroll-area>
+
+              <!-- Save Button -->
+              <div class="row justify-end q-pt-sm">
+                <q-btn 
+                  :label="$t('profilePage.saveButton')" 
+                  color="primary" 
+                  unelevated
+                  @click="updateProfile"
+                  icon="save"
+                  size="md"
+                  class="q-px-lg"
+                  data-cy="save-profile-btn"
+                  compact
+                />
               </div>
+              
             </div>
           </div>
         </q-card-section>
       </q-card>
     </div>
+
+
   </q-page>
 </template>
 
@@ -431,5 +451,31 @@ const updateProfile = async () => {
 <style scoped>
 .rounded-borders {
   border-radius: 16px;
+}
+
+.profile-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.profile-right {
+  flex: 1;
+  min-height: 0;
+}
+
+@media (min-width: 1024px) {
+  .profile-container {
+    flex-direction: row;
+    gap: 16px;
+  }
+  
+  .profile-left {
+    width: 33.3333%;
+  }
+  
+  .profile-right {
+    width: 66.6666%;
+  }
 }
 </style>
