@@ -7,7 +7,7 @@
         "create": "Create"
     },
     "navigation": {
-        "title": "Guide Badges",
+        "title": "Korifes",
         "header": "Navigation",
         "dashboard": "Dashboard",
         "myProgress": "My Progress",
@@ -293,7 +293,7 @@
         "register": {
             "tab": "Register",
             "title": "Create Account",
-            "subtitle": "Join Guide Badges today",
+            "subtitle": "Join Korifes today",
             "button": "Register",
             "success": "Registration successful! Please login.",
             "failed": "Registration failed",
@@ -487,5 +487,11 @@
         "message": "Oops! It looks like you've wandered into uncharted territory. Even the best guides get lost sometimes!",
         "returnHome": "Return to Base",
         "goBack": "Go Back"
+    },
+    "pwa": {
+        "installTitle": "Install Korifes",
+        "installMessage": "Install our app for a better experience and offline access!",
+        "install": "Install",
+        "dismiss": "Not Now"
     }
 }

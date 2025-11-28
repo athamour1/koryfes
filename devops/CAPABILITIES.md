@@ -1,4 +1,4 @@
-# Guide Badges - System Capabilities & User Roles
+# Korifes - System Capabilities & User Roles
 
 ## User Roles & Permissions
 

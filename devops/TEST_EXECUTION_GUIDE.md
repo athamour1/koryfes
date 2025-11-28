@@ -1,6 +1,6 @@
 # E2E Test Execution Guide
 
-This guide explains how to run and maintain the End-to-End (E2E) tests for the Guide Badges application using Cypress.
+This guide explains how to run and maintain the End-to-End (E2E) tests for the Korifes application using Cypress.
 
 ## Prerequisites
 

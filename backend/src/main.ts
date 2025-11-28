@@ -11,7 +11,13 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   // Serve static files from uploads directory
-  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+  // In production: __dirname = /usr/src/app/dist/src, so we need '../..' to reach /usr/src/app
+  // In development: __dirname = /backend/src, so we need '..' to reach /backend
+  const uploadsPath = process.env.NODE_ENV === 'production'
+    ? join(__dirname, '..', '..', 'uploads')
+    : join(__dirname, '..', 'uploads');
+
+  app.useStaticAssets(uploadsPath, {
     prefix: '/uploads/',
   });
 
@@ -44,8 +50,8 @@ async function bootstrap() {
   const isDevelopment = process.env.NODE_ENV !== 'production';
   if (isDevelopment) {
     const config = new DocumentBuilder()
-      .setTitle('Guide Badges API')
-      .setDescription('REST API for Guide Badges Management System')
+      .setTitle('Korifes API')
+      .setDescription('REST API for Korifes Management System')
       .setVersion('1.0')
       .addBearerAuth()
       .build();

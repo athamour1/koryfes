@@ -8,7 +8,7 @@ describe('Landing', () => {
   beforeEach(() => {
     cy.visit('/');
   });
-  cy.title().should('include', 'Guide Badges');
+  cy.title().should('include', 'Korifes');
 });
 
 // ** The following code is an example to show you how to write some tests for your home page **

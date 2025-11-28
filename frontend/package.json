@@ -2,7 +2,7 @@
     "name": "guide-badges-quasar",
     "version": "0.0.1",
     "description": "Track your guide progress and badges",
-    "productName": "Guide Badges",
+    "productName": "Korifes",
     "author": "Thanos Mourtzoukos <thanosmour.tk@gmail.com>",
     "type": "module",
     "private": true,

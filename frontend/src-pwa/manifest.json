@@ -1,13 +1,13 @@
 {
-  "name": "Guide Badges",
-  "short_name": "GuideBadges",
-  "description": "Track your guide progress and badges",
+  "name": "Korifes",
+  "short_name": "Korifes",
+  "description": "Track your guides personal progress",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#ffffff",
-  "theme_color": "#6a1b9a",
+  "theme_color": "#4facfe",
   "icons": [
     {
       "src": "icons/icon-128x128.png",

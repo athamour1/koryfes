@@ -148,6 +148,9 @@
     <q-page-container>
       <router-view />
     </q-page-container>
+
+    <!-- PWA Install Prompt -->
+    <PWAInstallPrompt />
   </q-layout>
 </template>
 
@@ -157,6 +160,7 @@ import { useAuthStore } from 'src/stores/auth';
 import { useRouter, useRoute } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
+import PWAInstallPrompt from 'src/components/PWAInstallPrompt.vue';
 
 const authStore = useAuthStore();
 const router = useRouter();

@@ -149,10 +149,10 @@ export default defineConfig((/* ctx */) => {
       // swFilename: 'sw.js',
       // manifestFilename: 'manifest.json',
       extendManifestJson(json) {
-        json.name = 'Guide Badges'
-        json.short_name = 'GuideBadges'
-        json.description = 'Track your guide progress and badges'
-        json.theme_color = '#6a1b9a'
+        json.name = 'Korifes'
+        json.short_name = 'Korifes'
+        json.description = 'Track your guides personal progress'
+        json.theme_color = '#4facfe'
         json.background_color = '#ffffff'
       },
       // useCredentialsForManifestTag: true,

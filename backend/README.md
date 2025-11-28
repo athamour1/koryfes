@@ -1,6 +1,6 @@
-# Guide Badges - Backend
+# Korifes - Backend
 
-The RESTful API for Guide Badges, built with **NestJS**.
+The RESTful API for Korifes, built with **NestJS**.
 
 ## ✨ Key Features
 

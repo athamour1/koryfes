@@ -1,4 +1,4 @@
-# Guide Badges Application
+# Korifes Application
 
 A full-stack badge management system built with **NestJS**, **Vue 3**, **Quasar**, and **PostgreSQL**.
 

@@ -1,4 +1,4 @@
-# Guide Badges (guide-badges-quasar)
+# Korifes (guide-badges-quasar)
 
 Track your guide progress and badges
 
