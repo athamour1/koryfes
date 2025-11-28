@@ -140,7 +140,7 @@ provide('theme', {
 
       <Body
         :type="body"
-        :color="clothingColor"
+        color="white"
         position="back"
         :bra-straps="braStraps"
       />
@@ -148,7 +148,7 @@ provide('theme', {
       <Clothing 
         position="back" 
         :type="clothing"
-        :color="clothingColor"
+        color="white"
       >
         <template #graphic>
           <ClothingGraphic 
@@ -161,7 +161,7 @@ provide('theme', {
         v-if="clothingVisibility.front || clothingVisibility.back"
         position="front"
         :type="body"
-        :color="clothing === 'dress-shirt' ? 'white' : clothingColor"
+        color="white"
         :bra-straps="braStraps"
       />
 
@@ -169,7 +169,7 @@ provide('theme', {
         v-if="clothingVisibility.front"
         position="front"
         :type="clothing"
-        :color="clothingColor"
+        color="white"
       />
 
       <!-- SCARF: Always visible, drapes over clothing -->
