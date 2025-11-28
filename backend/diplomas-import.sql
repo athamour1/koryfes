@@ -1,6 +1,9 @@
 -- Elective Diplomas Import Script
 -- Generated from /home/thanos98/Downloads/eshop_seo_gr/ptyxia
 
+-- Clear existing data
+DELETE FROM elective_diplomas;
+
 INSERT INTO elective_diplomas (name, description, image) VALUES
 ('Βοηθών', 'Πτυχίο Οργάνωσης
  Βοηθιών', '/uploads/progress-images/p-o-A_voithion-600x600_1763728535429.jpg'),

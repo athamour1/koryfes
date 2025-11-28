@@ -1,18 +1,14 @@
 <template>
   <q-page class="units-page">
     <!-- Hero Header -->
-    <div class="q-pa-md">
-      <div class="gradient-purple text-white q-pa-lg q-mb-lg" style="border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 1200px; margin: 0 auto;">
-        <div class="text-center" style="max-width: 800px; margin: 0 auto;">
-          <q-icon name="groups" size="48px" class="q-mb-sm" />
-          <div class="text-h4 text-weight-bold q-mb-sm">{{ $t('adminUnits.title') }}</div>
-          <div class="text-body1" style="opacity: 0.9;">{{ $t('adminUnits.subtitle') }}</div>
-        </div>
-      </div>
-    </div>
+    <PageHeader 
+      icon="groups"
+      :title="$t('adminUnits.title')"
+      :subtitle="$t('adminUnits.subtitle')"
+    />
 
     <!-- Content -->
-    <div class="q-pa-lg" style="max-width: 1200px; margin: 0 auto;">
+    <div class="q-pa-md" style="max-width: 1200px; margin: 0 auto;">
 
       <q-card flat bordered>
         <q-table
@@ -27,12 +23,12 @@
       :loading="loading"
     >
       <template v-slot:top-right>
-        <q-input borderless dense debounce="300" v-model="filter" :placeholder="$t('adminUnits.searchPlaceholder')">
+        <q-input borderless dense debounce="300" v-model="filter" :placeholder="$t('adminUnits.searchPlaceholder')" data-cy="search-input">
           <template v-slot:append>
             <q-icon name="search" />
           </template>
         </q-input>
-        <q-btn color="primary" icon="add" :label="$t('adminUnits.createButton')" class="q-ml-md" @click="openCreateDialog" />
+        <q-btn color="primary" icon="add" :label="$t('adminUnits.createButton')" class="q-ml-md" @click="openCreateDialog" data-cy="create-unit-btn" />
       </template>
 
       <template v-slot:body-cell-flag="props">
@@ -46,13 +42,14 @@
 
       <template v-slot:body-cell-actions="props">
         <q-td :props="props">
-          <q-btn flat dense color="primary" icon="edit" @click="openEditDialog(props.row)" />
+          <q-btn flat dense color="primary" icon="edit" @click="openEditDialog(props.row)" data-cy="edit-btn" />
           <q-btn 
             flat 
             dense 
             color="negative" 
             icon="delete" 
             @click="confirmDeleteUnit(props.row)" 
+            data-cy="delete-btn"
           />
         </q-td>
       </template>
@@ -71,7 +68,7 @@
 
     <!-- Create/Edit Unit Dialog -->
     <q-dialog v-model="unitDialog">
-      <q-card style="min-width: 500px">
+      <q-card style="width: 100%; max-width: 500px">
         <q-card-section>
           <div class="text-h6">{{ isEditing ? $t('adminUnits.dialog.editTitle') : $t('adminUnits.dialog.createTitle') }}</div>
         </q-card-section>
@@ -91,7 +88,7 @@
                   size="sm"
                   class="absolute-bottom-right"
                   style="bottom: -5px; right: -5px;"
-                  @click="$refs.fileInput.pickFiles()"
+                  @click="triggerFileInput"
                 />
                 <q-file
                   ref="fileInput"
@@ -103,7 +100,7 @@
               </div>
             </div>
 
-            <q-input filled v-model="unitForm.name" :label="$t('adminUnits.form.name')" :rules="[val => !!val || $t('adminUnits.form.required')]" />
+            <q-input filled v-model="unitForm.name" :label="$t('adminUnits.form.name')" :rules="[val => !!val || $t('adminUnits.form.required')]" data-cy="unit-name-input" />
             <q-input filled v-model="unitForm.description" :label="$t('adminUnits.form.description')" type="textarea" autogrow />
             
             <!-- Location Selection (Super Admin Only) -->
@@ -118,6 +115,7 @@
               map-options
               :label="$t('adminUnits.form.location')"
               :rules="[val => !!val || $t('adminUnits.form.locationRequired')]"
+              data-cy="location-select"
             >
               <template v-slot:prepend>
                 <q-icon name="location_on" />
@@ -126,7 +124,7 @@
 
             <div class="row justify-end q-gutter-sm">
               <q-btn :label="$t('general.cancel')" flat v-close-popup />
-              <q-btn :label="isEditing ? $t('general.save') : $t('general.create')" type="submit" color="primary" :loading="loading" />
+              <q-btn :label="isEditing ? $t('general.save') : $t('general.create')" type="submit" color="primary" :loading="loading" data-cy="save-unit-btn" />
             </div>
           </q-form>
         </q-card-section>
@@ -138,11 +136,12 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useUnitStore } from '../../stores/unit';
-import { useAuthStore } from '../../stores/auth';
+import { useUnitStore } from 'src/stores/unit';
+import { useAuthStore } from 'src/stores/auth';
 import { useQuasar } from 'quasar';
-import { config } from '../../config';
-import { api } from '../../api';
+import { config } from 'src/config';
+import { api } from 'src/api';
+import PageHeader from 'src/components/PageHeader.vue';
 
 const unitStore = useUnitStore();
 const authStore = useAuthStore();
@@ -164,6 +163,7 @@ const isEditing = ref(false);
 const uploadFile = ref(null);
 const previewImage = ref(null);
 const locations = ref([]);
+const fileInput = ref(null);
 
 const unitForm = ref({
   id: null,
@@ -202,10 +202,17 @@ const openCreateDialog = () => {
 
 const openEditDialog = (unit) => {
   isEditing.value = true;
-  unitForm.value = { ...unit };
+  unitForm.value = { 
+    ...unit,
+    locationId: unit.location?.id
+  };
   previewImage.value = null;
   uploadFile.value = null;
   unitDialog.value = true;
+};
+
+const triggerFileInput = () => {
+  fileInput.value?.pickFiles();
 };
 
 const handleImagePreview = (file) => {
@@ -217,10 +224,16 @@ const handleImagePreview = (file) => {
 const saveUnit = async () => {
   let result;
   if (isEditing.value) {
-    result = await unitStore.updateUnit(unitForm.value.id, {
+    const updatePayload = {
       name: unitForm.value.name,
       description: unitForm.value.description
-    });
+    };
+
+    if (authStore.isSuperAdmin && unitForm.value.locationId) {
+      updatePayload.location = { id: unitForm.value.locationId };
+    }
+
+    result = await unitStore.updateUnit(unitForm.value.id, updatePayload);
   } else {
     const createPayload = {
       name: unitForm.value.name,
@@ -265,3 +278,6 @@ const confirmDeleteUnit = (unit) => {
   });
 };
 </script>
+
+<style scoped>
+</style>

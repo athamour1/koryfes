@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { UserProgress } from './user-progress.entity';
 import { Peak } from '../peaks/peak.entity';
 import { Path } from '../paths/path.entity';
-import { ScoutDiploma } from '../scout-diplomas/scout-diploma.entity';
+import { GuideDiploma } from '../guide-diplomas/guide-diploma.entity';
 import { ElectiveDiploma } from '../elective-diplomas/elective-diploma.entity';
 import { User } from '../users/entities/user.entity';
 
@@ -17,8 +17,8 @@ export class UserProgressService {
         private peakRepository: Repository<Peak>,
         @InjectRepository(Path)
         private pathRepository: Repository<Path>,
-        @InjectRepository(ScoutDiploma)
-        private scoutDiplomaRepository: Repository<ScoutDiploma>,
+        @InjectRepository(GuideDiploma)
+        private guideDiplomaRepository: Repository<GuideDiploma>,
         @InjectRepository(ElectiveDiploma)
         private electiveDiplomaRepository: Repository<ElectiveDiploma>,
         @InjectRepository(User)
@@ -50,7 +50,7 @@ export class UserProgressService {
             user,
             currentPeak: null,
             completedPaths: [],
-            scoutDiplomas: [],
+            guideDiplomas: [],
             electiveDiplomas: [],
         });
 
@@ -63,7 +63,7 @@ export class UserProgressService {
     async getUserProgress(userId: number): Promise<UserProgress> {
         const progress = await this.userProgressRepository.findOne({
             where: { user: { id: userId } },
-            relations: ['currentPeak', 'completedPaths', 'scoutDiplomas', 'electiveDiplomas', 'user'],
+            relations: ['currentPeak', 'completedPaths', 'guideDiplomas', 'electiveDiplomas', 'user'],
         });
 
         if (!progress) {
@@ -102,20 +102,20 @@ export class UserProgressService {
     /**
      * Award a diploma to the user
      */
-    async awardDiploma(userId: number, diplomaId: number, type: 'scout' | 'elective'): Promise<UserProgress> {
+    async awardDiploma(userId: number, diplomaId: number, type: 'guide' | 'elective'): Promise<UserProgress> {
         const progress = await this.getUserProgress(userId);
 
-        if (type === 'scout') {
-            const diploma = await this.scoutDiplomaRepository.findOne({ where: { id: diplomaId } });
+        if (type === 'guide') {
+            const diploma = await this.guideDiplomaRepository.findOne({ where: { id: diplomaId } });
             if (!diploma) {
-                throw new NotFoundException('Scout diploma not found');
+                throw new NotFoundException('Guide diploma not found');
             }
 
-            if (progress.scoutDiplomas.some(d => d.id === diplomaId)) {
+            if (progress.guideDiplomas.some(d => d.id === diplomaId)) {
                 throw new BadRequestException('Diploma already awarded');
             }
 
-            progress.scoutDiplomas.push(diploma);
+            progress.guideDiplomas.push(diploma);
         } else {
             const diploma = await this.electiveDiplomaRepository.findOne({ where: { id: diplomaId } });
             if (!diploma) {
@@ -142,9 +142,9 @@ export class UserProgressService {
      * 
      * Peak Requirements (cumulative):
      * - Promise (order 1): Must be manually awarded by admin/leader - unlocks paths/diplomas section
-     * - Bronze (order 2): 4 paths (any category) + 1st Scout Diploma + 1 elective diploma
-     * - Silver (order 3): 8 paths (any category) + 2nd Scout Diploma + 2 elective diplomas
-     * - Gold (order 4): 12 paths (any category) + 3rd Scout Diploma + 4 elective diplomas
+     * - Bronze (order 2): 4 paths (any category) + 1st Guide Diploma + 1 elective diploma
+     * - Silver (order 3): 8 paths (any category) + 2nd Guide Diploma + 2 elective diplomas
+     * - Gold (order 4): 12 paths (any category) + 3rd Guide Diploma + 4 elective diplomas
      */
     async checkAndUnlockPeaks(userId: number): Promise<void> {
         const progress = await this.getUserProgress(userId);
@@ -157,23 +157,23 @@ export class UserProgressService {
         const currentOrder = progress.currentPeak.order;
 
         const pathCount = progress.completedPaths.length;
-        const scoutDiplomaLevels = progress.scoutDiplomas.map(d => d.level).sort();
+        const guideDiplomaLevels = progress.guideDiplomas.map(d => d.level).sort();
         const electiveDiplomaCount = progress.electiveDiplomas.length;
 
-        const hasScoutDiploma = (level: number) => scoutDiplomaLevels.includes(level);
+        const hasGuideDiploma = (level: number) => guideDiplomaLevels.includes(level);
 
         let newPeakOrder = currentOrder;
 
         // Check for Gold Peak (order 4)
-        if (currentOrder < 4 && pathCount >= 12 && hasScoutDiploma(3) && electiveDiplomaCount >= 4) {
+        if (currentOrder < 4 && pathCount >= 12 && hasGuideDiploma(3) && electiveDiplomaCount >= 4) {
             newPeakOrder = 4;
         }
         // Check for Silver Peak (order 3)
-        else if (currentOrder < 3 && pathCount >= 8 && hasScoutDiploma(2) && electiveDiplomaCount >= 2) {
+        else if (currentOrder < 3 && pathCount >= 8 && hasGuideDiploma(2) && electiveDiplomaCount >= 2) {
             newPeakOrder = 3;
         }
         // Check for Bronze Peak (order 2)
-        else if (currentOrder < 2 && pathCount >= 4 && hasScoutDiploma(1) && electiveDiplomaCount >= 1) {
+        else if (currentOrder < 2 && pathCount >= 4 && hasGuideDiploma(1) && electiveDiplomaCount >= 1) {
             newPeakOrder = 2;
         }
 
@@ -209,7 +209,7 @@ export class UserProgressService {
      */
     async findAll(): Promise<UserProgress[]> {
         return this.userProgressRepository.find({
-            relations: ['currentPeak', 'completedPaths', 'scoutDiplomas', 'electiveDiplomas', 'user'],
+            relations: ['currentPeak', 'completedPaths', 'guideDiplomas', 'electiveDiplomas', 'user'],
         });
     }
 }

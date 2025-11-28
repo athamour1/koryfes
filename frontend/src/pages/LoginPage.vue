@@ -1,28 +1,14 @@
 <template>
-  <q-page class="flex flex-center gradient-purple">
-    <q-card style="width: 100%; max-width: 400px; margin: 16px;">
-      <!-- Toggle Tabs -->
-      <q-tabs
-        v-model="tab"
-        dense
-        class="text-grey"
-        active-color="primary"
-        indicator-color="primary"
-        align="justify"
-      >
-        <q-tab name="login" :label="$t('auth.login.tab')" />
-        <q-tab name="register" :label="$t('auth.register.tab')" />
-      </q-tabs>
+  <q-page class="flex flex-center login-page" @mousemove="handleMouseMove">
+    <div class="interactive-bg" :style="bgStyle"></div>
+    
+    <q-card style="width: 100%; max-width: 400px; margin: 16px; z-index: 1; backdrop-filter: blur(10px); background: rgba(30, 30, 40, 0.85); border: 1px solid rgba(255,255,255,0.1);">
+      <q-card-section class="text-center q-pb-none">
+        <div class="text-h4 text-weight-bold text-grey-4">{{ $t('auth.login.title') }}</div>
+        <div class="text-subtitle2 text-grey-4">{{ $t('auth.login.subtitle') }}</div>
+      </q-card-section>
 
-      <q-separator />
 
-      <q-tab-panels v-model="tab" animated>
-        <!-- Login Panel -->
-        <q-tab-panel name="login">
-          <q-card-section class="text-center q-pb-none">
-            <div class="text-h4 text-weight-bold">{{ $t('auth.login.title') }}</div>
-            <div class="text-subtitle2 text-grey-7">{{ $t('auth.login.subtitle') }}</div>
-          </q-card-section>
 
           <q-card-section>
             <q-form @submit="handleLogin">
@@ -31,18 +17,33 @@
                 :label="$t('auth.form.username')" 
                 outlined 
                 dense 
+                dark
                 class="q-mb-md"
                 :rules="[val => !!val || $t('auth.form.rules.usernameRequired')]"
+                data-cy="username-input"
               />
               <q-input 
                 v-model="loginForm.password" 
                 :label="$t('auth.form.password')" 
-                type="password" 
+                :type="isPwd ? 'password' : 'text'" 
                 outlined 
                 dense 
+                dark
                 class="q-mb-md"
                 :rules="[val => !!val || $t('auth.form.rules.passwordRequired')]"
-              />
+                data-cy="password-input"
+              >
+                <template v-slot:append>
+                  <q-icon
+                    :name="isPwd ? 'visibility_off' : 'visibility'"
+                    class="cursor-pointer"
+                    @click="isPwd = !isPwd"
+                  />
+                </template>
+              </q-input>
+              <div class="row items-center q-mb-md">
+                <q-checkbox v-model="rememberMe" :label="$t('auth.login.rememberMe')" dark dense color="primary" class="text-grey-4" />
+              </div>
               <q-btn 
                 :label="$t('auth.login.button')" 
                 type="submit" 
@@ -50,67 +51,24 @@
                 class="full-width" 
                 size="md"
                 unelevated
+                data-cy="login-btn"
               />
             </q-form>
           </q-card-section>
-        </q-tab-panel>
-
-        <!-- Register Panel -->
-        <q-tab-panel name="register">
-          <q-card-section class="text-center q-pb-none">
-            <div class="text-h4 text-weight-bold">{{ $t('auth.register.title') }}</div>
-            <div class="text-subtitle2 text-grey-7">{{ $t('auth.register.subtitle') }}</div>
-          </q-card-section>
-
-          <q-card-section>
-            <q-form @submit="handleRegister">
-              <q-input 
-                v-model="registerForm.username" 
-                :label="$t('auth.form.username')" 
-                outlined 
-                dense 
-                class="q-mb-md"
-                :rules="usernameRules"
-              />
-              <q-input 
-                v-model="registerForm.password" 
-                :label="$t('auth.form.password')" 
-                type="password" 
-                outlined 
-                dense 
-                class="q-mb-md"
-                :rules="passwordRules"
-              />
-              <q-input 
-                v-model="registerForm.location" 
-                :label="$t('auth.form.location')" 
-                outlined 
-                dense 
-                class="q-mb-md"
-              />
-              <q-btn 
-                :label="$t('auth.register.button')" 
-                type="submit" 
-                color="primary" 
-                class="full-width" 
-                size="md"
-                unelevated
-              />
-            </q-form>
-          </q-card-section>
-        </q-tab-panel>
-      </q-tab-panels>
+      <q-card-section v-if="stagingMessage" class="text-center q-pt-none text-warning">
+        <div class="text-caption text-orange">{{ stagingMessage }}</div>
+      </q-card-section>
     </q-card>
   </q-page>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { useAuthStore } from '../stores/auth';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { useAuthStore } from 'src/stores/auth';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
-import { config } from '../config';
+import { config } from 'src/config';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -119,35 +77,29 @@ const { t } = useI18n();
 
 const tab = ref('login');
 const loginForm = ref({ username: '', password: '' });
-const registerForm = ref({ username: '', password: '', location: '' });
+const rememberMe = ref(false);
+const isPwd = ref(true);
+const stagingMessage = config.stagingMessage;
+const mouseX = ref(50);
+const mouseY = ref(50);
 
-// Validation rules for register
-const usernameRules = computed(() => {
-  if (config.isProd) {
-    return [
-      val => !!val || t('auth.form.rules.usernameRequired'),
-      val => /.+@.+\..+/.test(val) || t('auth.form.rules.validEmail')
-    ];
-  }
-  return [val => !!val || t('auth.form.rules.usernameRequired')];
-});
+const bgStyle = computed(() => ({
+  '--mouse-x': `${mouseX.value}%`,
+  '--mouse-y': `${mouseY.value}%`
+}));
 
-const passwordRules = computed(() => {
-  if (config.isProd) {
-    return [
-      val => !!val || t('auth.form.rules.passwordRequired'),
-      val => val.length >= 8 || t('auth.form.rules.passwordLength'),
-      val => /[A-Z]/.test(val) || t('auth.form.rules.passwordUpper'),
-      val => /[a-z]/.test(val) || t('auth.form.rules.passwordLower'),
-      val => /[0-9]/.test(val) || t('auth.form.rules.passwordNumber')
-    ];
-  }
-  return [val => !!val || t('auth.form.rules.passwordRequired')];
-});
+const handleMouseMove = (event) => {
+  const { clientX, clientY } = event;
+  const { innerWidth, innerHeight } = window;
+  mouseX.value = (clientX / innerWidth) * 100;
+  mouseY.value = (clientY / innerHeight) * 100;
+};
+
+
 
 const handleLogin = async () => {
   try {
-    const success = await authStore.login(loginForm.value.username, loginForm.value.password);
+    const success = await authStore.login(loginForm.value.username, loginForm.value.password, rememberMe.value);
     
     if (!success) {
       $q.notify({
@@ -163,7 +115,7 @@ const handleLogin = async () => {
     if (authStore.isAdmin) {
       router.push('/admin/dashboard');
     } else {
-      router.push('/my-badges');
+      router.push('/my-progress');
     }
   } catch (error) {
     console.error('Login failed', error);
@@ -177,24 +129,30 @@ const handleLogin = async () => {
   }
 };
 
-const handleRegister = async () => {
-  try {
-    await authStore.register(registerForm.value);
-    $q.notify({
-      color: 'positive',
-      message: t('auth.register.success'),
-      icon: 'check'
-    });
-    tab.value = 'login';
-    loginForm.value.username = registerForm.value.username;
-    registerForm.value = { username: '', password: '', location: '' };
-  } catch (error) {
-    console.error('Registration failed', error);
-    $q.notify({
-      color: 'negative',
-      message: t('auth.register.failed'),
-      icon: 'report_problem'
-    });
-  }
-};
+
 </script>
+
+<style scoped>
+.login-page {
+  position: relative;
+  overflow: hidden;
+  background: #1a1a2e; /* Fallback */
+}
+
+.interactive-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(
+      circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(138, 43, 226, 0.4) 0%,
+      rgba(0, 0, 0, 0) 50%
+    ),
+    linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  z-index: 0;
+  transition: background 0.1s ease;
+}
+</style>

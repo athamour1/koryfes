@@ -1,18 +1,14 @@
 <template>
   <q-page class="progress-page">
     <!-- Hero Header -->
-    <div class="q-pa-md">
-      <div class="gradient-purple text-white q-pa-lg q-mb-lg" style="border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 1400px; margin: 0 auto;">
-        <div class="text-center" style="max-width: 800px; margin: 0 auto;">
-          <q-icon name="trending_up" size="48px" class="q-mb-sm" />
-          <div class="text-h4 text-weight-bold q-mb-sm">Individual Progress Management</div>
-          <div class="text-body1" style="opacity: 0.9;">Manage peaks, diplomas, and paths for scout progression</div>
-        </div>
-      </div>
-    </div>
+    <PageHeader 
+      icon="trending_up"
+      title="Individual Progress Management"
+      subtitle="Manage peaks, diplomas, and paths for guide progression"
+    />
 
     <!-- Tabs Content -->
-    <div class="q-pa-lg" style="max-width: 1400px; margin: 0 auto;">
+    <div class="q-pa-md" style="max-width: 1400px; margin: 0 auto;">
       <q-card flat bordered>
         <q-tabs
           v-model="tab"
@@ -23,10 +19,10 @@
           align="justify"
           narrow-indicator
         >
-          <q-tab name="peaks" icon="landscape" label="Peaks" />
-          <q-tab name="scoutDiplomas" icon="school" label="Scout Diplomas" />
-          <q-tab name="electiveDiplomas" icon="stars" label="Elective Diplomas" />
-          <q-tab name="paths" icon="route" label="Paths" />
+          <q-tab name="peaks" icon="landscape" label="Peaks" data-cy="tab-peaks" />
+          <q-tab name="guideDiplomas" icon="school" label="Guide Diplomas" data-cy="tab-guide-diplomas" />
+          <q-tab name="electiveDiplomas" icon="stars" label="Elective Diplomas" data-cy="tab-elective-diplomas" />
+          <q-tab name="paths" icon="route" label="Paths" data-cy="tab-paths" />
         </q-tabs>
 
         <q-separator />
@@ -55,23 +51,23 @@
 
               <template v-slot:body-cell-actions="props">
                 <q-td :props="props">
-                  <q-btn flat dense color="primary" icon="edit" @click="openEditPeakDialog(props.row)" />
+                  <q-btn flat dense color="primary" icon="edit" @click="openEditPeakDialog(props.row)" data-cy="edit-peak-btn" />
                 </q-td>
               </template>
             </q-table>
           </q-tab-panel>
 
-          <!-- Scout Diplomas Tab -->
-          <q-tab-panel name="scoutDiplomas">
-            <div class="text-h6 q-mb-md">Scout Diplomas</div>
+          <!-- Guide Diplomas Tab -->
+          <q-tab-panel name="guideDiplomas">
+            <div class="text-h6 q-mb-md">Guide Diplomas</div>
             <q-table
-              :rows="progressStore.scoutDiplomas"
-              :columns="scoutDiplomaColumns"
+              :rows="progressStore.guideDiplomas"
+              :columns="guideDiplomaColumns"
               row-key="id"
               flat
               :pagination="{ rowsPerPage: 10 }"
             >
-              <!-- Create button removed - Scout Diplomas are fixed entries -->
+              <!-- Create button removed - Guide Diplomas are fixed entries -->
 
               <template v-slot:body-cell-image="props">
                 <q-td :props="props">
@@ -84,7 +80,7 @@
 
               <template v-slot:body-cell-actions="props">
                 <q-td :props="props">
-                  <q-btn flat dense color="primary" icon="edit" @click="openEditScoutDiplomaDialog(props.row)" />
+                  <q-btn flat dense color="primary" icon="edit" @click="openEditGuideDiplomaDialog(props.row)" data-cy="edit-guide-diploma-btn" />
                 </q-td>
               </template>
             </q-table>
@@ -102,6 +98,7 @@
                 v-model="electiveDiplomaSearch" 
                 placeholder="Search diplomas..."
                 style="min-width: 250px"
+                data-cy="search-elective-diploma"
               >
                 <template v-slot:append>
                   <q-icon name="search" />
@@ -127,7 +124,7 @@
 
               <template v-slot:body-cell-actions="props">
                 <q-td :props="props">
-                  <q-btn flat dense color="primary" icon="edit" @click="openEditElectiveDiplomaDialog(props.row)" />
+                  <q-btn flat dense color="primary" icon="edit" @click="openEditElectiveDiplomaDialog(props.row)" data-cy="edit-elective-diploma-btn" />
                 </q-td>
               </template>
             </q-table>
@@ -145,6 +142,7 @@
                 v-model="pathSearch" 
                 placeholder="Search paths..."
                 style="min-width: 250px"
+                data-cy="search-path"
               >
                 <template v-slot:append>
                   <q-icon name="search" />
@@ -178,7 +176,7 @@
 
               <template v-slot:body-cell-actions="props">
                 <q-td :props="props">
-                  <q-btn flat dense color="primary" icon="edit" @click="openEditPathDialog(props.row)" />
+                  <q-btn flat dense color="primary" icon="edit" @click="openEditPathDialog(props.row)" data-cy="edit-path-btn" />
                 </q-td>
               </template>
             </q-table>
@@ -217,28 +215,28 @@
 
         <q-card-actions align="right">
           <q-btn flat label="Cancel" color="grey" v-close-popup />
-          <q-btn flat label="Save" color="primary" @click="submitPeak" />
+          <q-btn flat label="Save" color="primary" @click="submitPeak" data-cy="save-peak-btn" />
         </q-card-actions>
       </q-card>
     </q-dialog>
 
-    <!-- Scout Diploma Dialog - Image Upload Only -->
-    <q-dialog v-model="scoutDiplomaDialog">
+    <!-- Guide Diploma Dialog - Image Upload Only -->
+    <q-dialog v-model="guideDiplomaDialog">
       <q-card style="min-width: 400px">
         <q-card-section>
-          <div class="text-h6">Edit Scout Diploma Image</div>
+          <div class="text-h6">Edit Guide Diploma Image</div>
         </q-card-section>
 
         <q-separator />
 
         <q-card-section class="q-gutter-md">
           <!-- Name (Read-only) -->
-          <q-input filled v-model="scoutDiplomaForm.name" label="Name" readonly />
+          <q-input filled v-model="guideDiplomaForm.name" label="Name" readonly />
           
           <!-- Image Upload -->
           <q-file 
             filled 
-            v-model="scoutDiplomaForm.imageFile" 
+            v-model="guideDiplomaForm.imageFile" 
             label="Diploma Image" 
             accept=".jpg, .png, .jpeg"
           >
@@ -252,7 +250,7 @@
 
         <q-card-actions align="right">
           <q-btn flat label="Cancel" color="grey" v-close-popup />
-          <q-btn flat label="Save" color="primary" @click="submitScoutDiploma" />
+          <q-btn flat label="Save" color="primary" @click="submitGuideDiploma" data-cy="save-guide-diploma-btn" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -267,7 +265,7 @@
         <q-separator />
 
         <q-card-section class="q-gutter-md">
-          <q-input filled v-model="electiveDiplomaForm.name" label="Name *" :rules="[val => !!val || 'Name is required']" />
+          <q-input filled v-model="electiveDiplomaForm.name" label="Name *" :rules="[val => !!val || 'Name is required']" data-cy="elective-diploma-name-input" />
           
           <q-input filled v-model="electiveDiplomaForm.description" label="Description" type="textarea" rows="3" />
           
@@ -287,7 +285,7 @@
 
         <q-card-actions align="right">
           <q-btn flat label="Cancel" color="grey" v-close-popup />
-          <q-btn flat label="Save" color="primary" @click="submitElectiveDiploma" />
+          <q-btn flat label="Save" color="primary" @click="submitElectiveDiploma" data-cy="save-elective-diploma-btn" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -302,7 +300,7 @@
         <q-separator />
 
         <q-card-section class="q-gutter-md">
-          <q-input filled v-model="pathForm.name" label="Name *" :rules="[val => !!val || 'Name is required']" />
+          <q-input filled v-model="pathForm.name" label="Name *" :rules="[val => !!val || 'Name is required']" data-cy="path-name-input" />
           
           <q-select 
             filled 
@@ -320,7 +318,7 @@
 
         <q-card-actions align="right">
           <q-btn flat label="Cancel" color="grey" v-close-popup />
-          <q-btn flat label="Save" color="primary" @click="submitPath" />
+          <q-btn flat label="Save" color="primary" @click="submitPath" data-cy="save-path-btn" />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -329,8 +327,9 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import { useProgressStore } from '../../stores/progress';
-import { config } from '../../config';
+import { useProgressStore } from 'src/stores/progress';
+import { config } from 'src/config';
+import PageHeader from 'src/components/PageHeader.vue';
 
 const tab = ref('peaks');
 const progressStore = useProgressStore();
@@ -346,7 +345,7 @@ const peakColumns = computed(() => [
   { name: 'actions', label: 'Actions', field: 'actions', align: 'right' }
 ]);
 
-const scoutDiplomaColumns = computed(() => [
+const guideDiplomaColumns = computed(() => [
   { name: 'image', label: 'Image', field: 'image', align: 'center' },
   { name: 'description', label: 'Description', field: 'description', align: 'left' },
   { name: 'actions', label: 'Actions', field: 'actions', align: 'right' }
@@ -433,14 +432,14 @@ const formatCategory = (category) => {
 
 // Dialog state
 const peakDialog = ref(false);
-const scoutDiplomaDialog = ref(false);
+const guideDiplomaDialog = ref(false);
 const electiveDiplomaDialog = ref(false);
 const pathDialog = ref(false);
 const editMode = ref(false);
 
 // Form data
 const peakForm = ref({ id: null, name: '', type: 'promise', description: '', order: 1, imageFile: null });
-const scoutDiplomaForm = ref({ id: null, name: '', level: 1, description: '', imageFile: null });
+const guideDiplomaForm = ref({ id: null, name: '', level: 1, description: '', imageFile: null });
 const electiveDiplomaForm = ref({ id: null, name: '', description: '', imageFile: null });
 const pathForm = ref({ id: null, name: '', category: 'me_and_my_capabilities', description: '', imageFile: null });
 
@@ -452,11 +451,11 @@ const peakTypeOptions = [
   { label: 'Gold', value: 'gold' }
 ];
 
-// Scout Diploma level options
-const scoutDiplomaLevelOptions = [
-  { label: '1st Scout Diploma', value: 1 },
-  { label: '2nd Scout Diploma', value: 2 },
-  { label: '3rd Scout Diploma', value: 3 }
+// Guide Diploma level options
+const guideDiplomaLevelOptions = [
+  { label: '1st Guide Diploma', value: 1 },
+  { label: '2nd Guide Diploma', value: 2 },
+  { label: '3rd Guide Diploma', value: 3 }
 ];
 
 // Path category options for form
@@ -480,16 +479,16 @@ const openEditPeakDialog = (peak) => {
   peakDialog.value = true;
 };
 
-const openCreateScoutDiplomaDialog = () => {
+const openCreateGuideDiplomaDialog = () => {
   editMode.value = false;
-  scoutDiplomaForm.value = { id: null, name: '', level: 1, description: '', imageFile: null };
-  scoutDiplomaDialog.value = true;
+  guideDiplomaForm.value = { id: null, name: '', level: 1, description: '', imageFile: null };
+  guideDiplomaDialog.value = true;
 };
 
-const openEditScoutDiplomaDialog = (diploma) => {
+const openEditGuideDiplomaDialog = (diploma) => {
   editMode.value = true;
-  scoutDiplomaForm.value = { ...diploma, imageFile: null };
-  scoutDiplomaDialog.value = true;
+  guideDiplomaForm.value = { ...diploma, imageFile: null };
+  guideDiplomaDialog.value = true;
 };
 
 const openCreateElectiveDiplomaDialog = () => {
@@ -539,24 +538,24 @@ const submitPeak = async () => {
   }
 };
 
-const submitScoutDiploma = async () => {
+const submitGuideDiploma = async () => {
   try {
     const formData = new FormData();
-    formData.append('name', scoutDiplomaForm.value.name);
-    formData.append('level', scoutDiplomaForm.value.level);
-    formData.append('description', scoutDiplomaForm.value.description || '');
-    if (scoutDiplomaForm.value.imageFile) {
-      formData.append('image', scoutDiplomaForm.value.imageFile);
+    formData.append('name', guideDiplomaForm.value.name);
+    formData.append('level', guideDiplomaForm.value.level);
+    formData.append('description', guideDiplomaForm.value.description || '');
+    if (guideDiplomaForm.value.imageFile) {
+      formData.append('image', guideDiplomaForm.value.imageFile);
     }
 
     if (editMode.value) {
-      await progressStore.updateScoutDiploma(scoutDiplomaForm.value.id, formData);
+      await progressStore.updateGuideDiploma(guideDiplomaForm.value.id, formData);
     } else {
-      await progressStore.createScoutDiploma(formData);
+      await progressStore.createGuideDiploma(formData);
     }
-    scoutDiplomaDialog.value = false;
+    guideDiplomaDialog.value = false;
   } catch (error) {
-    console.error('Error submitting scout diploma:', error);
+    console.error('Error submitting guide diploma:', error);
   }
 };
 
@@ -604,7 +603,7 @@ const submitPath = async () => {
 onMounted(async () => {
   await Promise.all([
     progressStore.fetchPeaks(),
-    progressStore.fetchScoutDiplomas(),
+    progressStore.fetchGuideDiplomas(),
     progressStore.fetchElectiveDiplomas(),
     progressStore.fetchPaths()
   ]);
@@ -615,4 +614,6 @@ onMounted(async () => {
 .gradient-purple {
   background: linear-gradient(135deg, var(--q-primary) 0%, var(--q-secondary) 100%);
 }
+
+
 </style>

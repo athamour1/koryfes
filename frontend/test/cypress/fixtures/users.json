@@ -1,0 +1,35 @@
+{
+    "superAdmin": {
+        "username": "admin",
+        "password": "admin123",
+        "role": "super_admin"
+    },
+    "admin": {
+        "username": "admin_1",
+        "password": "test",
+        "role": "admin",
+        "location": "ΤΤ Μεγαρων"
+    },
+    "unitLeader": {
+        "username": "αλέξανδρος_παπαδόπουλος_1_1_1",
+        "password": "test",
+        "role": "user",
+        "unitRole": "leader",
+        "location": "ΤΤ Μεγαρων",
+        "unit": "Αστροναύτης"
+    },
+    "user": {
+        "username": "δημήτρης_καραμανλής_1_1_3",
+        "password": "test",
+        "role": "user",
+        "unitRole": "member",
+        "location": "ΤΤ Μεγαρων",
+        "unit": "Αστροναύτης"
+    },
+    "newUser": {
+        "username": "new_test_user",
+        "password": "password123",
+        "firstName": "Test",
+        "lastName": "User"
+    }
+}

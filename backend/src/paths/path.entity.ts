@@ -10,7 +10,7 @@ export class Path {
     name: string;
 
     @Column({
-        type: 'enum',
+        type: 'simple-enum',
         enum: PathCategory,
     })
     category: PathCategory;

@@ -32,8 +32,7 @@
           <q-card class="cursor-pointer hover-effect" @click="$router.push(`/user/${member.id}`)">
             <q-card-section class="row items-center">
               <q-avatar size="50px" class="q-mr-md">
-                <img v-if="member.profileImage" :src="member.profileImage" style="object-fit: cover" />
-                <q-icon v-else name="person" color="grey" />
+                <AvatarDisplay :config="member.avatarConfig" size="50px" />
               </q-avatar>
               <div>
                 <div class="text-subtitle1">{{ member.username }}</div>
@@ -49,7 +48,7 @@
               <div class="unit-divider"></div>
               <div class="role-section">
                 <div class="text-caption text-grey-7">{{ $t('unitPage.roleLabel') || 'Role' }}</div>
-                <div class="text-weight-bold">{{ member.role === 'admin' ? $t('unitPage.roles.captain') : $t('unitPage.roles.scout') }}</div>
+                <div class="text-weight-bold">{{ member.role === 'admin' ? $t('unitPage.roles.captain') : $t('unitPage.roles.guide') }}</div>
               </div>
             </div>
           </q-card>
@@ -71,8 +70,9 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { useUnitStore } from '../stores/unit';
-import { config } from '../config';
+import { useUnitStore } from 'src/stores/unit';
+import { config } from 'src/config';
+import AvatarDisplay from 'src/components/AvatarDisplay.vue';
 
 const route = useRoute();
 const unitStore = useUnitStore();

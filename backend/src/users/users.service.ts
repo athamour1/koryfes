@@ -2,19 +2,16 @@ import { Injectable, ConflictException, InternalServerErrorException, OnModuleIn
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
 import { User, UserRole, UnitRole } from './entities/user.entity';
-import { UserBadge } from './entities/user-badge.entity';
-import { BadgesService } from '../badges/badges.service';
 import { LocationsService } from '../locations/locations.service';
 import * as bcrypt from 'bcrypt';
+
+import { generateRandomAvatarConfig } from './avatar.utils';
 
 @Injectable()
 export class UsersService implements OnModuleInit {
     constructor(
         @InjectRepository(User)
         private usersRepository: Repository<User>,
-        @InjectRepository(UserBadge)
-        private userBadgeRepository: Repository<UserBadge>,
-        private badgesService: BadgesService,
         private locationsService: LocationsService,
     ) { }
 
@@ -23,8 +20,9 @@ export class UsersService implements OnModuleInit {
         const adminPassword = process.env.ADMIN_PASSWORD;
 
         if (adminUsername && adminPassword) {
-            const adminExists = await this.usersRepository.findOne({ where: { username: adminUsername } });
-            if (!adminExists) {
+            let adminUser = await this.usersRepository.findOne({ where: { username: adminUsername } });
+
+            if (!adminUser) {
                 // Ensure Admin HQ location exists
                 let adminLocation = await this.locationsService.findByName('Admin HQ');
                 if (!adminLocation) {
@@ -32,22 +30,30 @@ export class UsersService implements OnModuleInit {
                 }
 
                 const hashedPassword = await bcrypt.hash(adminPassword, 10);
-                const adminUser = this.usersRepository.create({
+                adminUser = this.usersRepository.create({
                     username: adminUsername,
                     password: hashedPassword,
                     location: adminLocation,
                     role: UserRole.SUPER_ADMIN,
                     isAdmin: true,
+                    avatarConfig: generateRandomAvatarConfig(),
                 });
                 await this.usersRepository.save(adminUser);
                 console.log(`Admin user '${adminUsername}' created.`);
+            } else {
+                // Update password to match environment variable
+                const hashedPassword = await bcrypt.hash(adminPassword, 10);
+                adminUser.password = hashedPassword;
+                await this.usersRepository.save(adminUser);
+                console.log(`Admin user '${adminUsername}' password updated from environment variable.`);
             }
         }
     }
 
     async create(userData: Partial<User> & { locationName?: string }): Promise<any> {
         // Handle location lookup if provided as string name
-        let locationEntity = userData.location;
+        // Handle location lookup if provided as string name
+        let locationEntity = userData.location || null;
         if (userData.locationName) {
             // Find or create location
             let location = await this.locationsService.findByName(userData.locationName);
@@ -57,14 +63,25 @@ export class UsersService implements OnModuleInit {
             locationEntity = location;
         }
 
-        const hashedPassword = await bcrypt.hash(userData.password, 10);
+        // Hash password if provided and not already hashed
+        if (userData.password && !userData.password.startsWith('$2b$')) {
+            userData.password = await bcrypt.hash(userData.password, 10);
+        }
+
+        // Generate avatar config with appropriate scarf color based on location type
+        let avatarConfig = userData.avatarConfig || generateRandomAvatarConfig();
+        if (locationEntity && !userData.avatarConfig) {
+            // Set scarf color based on location type
+            const scarfColor = this.locationsService.getDefaultScarfColor(locationEntity.type);
+            avatarConfig.scarfColor = scarfColor;
+        }
 
         const user = this.usersRepository.create({
             ...userData,
-            password: hashedPassword,
             location: locationEntity,
             role: userData.role || UserRole.USER,
-            isAdmin: userData.role === UserRole.SUPER_ADMIN || userData.role === UserRole.ADMIN
+            isAdmin: userData.role === UserRole.SUPER_ADMIN || userData.role === UserRole.ADMIN,
+            avatarConfig,
         });
 
         // Enforce unique Leader/Deputy Leader per unit
@@ -91,36 +108,32 @@ export class UsersService implements OnModuleInit {
         const user = await this.usersRepository.findOne({
             where: { username },
             relations: [
-                'userBadges',
-                'userBadges.badge',
                 'location',
                 'unit',
                 'progress',
                 'progress.currentPeak',
                 'progress.completedPaths',
-                'progress.scoutDiplomas',
+                'progress.guideDiplomas',
                 'progress.electiveDiplomas'
             ]
         });
-        return this.transformUser(user);
+        return user;
     }
 
     async findOne(id: number): Promise<User | undefined> {
         const user = await this.usersRepository.findOne({
             where: { id },
             relations: [
-                'userBadges',
-                'userBadges.badge',
                 'location',
                 'unit',
                 'progress',
                 'progress.currentPeak',
                 'progress.completedPaths',
-                'progress.scoutDiplomas',
+                'progress.guideDiplomas',
                 'progress.electiveDiplomas'
             ]
         });
-        return this.transformUser(user);
+        return user;
     }
 
     async findAll(locationId?: number, name?: string): Promise<User[]> {
@@ -134,60 +147,26 @@ export class UsersService implements OnModuleInit {
         const users = await this.usersRepository.find({
             where,
             relations: [
-                'userBadges',
-                'userBadges.badge',
                 'location',
                 'unit',
                 'progress',
                 'progress.currentPeak',
                 'progress.completedPaths',
-                'progress.scoutDiplomas',
+                'progress.guideDiplomas',
                 'progress.electiveDiplomas'
             ]
         });
-        return users.map(user => this.transformUser(user));
+        return users;
     }
 
     async getAllIncludingAdmins(): Promise<User[]> {
         const users = await this.usersRepository.find({
-            relations: ['userBadges', 'userBadges.badge', 'location']
+            relations: ['location']
         });
-        return users.map(user => this.transformUser(user));
+        return users;
     }
 
-    async assignBadge(userId: number, badgeId: number, acquiredAt?: Date): Promise<User> {
-        const user = await this.usersRepository.findOne({ where: { id: userId } });
-        const badge = await this.badgesService.findOne(badgeId);
 
-        // Check if already assigned
-        const existing = await this.userBadgeRepository.findOne({
-            where: { user: { id: userId }, badge: { id: badgeId } }
-        });
-
-        if (!existing) {
-            const userBadge = this.userBadgeRepository.create({
-                user,
-                badge,
-                acquiredAt: acquiredAt || new Date()
-            });
-            await this.userBadgeRepository.save(userBadge);
-        }
-
-        return this.findOne(userId);
-    }
-
-    async removeBadge(userId: number, badgeId: number): Promise<User> {
-        await this.userBadgeRepository.delete({ user: { id: userId }, badge: { id: badgeId } });
-        return this.findOne(userId);
-    }
-
-    async updateBadgeDate(userId: number, badgeId: number, date: Date): Promise<User> {
-        await this.userBadgeRepository.update(
-            { user: { id: userId }, badge: { id: badgeId } },
-            { acquiredAt: date }
-        );
-        return this.findOne(userId);
-    }
 
     async update(id: number, updateData: Partial<User> & { locationName?: string }): Promise<any> {
         if (updateData.locationName) {
@@ -218,10 +197,7 @@ export class UsersService implements OnModuleInit {
         };
     }
 
-    async updateProfileImage(id: number, imagePath: string): Promise<User> {
-        await this.usersRepository.update(id, { profileImage: imagePath });
-        return this.findOne(id);
-    }
+
 
     async findByResetToken(token: string): Promise<User | undefined> {
         return this.usersRepository.findOne({ where: { resetPasswordToken: token } });
@@ -262,23 +238,6 @@ export class UsersService implements OnModuleInit {
             }
         }
         return null;
-    }
-
-    // Helper to transform User entity to match frontend expectations (flattening userBadges to badges with acquiredAt)
-    private transformUser(user: User): any {
-        if (!user) return user;
-        const plainUser = { ...user };
-        if (plainUser.userBadges) {
-            plainUser['badges'] = plainUser.userBadges.map(ub => ({
-                ...ub.badge,
-                acquiredAt: ub.acquiredAt
-            }));
-            delete plainUser.userBadges;
-        }
-        if (plainUser.unit) {
-            plainUser['unitId'] = plainUser.unit.id;
-        }
-        return plainUser;
     }
 }
 

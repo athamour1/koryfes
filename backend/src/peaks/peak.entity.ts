@@ -10,7 +10,7 @@ export class Peak {
     name: string;
 
     @Column({
-        type: 'enum',
+        type: 'simple-enum',
         enum: PeakType,
         unique: true,
     })

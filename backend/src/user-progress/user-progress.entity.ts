@@ -11,7 +11,7 @@ import {
 import { User } from '../users/entities/user.entity';
 import { Peak } from '../peaks/peak.entity';
 import { Path } from '../paths/path.entity';
-import { ScoutDiploma } from '../scout-diplomas/scout-diploma.entity';
+import { GuideDiploma } from '../guide-diplomas/guide-diploma.entity';
 import { ElectiveDiploma } from '../elective-diplomas/elective-diploma.entity';
 
 @Entity('user_progress')
@@ -41,13 +41,13 @@ export class UserProgress {
     })
     completedPaths: Path[];
 
-    @ManyToMany(() => ScoutDiploma)
+    @ManyToMany(() => GuideDiploma)
     @JoinTable({
-        name: 'user_scout_diplomas',
+        name: 'user_guide_diplomas',
         joinColumn: { name: 'userProgressId', referencedColumnName: 'id' },
-        inverseJoinColumn: { name: 'scoutDiplomaId', referencedColumnName: 'id' },
+        inverseJoinColumn: { name: 'guideDiplomaId', referencedColumnName: 'id' },
     })
-    scoutDiplomas: ScoutDiploma[];
+    guideDiplomas: GuideDiploma[];
 
     @ManyToMany(() => ElectiveDiploma)
     @JoinTable({

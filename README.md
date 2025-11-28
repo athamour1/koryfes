@@ -1,165 +1,93 @@
-# Scout Badges Application
+# Korifes Application
 
-A full-stack badge management system built with NestJS, Vue 3, Quasar, and PostgreSQL.
+A full-stack badge management system built with **NestJS**, **Vue 3**, **Quasar**, and **PostgreSQL**.
 
-## Features
-
-- **User Management**: Registration, authentication, and profile management
-- **Badge System**: Create and assign badges to users
-- **Admin Dashboard**: Manage users and badges with table views and inline editing
-- **Image Upload**: Profile pictures and badge images
-- **Responsive Design**: Modern UI with Quasar components
-- **Production Ready**: Security headers, rate limiting, environment-based configuration
-
-## Tech Stack
-
-### Backend
-- NestJS
-- PostgreSQL
-- TypeORM
-- JWT Authentication
-- Helmet (Security)
-- Rate Limiting
-
-### Frontend
-- Vue 3
-- Quasar Framework
-- Pinia (State Management)
-- Axios
-
-## Prerequisites
-
-- Docker & Docker Compose
-- Node.js 20+ (for local development)
-
-## Quick Start
+## 🚀 Quick Start
 
 ### Using Docker (Recommended)
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd scout-badges
-   ```
+1.  **Clone the repository**
+    ```bash
+    git clone <repository-url>
+    cd guide-badges
+    ```
 
-2. **Create environment file**
-   ```bash
-   cp .env.example .env
-   ```
+2.  **Start the application**
+    ```bash
+    docker compose up --build
+    ```
 
-3. **Start the application**
-   ```bash
-   docker-compose up --build
-   ```
-
-4. **Access the application**
-   - Frontend: http://localhost:8080
-   - Backend API: http://localhost:3000
+3.  **Access the application**
+    -   **Frontend:** [http://localhost:8080](http://localhost:8080)
+    -   **Backend API:** [http://localhost:3000](http://localhost:3000)
 
 ### Default Admin Credentials
-- Username: `admin`
-- Password: `admin123`
+-   **Username:** `admin`
+-   **Password:** `admin123`
 
-## Environment Configuration
+---
 
-### Development
-The `.env` file contains development settings:
-```env
-NODE_ENV=development
-VITE_API_URL=http://localhost:3000
-VITE_ENV=development
+## ✨ Features Overview
+
+-   **User Management:** Complete authentication system with role-based access (Guides, Leaders, Admins).
+-   **Badge System:** Dynamic badge creation, assignment, and progress tracking.
+-   **Avatar Editor:** Custom avatar creator with extensive customization options.
+-   **Admin Dashboard:** Powerful tools for managing users, units, and badges.
+-   **Internationalization:** Full Greek language support.
+
+## 📚 Documentation
+
+For detailed information about the specific technologies and features, please refer to the respective directories:
+
+-   [**Frontend Documentation**](./frontend/README.md) - Vue 3, Quasar, Avatar Editor, and more.
+-   [**Backend Documentation**](./backend/README.md) - NestJS API, Database Schema, and Security.
+
+## 🛠️ Tech Stack
+
+| Frontend | Backend | Infrastructure |
+|----------|---------|----------------|
+| Vue 3 | NestJS | Docker |
+| Quasar | PostgreSQL | Nginx |
+| Pinia | TypeORM | GitHub Actions |
+| Vite | Passport/JWT | |
+
+## ⚙️ Runtime Configuration
+
+The frontend uses a **runtime configuration** approach to allow environment variables to be changed via `docker-compose.yml` **without rebuilding** the Docker image.
+
+### How It Works
+
+1. **`entrypoint.sh`**: Runs when the container starts and generates `/usr/share/nginx/html/config.js` with values from environment variables.
+2. **`window.appConfig`**: The generated `config.js` file sets configuration values on the global `window` object.
+3. **`src/config.js`**: Reads from `window.appConfig` first, then falls back to build-time `import.meta.env` values.
+
+### Available Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `VITE_API_URL` | Backend API URL | `/api` |
+| `VITE_ENV` | Environment (development/production) | `development` |
+| `VITE_STAGING_MESSAGE` | Optional staging banner message | _(empty)_ |
+
+### Usage Example
+
+Set variables in `docker-compose.yml`:
+
+```yaml
+frontend:
+  environment:
+    VITE_STAGING_MESSAGE: "Staging Environment - Test Only"
 ```
 
-### Production
-For production, update the `.env` file:
-```env
-NODE_ENV=production
-VITE_API_URL=https://your-api-domain.com
-VITE_ENV=production
-JWT_SECRET=your-strong-secret-key
-CORS_ORIGIN=https://your-frontend-domain.com
-```
-
-**Production Features:**
-- Stricter password validation (8+ chars, uppercase, lowercase, number)
-- Security headers via Helmet
-- Rate limiting (100 requests/minute)
-- CORS configuration
-
-## Local Development
-
-### Backend
+Then restart (no rebuild needed):
 ```bash
-cd backend
-npm install
-npm run start:dev
+docker compose up
 ```
 
-### Frontend
-```bash
-cd frontend
-npm install
-npm run dev
-```
+The staging message will appear on the login page.
 
-## Project Structure
+---
 
-```
-scout-badges/
-├── backend/
-│   ├── src/
-│   │   ├── auth/          # Authentication module
-│   │   ├── users/         # Users module
-│   │   ├── badges/        # Badges module
-│   │   └── main.ts        # Application entry
-│   └── uploads/           # Uploaded files
-├── frontend/
-│   ├── src/
-│   │   ├── pages/         # Vue pages
-│   │   ├── stores/        # Pinia stores
-│   │   ├── api.js         # API configuration
-│   │   └── config.js      # Environment config
-│   └── public/
-└── docker-compose.yml
-```
-
-## API Endpoints
-
-### Authentication
-- `POST /auth/login` - User login
-- `POST /auth/register` - User registration
-- `GET /auth/profile` - Get current user profile
-
-### Users
-- `GET /users` - List all users
-- `GET /users/:id` - Get user by ID
-- `PATCH /users/:id` - Update user (admin only)
-- `POST /users/:id/badges` - Assign badge (admin only)
-- `DELETE /users/:id/badges/:badgeId` - Remove badge (admin only)
-- `POST /users/profile/image` - Upload profile image
-
-### Badges
-- `GET /badges` - List all badges
-- `POST /badges` - Create badge (admin only)
-- `PATCH /badges/:id` - Update badge (admin only)
-
-## Security Features
-
-- **Helmet**: Security headers
-- **Rate Limiting**: 100 requests per minute
-- **CORS**: Configurable origins
-- **Password Hashing**: bcrypt
-- **JWT**: Secure authentication
-- **Environment-based Validation**: Stricter rules in production
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
-
-## License
+## 📄 License
 
 MIT

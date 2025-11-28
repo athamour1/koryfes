@@ -16,7 +16,7 @@ export class AuthController {
         if (!user) {
             throw new UnauthorizedException('Invalid credentials');
         }
-        return this.authService.login(user);
+        return this.authService.login(user, req.rememberMe);
     }
 
     @Post('register')
@@ -29,6 +29,23 @@ export class AuthController {
     async getProfile(@Request() req) {
         return this.usersService.findOne(req.user.userId);
     }
+
+    @Post('refresh')
+    async refresh(@Body('refresh_token') refreshToken: string) {
+        if (!refreshToken) {
+            throw new UnauthorizedException('Refresh token required');
+        }
+        return this.authService.refreshAccessToken(refreshToken);
+    }
+
+    @Post('logout')
+    async logout(@Body('refresh_token') refreshToken: string) {
+        if (refreshToken) {
+            await this.authService.revokeRefreshToken(refreshToken);
+        }
+        return { message: 'Logged out successfully' };
+    }
+
     @Post('forgot-password')
     async forgotPassword(@Body('email') email: string) {
         return this.authService.forgotPassword(email);

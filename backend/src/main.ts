@@ -2,11 +2,24 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe, ClassSerializerInterceptor } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 import helmet from 'helmet';
 import compression from 'compression';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // Serve static files from uploads directory
+  // In production: __dirname = /usr/src/app/dist/src, so we need '../..' to reach /usr/src/app
+  // In development: __dirname = /backend/src, so we need '..' to reach /backend
+  const uploadsPath = process.env.NODE_ENV === 'production'
+    ? join(__dirname, '..', '..', 'uploads')
+    : join(__dirname, '..', 'uploads');
+
+  app.useStaticAssets(uploadsPath, {
+    prefix: '/uploads/',
+  });
 
   // Global serialization
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
@@ -37,8 +50,8 @@ async function bootstrap() {
   const isDevelopment = process.env.NODE_ENV !== 'production';
   if (isDevelopment) {
     const config = new DocumentBuilder()
-      .setTitle('Scout Badges API')
-      .setDescription('REST API for Scout Badges Management System')
+      .setTitle('Korifes API')
+      .setDescription('REST API for Korifes Management System')
       .setVersion('1.0')
       .addBearerAuth()
       .build();

@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_DATABASE:-guide_badges}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    image: thanosmourtk/korifes-backend:26.11.25-beta
+    restart: always
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      NODE_ENV: production
+      DB_HOST: ${DB_HOST:-db}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_DATABASE: ${DB_DATABASE:-guide_badges}
+      JWT_SECRET: ${JWT_SECRET}
+      ADMIN_USERNAME: ${ADMIN_USERNAME}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      PORT: 3000
+    depends_on:
+      - db
+    volumes:
+      - ./uploads:/usr/src/app/uploads
+
+  frontend:
+    image: thanosmourtk/korifes-frontend:26.11.25-beta
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-/api}
+      VITE_ENV: ${VITE_ENV:-production}
+      VITE_STAGING_MESSAGE: ${VITE_STAGING_MESSAGE:-}
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

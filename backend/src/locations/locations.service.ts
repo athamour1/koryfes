@@ -1,24 +1,32 @@
 import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Location } from './entities/location.entity';
+import { Location, LocationType } from './entities/location.entity';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
+import { User } from '../users/entities/user.entity';
 
 @Injectable()
 export class LocationsService {
     constructor(
         @InjectRepository(Location)
         private locationsRepository: Repository<Location>,
+        @InjectRepository(User)
+        private usersRepository: Repository<User>,
     ) { }
 
     async create(createLocationDto: CreateLocationDto): Promise<Location> {
-        const { name } = createLocationDto;
+        const { name, type, latitude, longitude } = createLocationDto;
         const existing = await this.locationsRepository.findOne({ where: { name } });
         if (existing) {
             throw new ConflictException('Location already exists');
         }
-        const location = this.locationsRepository.create({ name });
+        const location = this.locationsRepository.create({
+            name,
+            type: type || LocationType.GUIDES,
+            latitude,
+            longitude,
+        });
         return this.locationsRepository.save(location);
     }
 
@@ -40,10 +48,30 @@ export class LocationsService {
 
     async update(id: number, updateLocationDto: UpdateLocationDto): Promise<Location> {
         const location = await this.findOne(id);
+        const oldType = location.type;
+
+        // Update fields
         if (updateLocationDto.name) {
             location.name = updateLocationDto.name;
         }
-        return this.locationsRepository.save(location);
+        if (updateLocationDto.type !== undefined) {
+            location.type = updateLocationDto.type;
+        }
+        if (updateLocationDto.latitude !== undefined) {
+            location.latitude = updateLocationDto.latitude;
+        }
+        if (updateLocationDto.longitude !== undefined) {
+            location.longitude = updateLocationDto.longitude;
+        }
+
+        const updatedLocation = await this.locationsRepository.save(location);
+
+        // If type changed, update all users' scarf colors
+        if (updateLocationDto.type !== undefined && oldType !== updateLocationDto.type) {
+            await this.updateUsersScarf(id, updateLocationDto.type);
+        }
+
+        return updatedLocation;
     }
 
     async remove(id: number): Promise<void> {
@@ -51,5 +79,33 @@ export class LocationsService {
         if (result.affected === 0) {
             throw new NotFoundException(`Location with ID ${id} not found`);
         }
+    }
+
+    /**
+     * Update scarf color for all users in a location based on location type
+     */
+    private async updateUsersScarf(locationId: number, locationType: LocationType): Promise<void> {
+        const scarfColor = locationType === LocationType.NAVAL_GUIDES ? 'navy' : 'light-blue';
+
+        const users = await this.usersRepository.find({
+            where: { location: { id: locationId } },
+        });
+
+        for (const user of users) {
+            if (user.avatarConfig) {
+                user.avatarConfig.scarfColor = scarfColor;
+            } else {
+                // Initialize avatarConfig if it doesn't exist
+                user.avatarConfig = { scarfColor };
+            }
+            await this.usersRepository.save(user);
+        }
+    }
+
+    /**
+     * Get default scarf color based on location type
+     */
+    getDefaultScarfColor(locationType: LocationType): string {
+        return locationType === LocationType.NAVAL_GUIDES ? 'navy' : 'light-blue';
     }
 }

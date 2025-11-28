@@ -1,18 +1,14 @@
 <template>
   <q-page class="locations-page">
     <!-- Hero Header -->
-    <div class="q-pa-md">
-      <div class="gradient-purple text-white q-pa-lg q-mb-lg" style="border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 1200px; margin: 0 auto;">
-        <div class="text-center" style="max-width: 800px; margin: 0 auto;">
-          <q-icon name="location_on" size="48px" class="q-mb-sm" />
-          <div class="text-h4 text-weight-bold q-mb-sm">{{ $t('locationManagement.title') }}</div>
-          <div class="text-body1" style="opacity: 0.9;">{{ $t('locationManagement.subtitle') }}</div>
-        </div>
-      </div>
-    </div>
+    <PageHeader 
+      icon="location_on"
+      :title="$t('locationManagement.title')"
+      :subtitle="$t('locationManagement.subtitle')"
+    />
 
     <!-- Content -->
-    <div class="q-pa-lg" style="max-width: 1200px; margin: 0 auto;">
+    <div class="q-pa-md" style="max-width: 1200px; margin: 0 auto;">
       <q-card flat bordered>
         <q-table
           :title="$t('locationManagement.tableTitle')"
@@ -27,12 +23,12 @@
         >
           <template v-slot:top-right>
             <div class="row q-gutter-sm items-center">
-              <q-input outlined dense debounce="300" v-model="filter" :placeholder="$t('locationManagement.searchPlaceholder')">
+              <q-input outlined dense debounce="300" v-model="filter" :placeholder="$t('locationManagement.searchPlaceholder')" data-cy="search-input">
                 <template v-slot:append>
                   <q-icon name="search" />
                 </template>
               </q-input>
-              <q-btn color="primary" icon="add" :label="$t('locationManagement.addButton')" @click="showAddDialog = true" />
+              <q-btn color="primary" icon="add" :label="$t('locationManagement.addButton')" @click="showAddDialog = true" data-cy="create-location-btn" />
             </div>
           </template>
           <template v-slot:body-cell-id="props">
@@ -61,6 +57,7 @@
                 color="primary" 
                 icon="edit" 
                 @click="editLocation(props.row)"
+                data-cy="edit-btn"
               >
                 <q-tooltip>{{ $t('locationManagement.tooltips.edit') }}</q-tooltip>
               </q-btn>
@@ -71,6 +68,7 @@
                 color="negative" 
                 icon="delete" 
                 @click="confirmDelete(props.row)"
+                data-cy="delete-btn"
               >
                 <q-tooltip>{{ $t('locationManagement.tooltips.delete') }}</q-tooltip>
               </q-btn>
@@ -82,7 +80,7 @@
 
     <!-- Add/Edit Dialog -->
     <q-dialog v-model="showAddDialog">
-      <q-card style="min-width: 400px">
+      <q-card style="width: 700px; max-width: 90vw;">
         <q-card-section class="gradient-blue text-white">
           <div class="text-h6">
             <q-icon name="location_city" size="24px" class="q-mr-sm" />
@@ -98,11 +96,36 @@
             autofocus 
             @keyup.enter="saveLocation"
             :rules="[val => !!val || $t('locationManagement.form.required')]"
+            data-cy="location-name-input"
+            class="q-mb-md"
           >
             <template v-slot:prepend>
               <q-icon name="place" />
             </template>
           </q-input>
+
+          <q-select
+            filled
+            v-model="locationForm.type"
+            :options="locationTypeOptions"
+            :label="$t('locationManagement.form.type')"
+            emit-value
+            map-options
+            class="q-mb-md"
+            data-cy="location-type-select"
+          >
+            <template v-slot:prepend>
+              <q-icon name="category" />
+            </template>
+          </q-select>
+
+          <!-- Interactive Map for Coordinates -->
+          <div class="q-mb-md">
+            <div class="text-subtitle2 q-mb-sm">{{ $t('locationManagement.form.coordinates') }}</div>
+            <LocationMapPicker 
+              v-model="mapCoordinates"
+            />
+          </div>
         </q-card-section>
 
         <q-card-actions align="right" class="q-pa-md">
@@ -113,6 +136,7 @@
             unelevated
             @click="saveLocation"
             icon="save"
+            data-cy="save-location-btn"
           />
         </q-card-actions>
       </q-card>
@@ -123,8 +147,10 @@
 <script setup>
 import { ref, onMounted, reactive, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { api } from '../../api';
+import { api } from 'src/api';
 import { useQuasar } from 'quasar';
+import PageHeader from 'src/components/PageHeader.vue';
+import LocationMapPicker from 'src/components/LocationMapPicker.vue';
 
 const $q = useQuasar();
 const { t } = useI18n();
@@ -132,10 +158,28 @@ const locations = ref([]);
 const loading = ref(false);
 const showAddDialog = ref(false);
 const isEditing = ref(false);
-const locationForm = reactive({ id: null, name: '' });
+const locationForm = reactive({ id: null, name: '', type: 'guides', latitude: null, longitude: null });
+
+const locationTypeOptions = computed(() => [
+  { label: t('locationManagement.types.guides'), value: 'guides' },
+  { label: t('locationManagement.types.navalGuides'), value: 'naval-guides' },
+]);
+
+// Computed property for map coordinates (two-way binding)
+const mapCoordinates = computed({
+  get: () => ({
+    latitude: locationForm.latitude,
+    longitude: locationForm.longitude
+  }),
+  set: (value) => {
+    locationForm.latitude = value.latitude;
+    locationForm.longitude = value.longitude;
+  }
+});
 
 const columns = computed(() => [
   { name: 'name', label: t('locationManagement.columns.name'), field: 'name', sortable: true, align: 'left' },
+  { name: 'type', label: t('locationManagement.columns.type'), field: row => t(`locationManagement.types.${row.type === 'naval-guides' ? 'navalGuides' : 'guides'}`), sortable: true, align: 'left' },
   { name: 'actions', label: t('locationManagement.columns.actions'), field: 'actions', align: 'right' },
 ]);
 
@@ -161,11 +205,18 @@ const saveLocation = async () => {
   }
 
   try {
+    const payload = {
+      name: locationForm.name,
+      type: locationForm.type,
+      latitude: locationForm.latitude,
+      longitude: locationForm.longitude,
+    };
+
     if (isEditing.value) {
-      await api.patch(`/locations/${locationForm.id}`, { name: locationForm.name });
+      await api.patch(`/locations/${locationForm.id}`, payload);
       $q.notify({ type: 'positive', message: t('locationManagement.notifications.updateSuccess'), icon: 'check' });
     } else {
-      await api.post('/locations', { name: locationForm.name });
+      await api.post('/locations', payload);
       $q.notify({ type: 'positive', message: t('locationManagement.notifications.createSuccess'), icon: 'check' });
     }
     showAddDialog.value = false;
@@ -180,6 +231,10 @@ const saveLocation = async () => {
 const editLocation = (location) => {
   locationForm.id = location.id;
   locationForm.name = location.name;
+  locationForm.type = location.type || 'guides';
+  locationForm.latitude = location.latitude ? Number(location.latitude) : null;
+  locationForm.longitude = location.longitude ? Number(location.longitude) : null;
+  locationForm.createdAt = location.createdAt;
   isEditing.value = true;
   showAddDialog.value = true;
 };
@@ -206,6 +261,10 @@ const confirmDelete = (location) => {
 const resetForm = () => {
   locationForm.id = null;
   locationForm.name = '';
+  locationForm.type = 'guides';
+  locationForm.latitude = null;
+  locationForm.longitude = null;
+  locationForm.createdAt = null;
   isEditing.value = false;
 };
 
@@ -216,4 +275,6 @@ onMounted(fetchLocations);
 .locations-page {
   min-height: 100vh;
 }
+
+
 </style>

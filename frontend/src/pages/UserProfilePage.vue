@@ -1,82 +1,67 @@
 <template>
   <q-page class="user-profile-page">
-    <!-- Header Section -->
-    <div class="profile-header">
-      <div class="container">
-        <q-btn
-          flat
-          icon="arrow_back"
-          :label="$t('userProfilePage.backButton')"
-          color="white"
-          class="back-btn"
-          @click="$router.push('/users')"
-        />
+    <!-- Hero Header -->
+    <div class="q-pa-md">
+      <div class="gradient-purple text-white q-pa-lg q-mb-lg" style="border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 1400px; margin: 0 auto;">
+        <div class="flex items-center q-mb-md">
+          <q-btn
+            flat
+            round
+            dense
+            icon="arrow_back"
+            class="text-white q-mr-md"
+            @click="$router.back()"
+          >
+            <q-tooltip>{{ $t('general.back') }}</q-tooltip>
+          </q-btn>
+        </div>
         
         <div class="profile-hero">
-          <q-avatar size="120px" class="profile-avatar">
-            <img :src="getAvatarUrl(user?.username, user?.profileImage)" style="object-fit: cover" />
-          </q-avatar>
+          <div class="profile-avatar-wrapper shadow-10" v-if="user">
+            <AvatarDisplay :config="user.avatarConfig" size="120px" />
+          </div>
           
           <div class="profile-info">
             <h1 class="profile-name">{{ user?.username }}</h1>
             <div class="text-subtitle1 text-grey-5 q-mb-md">
               <q-icon name="place" size="sm" class="q-mr-xs" />
-              {{ user.location?.name || $t('userProfilePage.noLocation') }}
+              {{ user?.location?.name || $t('userProfilePage.noLocation') }}
             </div>
 
-
-            
-            <div class="unit-role-card-hero q-mt-md">
+            <div v-if="!isAdmin" class="unit-role-card-hero q-mt-md">
               <div class="unit-section">
                 <div class="text-caption text-white-7">{{ $t('userListPage.unitLabel') || 'Unit' }}</div>
-                <div class="text-weight-bold">{{ user.unit?.name || '-' }}</div>
+                <div class="text-weight-bold">{{ user?.unit?.name || '-' }}</div>
               </div>
               <div class="unit-divider-hero"></div>
               <div class="role-section">
                 <div class="text-caption text-white-7">{{ $t('userListPage.roleLabel') || 'Role' }}</div>
-                <div class="text-weight-bold">{{ formatUnitRole(user.unitRole) }}</div>
+                <div class="text-weight-bold">{{ formatUnitRole(user?.unitRole) }}</div>
               </div>
             </div>
           </div>
         </div>
-
-        <!-- Stats Cards -->
-        <!-- <div class="stats-cards">
-          <div class="stat-card">
-            <q-icon name="trending_up" size="40px" color="white" />
-            <div class="stat-number">{{ user?.progress?.currentPeak?.name || $t('progress.admin.noPeak') || '-' }}</div>
-            <div class="stat-label">{{ $t('progress.admin.currentPeak') || 'Current Peak' }}</div>
-          </div>
-          <div class="stat-card">
-            <q-icon name="explore" size="40px" color="white" />
-            <div class="stat-number">{{ user?.progress?.completedPaths?.length || 0 }}/12</div>
-            <div class="stat-label">{{ $t('progress.admin.paths.title') || 'Paths Completed' }}</div>
-          </div>
-          <div class="stat-card">
-            <q-icon name="school" size="40px" color="white" />
-            <div class="stat-number">{{ (user?.progress?.scoutDiplomas?.length || 0) + (user?.progress?.electiveDiplomas?.length || 0) }}</div>
-            <div class="stat-label">{{ $t('progress.admin.diplomas.title') || 'Diplomas Earned' }}</div>
-          </div>
-        </div> -->
       </div>
     </div>
 
     <!-- Progress Section -->
-    <div class="container content-section">
-      <div class="section-header">
-        <h2>
-          <q-icon name="insights" size="32px" />
-          {{ $t('progress.admin.title') || 'Individual Progress' }}
-        </h2>
-        <p>{{ $t('progress.admin.extraStageInfo') || 'Track your journey through peaks, paths, and diplomas.' }}</p>
-      </div>
+    <div v-if="!isAdmin" class="q-pa-lg" style="max-width: 1400px; margin: 0 auto;">
+      <q-card flat bordered>
+        <q-card-section>
+          <div class="section-header">
+            <h2>
+              <q-icon name="insights" size="32px" />
+              {{ $t('progress.admin.title') || 'Individual Progress' }}
+            </h2>
+            <p>{{ $t('progress.admin.extraStageInfo') || 'Track your journey through peaks, paths, and diplomas.' }}</p>
+          </div>
 
-      <div class="row q-col-gutter-xl q-mb-xl">
+          <div class="row q-col-gutter-xl q-mb-xl">
         <!-- 1. Current Peak (Left) -->
         <div class="col-12 col-md-4 text-center">
           <div v-if="user?.progress?.currentPeak">
             <q-avatar size="200px" class="peak-avatar shadow-10">
-              <img :src="`${config.apiUrl}${user.progress.currentPeak.image}`" style="object-fit: cover" />
+              <img :src="`${config.apiUrl}${user?.progress?.currentPeak?.image}`" style="object-fit: cover" />
             </q-avatar>
           </div>
           <div v-else class="empty-state-card">
@@ -94,11 +79,11 @@
           
           <q-card class="diplomas-card">
             <q-card-section>
-              <!-- Scout Diplomas -->
-              <div v-if="user?.progress?.scoutDiplomas && user.progress.scoutDiplomas.length > 0">
-                <div class="text-subtitle2 text-grey-7 q-mb-sm">{{ $t('progress.admin.diplomas.scout') || 'Scout Diplomas' }}</div>
+              <!-- Guide Diplomas -->
+              <div v-if="user?.progress?.guideDiplomas && user?.progress?.guideDiplomas.length > 0">
+                <div class="text-subtitle2 text-grey-7 q-mb-sm">{{ $t('progress.admin.diplomas.guide') || 'Guide Diplomas' }}</div>
                 <div class="diplomas-grid">
-                  <div v-for="diploma in user.progress.scoutDiplomas" :key="diploma.id" class="diploma-item">
+                  <div v-for="diploma in user?.progress?.guideDiplomas" :key="diploma.id" class="diploma-item">
                     <q-avatar size="60px" class="diploma-avatar">
                       <img v-if="diploma.image" :src="`${config.apiUrl}${diploma.image}`" style="object-fit: contain" />
                       <q-icon v-else name="school" color="accent" size="30px" />
@@ -107,15 +92,15 @@
                   </div>
                 </div>
               </div>
-              <div v-else class="text-grey-5 q-mb-md">{{ $t('progress.admin.noEarnedScoutDiplomas') || 'No Scout Diplomas Yet' }}</div>
+              <div v-else class="text-grey-5 q-mb-md">{{ $t('progress.admin.noEarnedGuideDiplomas') || 'No Guide Diplomas Yet' }}</div>
 
               <q-separator class="q-my-md" />
 
               <!-- Elective Diplomas -->
-              <div v-if="user?.progress?.electiveDiplomas && user.progress.electiveDiplomas.length > 0">
+              <div v-if="user?.progress?.electiveDiplomas && user?.progress?.electiveDiplomas.length > 0">
                 <div class="text-subtitle2 text-grey-7 q-mb-sm">{{ $t('progress.admin.diplomas.elective') || 'Elective Diplomas' }}</div>
                 <div class="diplomas-grid">
-                  <div v-for="diploma in user.progress.electiveDiplomas" :key="diploma.id" class="diploma-item">
+                  <div v-for="diploma in user?.progress?.electiveDiplomas" :key="diploma.id" class="diploma-item">
                     <q-avatar size="60px" class="diploma-avatar">
                       <img v-if="diploma.image" :src="`${config.apiUrl}${diploma.image}`" style="object-fit: contain" />
                       <q-icon v-else name="star" color="purple" size="30px" />
@@ -137,11 +122,11 @@
           {{ $t('progress.admin.paths.title') || 'Completed Paths' }} ({{ user?.progress?.completedPaths?.length || 0 }})
         </h3>
         
-        <div v-if="user?.progress?.completedPaths && user.progress.completedPaths.length > 0">
+        <div v-if="user?.progress?.completedPaths && user?.progress?.completedPaths.length > 0">
           <q-card class="paths-text-card">
             <q-card-section>
               <div class="row q-col-gutter-md">
-                <div v-for="path in user.progress.completedPaths" :key="path.id" class="col-12 col-sm-6 col-md-4">
+                <div v-for="path in user?.progress?.completedPaths" :key="path.id" class="col-12 col-sm-6 col-md-4">
                   <div class="flex items-center path-item-text">
                     <q-icon name="check_circle" color="secondary" size="sm" class="q-mr-sm flex-shrink-0" />
                     <span class="text-body1 path-name-text">{{ path.name }}</span>
@@ -156,25 +141,32 @@
           <div class="text-h6 text-grey-6 q-mt-md">{{ $t('progress.admin.noEarnedPaths') || 'No Paths Completed Yet' }}</div>
         </div>
       </div>
+        </q-card-section>
+      </q-card>
     </div>
   </q-page>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { useAuthStore } from '../stores/auth';
-import { api } from '../api';
-import { config } from '../config';
-import { getAvatarUrl } from '../utils/avatar';
+import { useAuthStore } from 'src/stores/auth';
+import { api } from 'src/api';
+import { config } from 'src/config';
 import { date } from 'quasar';
+import AvatarDisplay from 'src/components/AvatarDisplay.vue';
 
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
 const { t } = useI18n();
 const user = ref(null);
+
+// Check if the user being displayed is an admin or super admin
+const isAdmin = computed(() => {
+  return user.value?.role === 'admin' || user.value?.role === 'super_admin';
+});
 
 const formatDate = (dateString) => {
   if (!dateString) return '';
@@ -226,6 +218,11 @@ const formatUnitRole = (unitRole) => {
 onMounted(() => {
   fetchUserProfile();
 });
+
+onBeforeUnmount(() => {
+  // Clean up user data before component unmounts
+  user.value = null;
+});
 </script>
 
 <style scoped>
@@ -233,13 +230,11 @@ onMounted(() => {
   min-height: 100vh;
 }
 
-.container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 20px;
+/* Header Section */
+.gradient-purple {
+  background: linear-gradient(135deg, var(--q-primary) 0%, var(--q-secondary) 100%);
 }
 
-/* Header Section */
 .profile-header {
   background: linear-gradient(135deg, var(--q-primary) 0%, var(--q-secondary) 100%);
   padding: 30px 20px 60px;
@@ -258,8 +253,15 @@ onMounted(() => {
   margin-bottom: 40px;
 }
 
-.profile-avatar {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+.profile-avatar-wrapper {
+  border-radius: 50%;
+  overflow: hidden;
+  background: white;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .profile-info {
@@ -335,11 +337,6 @@ onMounted(() => {
 .stat-label {
   font-size: 0.95rem;
   opacity: 0.9;
-}
-
-/* Content Section */
-.content-section {
-  padding: 60px 20px 40px;
 }
 
 .section-header {

@@ -7,30 +7,28 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
-import { BadgesModule } from './badges/badges.module';
-import { AdminModule } from './admin/admin.module';
 import { LocationsModule } from './locations/locations.module';
 import { UnitsModule } from './units/units.module';
 import { PeaksModule } from './peaks/peaks.module';
 import { PathsModule } from './paths/paths.module';
-import { ScoutDiplomasModule } from './scout-diplomas/scout-diplomas.module';
+import { GuideDiplomasModule } from './guide-diplomas/guide-diplomas.module';
 import { ElectiveDiplomasModule } from './elective-diplomas/elective-diplomas.module';
 import { UserProgressModule } from './user-progress/user-progress.module';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
-      type: 'postgres',
+      type: (process.env.DB_TYPE as any) || 'postgres',
       host: process.env.DB_HOST || 'db',
       port: parseInt(process.env.DB_PORT) || 5432,
       username: process.env.DB_USERNAME || 'postgres',
       password: process.env.DB_PASSWORD || 'postgres',
-      database: process.env.DB_DATABASE || 'scout_badges',
+      database: process.env.DB_DATABASE || 'guide_badges',
       autoLoadEntities: true,
       synchronize: true,
     }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'uploads'),
+      rootPath: join(process.cwd(), 'uploads'),
       serveRoot: '/uploads',
     }),
     ThrottlerModule.forRoot([{
@@ -39,13 +37,11 @@ import { UserProgressModule } from './user-progress/user-progress.module';
     }]),
     UsersModule,
     AuthModule,
-    BadgesModule,
-    AdminModule,
     LocationsModule,
     UnitsModule,
     PeaksModule,
     PathsModule,
-    ScoutDiplomasModule,
+    GuideDiplomasModule,
     ElectiveDiplomasModule,
     UserProgressModule,
   ],

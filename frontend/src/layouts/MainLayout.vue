@@ -1,6 +1,6 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
-    <q-header elevated class="bg-primary" v-if="!isAuthPage">
+  <q-layout view="hHh Lpr fFf">
+    <q-header elevated class="bg-primary rounded-header" v-if="!isAuthPage">
       <q-toolbar>
         <q-btn
           flat
@@ -14,7 +14,7 @@
         />
 
         <q-toolbar-title>
-          {{ $t('navigation.title') }}
+          {{ pageTitle }}
         </q-toolbar-title>
 
         <!-- Dark Mode Toggle -->
@@ -37,39 +37,34 @@
       :width="250"
       :breakpoint="768"
       bordered
-      v-if="authStore.isAuthenticated"
+      v-if="authStore.isAuthenticated && !isAuthPage"
     >
       <q-list>
         <q-item-label header>{{ $t('navigation.header') }}</q-item-label>
 
         <template v-if="authStore.isAuthenticated">
-          <q-item clickable v-ripple to="/my-badges" v-if="!authStore.isAdmin">
+          <q-item clickable v-ripple to="/my-progress" v-if="!authStore.isAdmin" data-cy="nav-my-progress">
             <q-item-section avatar>
               <q-icon name="emoji_events" />
             </q-item-section>
-            <q-item-section>{{ $t('navigation.myBadges') }}</q-item-section>
+            <q-item-section>{{ $t('navigation.myProgress') }}</q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple to="/users">
+          <q-item clickable v-ripple to="/users" data-cy="nav-users">
             <q-item-section avatar>
               <q-icon name="people" />
             </q-item-section>
             <q-item-section>{{ $t('navigation.users') }}</q-item-section>
           </q-item>
 
-          <q-item 
-            clickable 
-            v-ripple 
-            to="/my-unit" 
-            v-if="authStore.user?.role === 'user' && authStore.user?.unitRole === 'leader'"
-          >
+          <q-item clickable v-ripple to="/my-unit" v-if="authStore.user?.role === 'user' && authStore.user?.unit?.id" exact-active-class="active-link" active-class="active-link">
             <q-item-section avatar>
               <q-icon name="groups" />
             </q-item-section>
             <q-item-section>{{ $t('navigation.myUnit') }}</q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple to="/profile">
+          <q-item clickable v-ripple to="/profile" data-cy="nav-profile">
             <q-item-section avatar>
               <q-icon name="person" />
             </q-item-section>
@@ -81,14 +76,14 @@
             <q-separator class="q-my-md" />
             <q-item-label header>{{ $t('navigation.administration') }}</q-item-label>
 
-            <q-item clickable v-ripple to="/admin/dashboard">
+            <q-item clickable v-ripple to="/admin/dashboard" data-cy="nav-admin-dashboard">
               <q-item-section avatar>
                 <q-icon name="dashboard" />
               </q-item-section>
               <q-item-section>{{ $t('navigation.dashboard') }}</q-item-section>
             </q-item>
 
-            <q-item clickable v-ripple to="/admin/units" active-class="text-accent">
+            <q-item clickable v-ripple to="/admin/units" data-cy="nav-admin-units">
               <q-item-section avatar>
                 <q-icon name="groups" />
               </q-item-section>
@@ -97,21 +92,21 @@
               </q-item-section>
             </q-item>
 
-            <q-item clickable v-ripple to="/admin/users" active-class="text-accent">
+            <q-item clickable v-ripple to="/admin/users" data-cy="nav-admin-users">
               <q-item-section avatar>
                 <q-icon name="admin_panel_settings" />
               </q-item-section>
               <q-item-section>{{ $t('navigation.adminUsers') }}</q-item-section>
             </q-item>
 
-            <q-item clickable v-ripple to="/admin/progress" v-if="authStore.isSuperAdmin">
+            <q-item clickable v-ripple to="/admin/progress" v-if="authStore.isSuperAdmin" data-cy="nav-admin-progress">
               <q-item-section avatar>
                 <q-icon name="trending_up" />
               </q-item-section>
               <q-item-section>{{ $t('navigation.progress') }}</q-item-section>
             </q-item>
 
-            <q-item clickable v-ripple to="/admin/locations" v-if="authStore.isSuperAdmin">
+            <q-item clickable v-ripple to="/admin/locations" v-if="authStore.isSuperAdmin" data-cy="nav-admin-locations">
               <q-item-section avatar>
                 <q-icon name="location_on" />
               </q-item-section>
@@ -124,7 +119,7 @@
           <!-- User Info Header -->
           <q-item-label header class="text-weight-bold">{{ authStore.user?.username || 'User' }}</q-item-label>
 
-          <q-item clickable v-ripple @click="logout" class="text-negative">
+          <q-item clickable v-ripple @click="logout" class="text-negative" data-cy="nav-logout">
             <q-item-section avatar>
               <q-icon name="logout" color="negative" />
             </q-item-section>
@@ -153,25 +148,47 @@
     <q-page-container>
       <router-view />
     </q-page-container>
+
+    <!-- PWA Install Prompt -->
+    <PWAInstallPrompt />
   </q-layout>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { useAuthStore } from '../stores/auth';
+import { ref, computed, watch } from 'vue';
+import { useAuthStore } from 'src/stores/auth';
 import { useRouter, useRoute } from 'vue-router';
 import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
+import PWAInstallPrompt from 'src/components/PWAInstallPrompt.vue';
 
 const authStore = useAuthStore();
 const router = useRouter();
 const route = useRoute();
 const $q = useQuasar();
+const { t } = useI18n();
+
 // Open drawer by default on desktop (>768px), closed on mobile
 const drawer = ref($q.screen.gt.sm);
 
 // Check if current route is login or register
 const isAuthPage = computed(() => {
   return route.path === '/login' || route.path === '/register' || route.path === '/';
+});
+
+// Watch for authentication changes and open drawer on login
+watch(() => authStore.isAuthenticated, (isAuthenticated) => {
+  if (isAuthenticated && !isAuthPage.value) {
+    drawer.value = true;
+  }
+});
+
+// Page Title Logic
+const pageTitle = computed(() => {
+  if ($q.screen.lt.md && route.meta.titleKey) {
+    return t(route.meta.titleKey);
+  }
+  return t('navigation.title');
 });
 
 // Initialize dark mode from localStorage
@@ -191,3 +208,11 @@ const logout = () => {
   drawer.value = false;
 };
 </script>
+
+<style scoped>
+.rounded-header {
+  border-radius: 0 0 16px 16px;
+  overflow: hidden;
+  padding: 0 16px;
+}
+</style>

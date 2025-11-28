@@ -21,8 +21,8 @@ export class AwardDiplomaDto {
     diplomaId: number;
 
     @IsString()
-    @IsEnum(['scout', 'elective'])
-    type: 'scout' | 'elective';
+    @IsEnum(['guide', 'elective'])
+    type: 'guide' | 'elective';
 }
 
 export class UserProgressResponseDto {
@@ -40,7 +40,7 @@ export class UserProgressResponseDto {
         name: string;
         category: string;
     }>;
-    scoutDiplomas: Array<{
+    guideDiplomas: Array<{
         id: number;
         name: string;
         level: number;
@@ -50,7 +50,7 @@ export class UserProgressResponseDto {
         name: string;
     }>;
     pathsCount: number;
-    scoutDiplomasCount: number;
+    guideDiplomasCount: number;
     electiveDiplomasCount: number;
     nextPeak?: {
         id: number;

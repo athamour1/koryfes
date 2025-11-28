@@ -1,13 +1,19 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, Query, UnauthorizedException, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, Query, UnauthorizedException, UseInterceptors, UploadedFile, Inject, forwardRef } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { UsersService } from './users.service';
 import { AuthGuard } from '@nestjs/passport';
+import { UserProgressService } from '../user-progress/user-progress.service';
+import { UnitRole } from './entities/user.entity';
 
 @Controller('users')
 export class UsersController {
-    constructor(private readonly usersService: UsersService) { }
+    constructor(
+        private readonly usersService: UsersService,
+        @Inject(forwardRef(() => UserProgressService))
+        private readonly userProgressService: UserProgressService,
+    ) { }
 
     @UseGuards(AuthGuard('jwt'))
     @Get('profile')
@@ -98,134 +104,12 @@ export class UsersController {
             delete updateData.isAdmin;
         }
 
-        // Handle badges update if provided as array of IDs
-        if (updateData.badges && Array.isArray(updateData.badges)) {
-            updateData.badges = updateData.badges.map(id => ({ id: +id }));
-        }
-
         return this.usersService.update(+id, updateData);
     }
 
-    @UseGuards(AuthGuard('jwt'))
-    @Post(':id/badges')
-    async assignBadge(
-        @Param('id') id: string,
-        @Body('badgeId') badgeId: number,
-        @Body('acquiredAt') acquiredAt: string,
-        @Request() req
-    ) {
-        if (!req.user.isAdmin && req.user.role !== 'super_admin' && req.user.role !== 'admin') {
-            throw new UnauthorizedException('Only admins can assign badges');
-        }
 
-        // If Admin (not Super Admin), verify user is in same location
-        if (req.user.role === 'admin') {
-            const targetUser = await this.usersService.findOne(+id);
-            if (!targetUser) {
-                throw new UnauthorizedException('User not found');
-            }
-            if (targetUser.location?.id != req.user.locationId) {
-                console.log(`Location mismatch: Target ${targetUser.location?.id} vs Admin ${req.user.locationId}`);
-                throw new UnauthorizedException('You can only assign badges to users in your location');
-            }
-        }
 
-        const date = acquiredAt ? new Date(acquiredAt) : new Date();
-        return this.usersService.assignBadge(+id, badgeId, date);
-    }
 
-    @UseGuards(AuthGuard('jwt'))
-    @Patch(':id/badges/:badgeId')
-    async updateBadgeDate(
-        @Param('id') id: string,
-        @Param('badgeId') badgeId: string,
-        @Body('acquiredAt') acquiredAt: string,
-        @Request() req
-    ) {
-        if (!req.user.isAdmin && req.user.role !== 'super_admin' && req.user.role !== 'admin') {
-            throw new UnauthorizedException('Only admins can update badges');
-        }
-
-        // If Admin (not Super Admin), verify user is in same location
-        if (req.user.role === 'admin') {
-            const targetUser = await this.usersService.findOne(+id);
-            if (!targetUser) {
-                throw new UnauthorizedException('User not found');
-            }
-            if (targetUser.location?.id != req.user.locationId) {
-                throw new UnauthorizedException('You can only update badges for users in your location');
-            }
-        }
-
-        const date = new Date(acquiredAt);
-        return this.usersService.updateBadgeDate(+id, +badgeId, date);
-    }
-
-    @UseGuards(AuthGuard('jwt'))
-    @Delete(':id/badges/:badgeId')
-    async removeBadge(@Param('id') id: string, @Param('badgeId') badgeId: string, @Request() req) {
-        if (!req.user.isAdmin && req.user.role !== 'super_admin' && req.user.role !== 'admin') {
-            throw new UnauthorizedException('Only admins can remove badges');
-        }
-
-        // If Admin (not Super Admin), verify user is in same location
-        if (req.user.role === 'admin') {
-            const targetUser = await this.usersService.findOne(+id);
-            if (!targetUser) {
-                throw new UnauthorizedException('User not found');
-            }
-            if (targetUser.location?.id !== req.user.locationId) {
-                throw new UnauthorizedException('You can only remove badges from users in your location');
-            }
-        }
-
-        return this.usersService.removeBadge(+id, +badgeId);
-    }
-
-    @UseGuards(AuthGuard('jwt'))
-    @Post('profile/image')
-    @UseInterceptors(FileInterceptor('file', {
-        storage: diskStorage({
-            destination: './uploads/profile-images',
-            filename: (req, file, cb) => {
-                const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('');
-                return cb(null, `${randomName}${extname(file.originalname)}`);
-            }
-        })
-    }))
-    uploadProfileImage(@Request() req, @UploadedFile() file: any) {
-        return this.usersService.updateProfileImage(req.user.userId, `/uploads/profile-images/${file.filename}`);
-    }
-
-    @UseGuards(AuthGuard('jwt'))
-    @Post(':id/image')
-    @UseInterceptors(FileInterceptor('file', {
-        storage: diskStorage({
-            destination: './uploads/profile-images',
-            filename: (req, file, cb) => {
-                const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('');
-                return cb(null, `${randomName}${extname(file.originalname)}`);
-            }
-        })
-    }))
-    async uploadUserImage(@Param('id') id: string, @Request() req, @UploadedFile() file: any) {
-        if (!req.user.isAdmin && req.user.role !== 'super_admin' && req.user.role !== 'admin') {
-            throw new UnauthorizedException('Only admins can upload user images');
-        }
-
-        // If Admin (not Super Admin), verify user is in same location
-        if (req.user.role === 'admin') {
-            const targetUser = await this.usersService.findOne(+id);
-            if (!targetUser) {
-                throw new UnauthorizedException('User not found');
-            }
-            if (targetUser.location?.id !== req.user.locationId) {
-                throw new UnauthorizedException('You can only upload images for users in your location');
-            }
-        }
-
-        return this.usersService.updateProfileImage(+id, `/uploads/profile-images/${file.filename}`);
-    }
 
     @UseGuards(AuthGuard('jwt'))
     @Delete(':id')
@@ -255,5 +139,129 @@ export class UsersController {
 
         await this.usersService.remove(+id);
         return { message: 'User deleted successfully' };
+    }
+
+    /**
+     * User Progress Endpoints
+     * These match the frontend API calls
+     */
+
+    @UseGuards(AuthGuard('jwt'))
+    @Get(':id/progress')
+    async getUserProgress(@Param('id') id: string, @Request() req) {
+        const targetUserId = +id;
+        const requestingUser = await this.usersService.findOne(req.user.userId);
+        const targetUser = await this.usersService.findOne(targetUserId);
+
+        // Allow if:
+        // 1. User viewing their own progress
+        // 2. Admin or Super Admin
+        // 3. Unit leader/deputy viewing member of their unit
+        const isSelf = req.user.userId === targetUserId;
+        const isAdmin = req.user.role === 'admin' || req.user.role === 'super_admin';
+        const isUnitLeader = requestingUser?.unitRole === UnitRole.LEADER || requestingUser?.unitRole === UnitRole.DEPUTY_LEADER;
+        const sameUnit = requestingUser?.unit?.id && targetUser?.unit?.id &&
+            requestingUser.unit.id === targetUser.unit.id;
+
+        if (!isSelf && !isAdmin && !(isUnitLeader && sameUnit)) {
+            throw new UnauthorizedException('Insufficient permissions to view this user\'s progress');
+        }
+
+        return this.userProgressService.getUserProgress(targetUserId);
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Post(':id/progress/peak')
+    async awardPeakToUser(
+        @Param('id') id: string,
+        @Body() body: { peakName?: string; peakId?: number },
+        @Request() req
+    ) {
+        if (req.user.role !== 'admin' && req.user.role !== 'super_admin') {
+            throw new UnauthorizedException('Only admins can award peaks');
+        }
+
+        // If Admin (not Super Admin), verify user is in same location
+        if (req.user.role === 'admin') {
+            const targetUser = await this.usersService.findOne(+id);
+            if (!targetUser) {
+                throw new UnauthorizedException('User not found');
+            }
+            if (targetUser.location?.id !== req.user.locationId) {
+                throw new UnauthorizedException('You can only award peaks to users in your location');
+            }
+        }
+
+        // If peakName is provided, find the peak by name
+        let peakId = body.peakId;
+        if (body.peakName && !peakId) {
+            // Import Peak repository to find by name
+            const { InjectRepository } = require('@nestjs/typeorm');
+            const { Peak } = require('../peaks/peak.entity');
+            const peakRepo = await this.userProgressService['peakRepository'];
+            const peak = await peakRepo.findOne({ where: { name: body.peakName } });
+            if (!peak) {
+                throw new UnauthorizedException(`Peak "${body.peakName}" not found`);
+            }
+            peakId = peak.id;
+        }
+
+        if (!peakId) {
+            throw new UnauthorizedException('Either peakName or peakId must be provided');
+        }
+
+        return this.userProgressService.awardPeak(+id, peakId);
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Post(':id/progress/path')
+    async awardPathToUser(
+        @Param('id') id: string,
+        @Body() body: { pathId: number },
+        @Request() req
+    ) {
+        if (req.user.role !== 'admin' && req.user.role !== 'super_admin') {
+            throw new UnauthorizedException('Only admins can award paths');
+        }
+
+        // If Admin (not Super Admin), verify user is in same location
+        if (req.user.role === 'admin') {
+            const targetUser = await this.usersService.findOne(+id);
+            if (!targetUser) {
+                throw new UnauthorizedException('User not found');
+            }
+            if (targetUser.location?.id !== req.user.locationId) {
+                throw new UnauthorizedException('You can only award paths to users in your location');
+            }
+        }
+
+        return this.userProgressService.awardPath(+id, body.pathId);
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Post(':id/progress/diploma')
+    async awardDiplomaToUser(
+        @Param('id') id: string,
+        @Body() body: { diplomaId: number; type?: 'guide' | 'elective' },
+        @Request() req
+    ) {
+        if (req.user.role !== 'admin' && req.user.role !== 'super_admin') {
+            throw new UnauthorizedException('Only admins can award diplomas');
+        }
+
+        // If Admin (not Super Admin), verify user is in same location
+        if (req.user.role === 'admin') {
+            const targetUser = await this.usersService.findOne(+id);
+            if (!targetUser) {
+                throw new UnauthorizedException('User not found');
+            }
+            if (targetUser.location?.id !== req.user.locationId) {
+                throw new UnauthorizedException('You can only award diplomas to users in your location');
+            }
+        }
+
+        // Default to 'elective' if not specified
+        const type = body.type || 'elective';
+        return this.userProgressService.awardDiploma(+id, body.diplomaId, type);
     }
 }

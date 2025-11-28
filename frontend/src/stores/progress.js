@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia';
-import { api } from '../api';
+import { api } from 'src/api';
 
 export const useProgressStore = defineStore('progress', {
     state: () => ({
         peaks: [],
-        scoutDiplomas: [],
+        guideDiplomas: [],
         electiveDiplomas: [],
         paths: [],
         loading: false,
@@ -24,13 +24,13 @@ export const useProgressStore = defineStore('progress', {
             }
         },
 
-        async fetchScoutDiplomas() {
+        async fetchGuideDiplomas() {
             try {
                 this.loading = true;
-                const response = await api.get('/scout-diplomas');
-                this.scoutDiplomas = response.data;
+                const response = await api.get('/guide-diplomas');
+                this.guideDiplomas = response.data;
             } catch (error) {
-                console.error('Error fetching scout diplomas:', error);
+                console.error('Error fetching guide diplomas:', error);
                 throw error;
             } finally {
                 this.loading = false;
@@ -81,21 +81,21 @@ export const useProgressStore = defineStore('progress', {
             await this.fetchPeaks();
         },
 
-        async createScoutDiploma(diplomaData) {
-            const response = await api.post('/scout-diplomas', diplomaData);
-            await this.fetchScoutDiplomas();
+        async createGuideDiploma(diplomaData) {
+            const response = await api.post('/guide-diplomas', diplomaData);
+            await this.fetchGuideDiplomas();
             return response.data;
         },
 
-        async updateScoutDiploma(id, diplomaData) {
-            const response = await api.patch(`/scout-diplomas/${id}`, diplomaData);
-            await this.fetchScoutDiplomas();
+        async updateGuideDiploma(id, diplomaData) {
+            const response = await api.patch(`/guide-diplomas/${id}`, diplomaData);
+            await this.fetchGuideDiplomas();
             return response.data;
         },
 
-        async deleteScoutDiploma(id) {
-            await api.delete(`/scout-diplomas/${id}`);
-            await this.fetchScoutDiplomas();
+        async deleteGuideDiploma(id) {
+            await api.delete(`/guide-diplomas/${id}`);
+            await this.fetchGuideDiplomas();
         },
 
         async createElectiveDiploma(diplomaData) {
@@ -171,7 +171,7 @@ export const useProgressStore = defineStore('progress', {
                 const response = await api.post('/user-progress/award-diploma', {
                     userId,
                     diplomaId,
-                    type // 'scout' or 'elective'
+                    type // 'guide' or 'elective'
                 });
                 return response.data;
             } catch (error) {

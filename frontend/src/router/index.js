@@ -1,128 +1,111 @@
-import { createRouter, createWebHistory } from 'vue-router';
-import { useAuthStore } from '../stores/auth';
+import { defineRouter } from '#q-app/wrappers'
+import { createRouter, createMemoryHistory, createWebHistory, createWebHashHistory } from 'vue-router'
+import routes from './routes'
+import { useAuthStore } from 'src/stores/auth'
 
-const routes = [
-    {
-        path: '/',
-        component: () => import('../layouts/MainLayout.vue'),
-        children: [
-            {
-                path: '',
-                redirect: (to) => {
-                    const authStore = useAuthStore();
-                    if (authStore.isAuthenticated) {
-                        return authStore.isAdmin ? '/admin/dashboard' : '/my-badges';
-                    }
-                    return '/login';
-                }
-            },
-            { path: 'login', component: () => import('../pages/LoginPage.vue') },
-            { path: 'register', component: () => import('../pages/RegisterPage.vue') },
-            { path: 'forgot-password', component: () => import('../pages/ForgotPasswordPage.vue') },
+/*
+ * If not building with SSR mode, you can
+ * directly export the Router instantiation;
+ *
+ * The function below can be async too; either use
+ * async/await or return a Promise which resolves
+ * with the Router instance.
+ */
 
-            { path: 'reset-password', component: () => import('../pages/ResetPasswordPage.vue') },
-            { path: 'profile', component: () => import('../pages/ProfilePage.vue'), meta: { requiresAuth: true } },
-            { path: 'my-badges', component: () => import('../pages/MyBadgesPage.vue'), meta: { requiresAuth: true } },
-            { path: 'users', component: () => import('../pages/UserListPage.vue'), meta: { requiresAuth: true } },
-            { path: 'user/:id', component: () => import('../pages/UserProfilePage.vue'), meta: { requiresAuth: true } },
-            { path: 'my-unit', component: () => import('../pages/MyUnitPage.vue'), meta: { requiresAuth: true } },
+export default defineRouter(function (/* { store, ssrContext } */) {
+  const createHistory = process.env.SERVER
+    ? createMemoryHistory
+    : (process.env.VUE_ROUTER_MODE === 'history' ? createWebHistory : createWebHashHistory)
 
-
-            // Admin Routes
-            {
-                path: 'admin/dashboard',
-                component: () => import('../pages/admin/AdminDashboardPage.vue'),
-                meta: { requiresAuth: true, requiresAdmin: true }
-            },
-            {
-                path: 'admin/units',
-                component: () => import('../pages/admin/AdminUnitsPage.vue'),
-                meta: { requiresAuth: true, requiresAdmin: true }
-            },
-            {
-                path: 'units/:id',
-                component: () => import('../pages/UnitPage.vue'),
-                meta: { requiresAuth: true }
-            },
-            {
-                path: 'admin/users',
-                component: () => import('../pages/admin/AdminUsersPage.vue'),
-                meta: { requiresAuth: true, requiresAdmin: true }
-            },
-            {
-                path: 'admin/progress',
-                component: () => import('../pages/admin/AdminProgressPage.vue'),
-                meta: { requiresAuth: true, requiresAdmin: true }
-            },
-
-            // Super Admin Routes
-            {
-                path: 'admin/locations',
-                component: () => import('../pages/admin/LocationManagement.vue'),
-                meta: { requiresAuth: true, requiresSuperAdmin: true }
-            },
-        ],
-    },
-];
-
-const router = createRouter({
-    history: createWebHistory(),
+  const Router = createRouter({
+    scrollBehavior: () => ({ left: 0, top: 0 }),
     routes,
-});
 
-router.beforeEach(async (to, from, next) => {
+    // Leave this as is and make changes in quasar.conf.js instead!
+    // quasar.conf.js -> build -> vueRouterMode
+    // quasar.conf.js -> build -> publicPath
+    history: createHistory(process.env.VUE_ROUTER_BASE)
+  })
+
+  // Navigation guards
+  Router.beforeEach(async (to, from, next) => {
     const authStore = useAuthStore();
+
+    // Check token expiration before any navigation
+    const isAuthValid = authStore.checkAuth();
+
+    // Redirect authenticated users away from login/register pages
+    const authPages = ['/login', '/register', '/'];
+    if (authPages.includes(to.path) && authStore.token && isAuthValid) {
+      // User is authenticated and trying to access login/register
+      // Redirect to appropriate page based on role
+      if (authStore.isAdmin) {
+        next('/admin/dashboard');
+      } else {
+        next('/my-progress');
+      }
+      return;
+    }
+
+    // If checkAuth determined token is expired, it already called logout
+    // In this case, redirect to login if not already going there
+    if (!isAuthValid && to.meta.requiresAuth && to.path !== '/login') {
+      next('/login');
+      return;
+    }
 
     // Check if route requires auth
     if (to.meta.requiresAuth) {
-        // If no token, redirect to login
-        if (!authStore.token) {
-            next('/login');
-            return;
-        }
+      // If no token, redirect to login
+      if (!authStore.token) {
+        next('/login');
+        return;
+      }
 
-        // If we have a token but no user data, fetch it
-        if (!authStore.user) {
-            try {
-                await authStore.fetchProfile();
-            } catch (error) {
-                // If fetching profile fails (e.g. invalid token), redirect to login
-                next('/login');
-                return;
-            }
+      // If we have a token but no user data, fetch it
+      if (!authStore.user) {
+        try {
+          await authStore.fetchProfile();
+        } catch (error) {
+          // If fetching profile fails, the 401 interceptor will handle logout
+          // Just redirect to login here
+          next('/login');
+          return;
         }
+      }
     }
 
     // Role-based checks
     if (to.meta.requiresAdmin || to.meta.requiresSuperAdmin) {
-        if (to.meta.requiresSuperAdmin) {
-            if (authStore.isSuperAdmin) {
-                next();
-            } else {
-                next('/admin/dashboard'); // Downgrade to admin dashboard or forbidden
-            }
-            return;
-        }
-
-        if (authStore.isAdmin) {
-            next();
+      if (to.meta.requiresSuperAdmin) {
+        if (authStore.isSuperAdmin) {
+          next();
         } else {
-            next('/my-badges'); // Redirect non-admins
+          next('/admin/dashboard'); // Downgrade to admin dashboard or forbidden
         }
         return;
+      }
+
+      if (authStore.isAdmin) {
+        next();
+      } else {
+        next('/my-progress'); // Redirect non-admins
+      }
+      return;
     }
 
-    // Unit Leader check for My Unit page
+    // Unit Member check for My Unit page
     if (to.path === '/my-unit') {
-        if (authStore.user?.unitRole === 'leader') {
-            next();
-        } else {
-            next('/my-badges'); // Redirect non-leaders
-        }
-        return;
+      if (authStore.user?.unit?.id) {
+        next(); // Allow all unit members
+      } else {
+        next('/my-progress'); // Redirect users without a unit
+      }
+      return;
     }
 
     next();
-});
+  });
 
-export default router;
+  return Router
+})
