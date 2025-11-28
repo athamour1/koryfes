@@ -68,7 +68,7 @@
 
     <!-- Create/Edit Unit Dialog -->
     <q-dialog v-model="unitDialog">
-      <q-card style="min-width: 500px">
+      <q-card style="width: 100%; max-width: 500px">
         <q-card-section>
           <div class="text-h6">{{ isEditing ? $t('adminUnits.dialog.editTitle') : $t('adminUnits.dialog.createTitle') }}</div>
         </q-card-section>
@@ -88,7 +88,7 @@
                   size="sm"
                   class="absolute-bottom-right"
                   style="bottom: -5px; right: -5px;"
-                  @click="$refs.fileInput.pickFiles()"
+                  @click="triggerFileInput"
                 />
                 <q-file
                   ref="fileInput"
@@ -163,6 +163,7 @@ const isEditing = ref(false);
 const uploadFile = ref(null);
 const previewImage = ref(null);
 const locations = ref([]);
+const fileInput = ref(null);
 
 const unitForm = ref({
   id: null,
@@ -201,10 +202,17 @@ const openCreateDialog = () => {
 
 const openEditDialog = (unit) => {
   isEditing.value = true;
-  unitForm.value = { ...unit };
+  unitForm.value = { 
+    ...unit,
+    locationId: unit.location?.id
+  };
   previewImage.value = null;
   uploadFile.value = null;
   unitDialog.value = true;
+};
+
+const triggerFileInput = () => {
+  fileInput.value?.pickFiles();
 };
 
 const handleImagePreview = (file) => {
@@ -216,10 +224,16 @@ const handleImagePreview = (file) => {
 const saveUnit = async () => {
   let result;
   if (isEditing.value) {
-    result = await unitStore.updateUnit(unitForm.value.id, {
+    const updatePayload = {
       name: unitForm.value.name,
       description: unitForm.value.description
-    });
+    };
+
+    if (authStore.isSuperAdmin && unitForm.value.locationId) {
+      updatePayload.location = { id: unitForm.value.locationId };
+    }
+
+    result = await unitStore.updateUnit(unitForm.value.id, updatePayload);
   } else {
     const createPayload = {
       name: unitForm.value.name,
