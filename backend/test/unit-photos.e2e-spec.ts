@@ -210,6 +210,23 @@ describe('Unit images (e2e)', () => {
         });
     });
 
+    describe('DELETE /locations/:id', () => {
+        it('deletes the stored images of the location\'s units', async () => {
+            const loc = await seedLocation(app, 'Closing down');
+            const unit = await seedUnit(app, 'Last unit', loc);
+            const photo = await upload(superToken, unit.id, 'corner').expect(201);
+            const flagged = await http()
+                .post(`/units/${unit.id}/image`)
+                .set('Authorization', `Bearer ${superToken}`)
+                .attach('file', photoJpeg, { filename: 'f.jpg', contentType: 'image/jpeg' })
+                .expect(201);
+            const keys = [photo.body.path, flagged.body.flag].map((p) => p.replace('/uploads/', ''));
+            keys.forEach((k) => expect(storage.objects.has(k)).toBe(true));
+            await http().delete(`/locations/${loc.id}`).set('Authorization', `Bearer ${superToken}`).expect(200);
+            keys.forEach((k) => expect(storage.objects.has(k)).toBe(false));
+        });
+    });
+
     describe('DELETE /units/:id/photos/:photoId', () => {
         it('removes the photo and its object', async () => {
             const unit = await http().get(`/units/${unitA.id}`).set('Authorization', `Bearer ${leaderToken}`).expect(200);

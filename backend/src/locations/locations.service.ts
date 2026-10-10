@@ -6,6 +6,10 @@ import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
 import { User } from '../users/entities/user.entity';
 
+import { Unit } from '../units/entities/unit.entity';
+import { StorageService } from '../storage/storage.service';
+import { deleteQuietly } from '../storage/delete-quietly';
+import { keyFromUploadPath, unitFlagKey } from '../storage/upload-paths';
 @Injectable()
 export class LocationsService {
     constructor(
@@ -13,6 +17,7 @@ export class LocationsService {
         private locationsRepository: Repository<Location>,
         @InjectRepository(User)
         private usersRepository: Repository<User>,
+        private readonly storage: StorageService,
     ) { }
 
     async create(createLocationDto: CreateLocationDto): Promise<Location> {
@@ -75,10 +80,18 @@ export class LocationsService {
     }
 
     async remove(id: number): Promise<void> {
+        // units and their photo rows go by cascade; their stored images don't
+        const units = await this.locationsRepository.manager.find(Unit, {
+            where: { location: { id } },
+            relations: ['photos'],
+        });
+        const keys = units.flatMap((unit) => [unitFlagKey(unit.flag), ...(unit.photos || []).map((p) => keyFromUploadPath(p.path))]);
+
         const result = await this.locationsRepository.delete(id);
         if (result.affected === 0) {
             throw new NotFoundException(`Location with ID ${id} not found`);
         }
+        await deleteQuietly(this.storage, keys);
     }
 
     /**

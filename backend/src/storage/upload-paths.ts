@@ -12,6 +12,12 @@ export function keyFromUploadPath(path: string | null | undefined): string | nul
     return path && path.startsWith(PREFIX) ? path.slice(PREFIX.length) : null;
 }
 
+/** Key of a unit's own flag object, or null (never another kind of object). */
+export function unitFlagKey(path: string | null | undefined): string | null {
+    const key = keyFromUploadPath(path);
+    return key?.startsWith('unit-flags/') ? key : null;
+}
+
 /** New random key for a processed (WebP) image under the given prefix. */
 export function newImageKey(prefix: string): string {
     return `${prefix}/${randomBytes(16).toString('hex')}.webp`;

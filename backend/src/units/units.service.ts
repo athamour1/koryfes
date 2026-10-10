@@ -4,13 +4,7 @@ import { Repository } from 'typeorm';
 import { Unit } from './entities/unit.entity';
 import { Location } from '../locations/entities/location.entity';
 import { StorageService } from '../storage/storage.service';
-import { keyFromUploadPath, newImageKey, toUploadPath } from '../storage/upload-paths';
-
-/** Key of the unit's own flag object, or null (never another kind of object). */
-const flagKey = (path: string | null | undefined) => {
-    const key = keyFromUploadPath(path);
-    return key?.startsWith('unit-flags/') ? key : null;
-};
+import { newImageKey, toUploadPath, unitFlagKey } from '../storage/upload-paths';
 import { IMAGE_MAX_SIDE, processImage } from '../common/image-upload';
 import { UnitPhotosService } from './unit-photos.service';
 import { deleteQuietly } from '../storage/delete-quietly';
@@ -63,7 +57,7 @@ export class UnitsService {
         const unit = await this.findOne(id);
         // photo rows go by cascade; their objects (and the flag's) are deleted
         // after the rows, so a bucket failure can't leave rows without images
-        const keys = [...(await this.unitPhotos.objectKeys(id)), flagKey(unit.flag)];
+        const keys = [...(await this.unitPhotos.objectKeys(id)), unitFlagKey(unit.flag)];
         await this.unitsRepository.delete(id);
         await deleteQuietly(this.storage, keys);
     }
@@ -73,7 +67,7 @@ export class UnitsService {
         const key = newImageKey('unit-flags');
         await this.storage.put(key, await processImage(file, IMAGE_MAX_SIDE.flag), 'image/webp');
         await this.unitsRepository.update(id, { flag: toUploadPath(key) });
-        await deleteQuietly(this.storage, [flagKey(unit.flag)]);
+        await deleteQuietly(this.storage, [unitFlagKey(unit.flag)]);
         return this.findOne(id);
     }
 }

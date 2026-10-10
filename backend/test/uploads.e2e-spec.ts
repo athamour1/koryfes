@@ -88,3 +88,38 @@ describe('GET /uploads/* when the bucket stream fails (e2e)', () => {
         }
     });
 });
+
+describe('legacy uploads migration, later boots (e2e)', () => {
+    const legacyDir = () => {
+        const dir = mkdtempSync(join(tmpdir(), 'uploads-'));
+        mkdirSync(join(dir, 'unit-flags'));
+        writeFileSync(join(dir, 'unit-flags', 'old.png'), Buffer.from('png-bytes'));
+        return dir;
+    };
+
+    it('does not bring back an object deleted after the first copy', async () => {
+        process.env.UPLOADS_DIR = legacyDir();
+        const storage = new InMemoryStorage();
+        try {
+            await (await createTestApp(storage)).close();
+            await storage.delete('unit-flags/old.png'); // e.g. the flag was replaced
+            await (await createTestApp(storage)).close();
+            expect(storage.objects.has('unit-flags/old.png')).toBe(false);
+        } finally {
+            delete process.env.UPLOADS_DIR;
+        }
+    });
+
+    it('still boots when the bucket is unreachable', async () => {
+        process.env.UPLOADS_DIR = legacyDir();
+        const storage = new InMemoryStorage();
+        storage.exists = async () => { throw new Error('bucket unreachable'); };
+        try {
+            const app = await createTestApp(storage);
+            await request(app.getHttpServer()).get('/health').expect(200);
+            await app.close();
+        } finally {
+            delete process.env.UPLOADS_DIR;
+        }
+    });
+});
