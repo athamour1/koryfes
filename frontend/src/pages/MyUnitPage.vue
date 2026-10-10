@@ -165,13 +165,13 @@
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from 'src/stores/auth';
-import { useUnitStore } from 'src/stores/unit';
-import { api } from 'src/api';
+import { useAuthStore } from '@/stores/auth';
+import { useUnitStore } from '@/stores/unit';
+import { api } from '@/api';
 import { useQuasar } from 'quasar';
-import { config } from 'src/config';
-import PageHeader from 'src/components/PageHeader.vue';
-import AvatarDisplay from 'src/components/AvatarDisplay.vue';
+import { config } from '@/config';
+import PageHeader from '@/components/PageHeader.vue';
+import AvatarDisplay from '@/components/AvatarDisplay.vue';
 
 const { t } = useI18n();
 const router = useRouter();

@@ -156,11 +156,11 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
-import { useAuthStore } from 'src/stores/auth';
+import { useAuthStore } from '@/stores/auth';
 import { useRouter, useRoute } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
-import PWAInstallPrompt from 'src/components/PWAInstallPrompt.vue';
+import PWAInstallPrompt from '@/components/PWAInstallPrompt.vue';
 
 const authStore = useAuthStore();
 const router = useRouter();

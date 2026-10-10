@@ -147,10 +147,10 @@
 <script setup>
 import { ref, onMounted, reactive, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { api } from 'src/api';
+import { api } from '@/api';
 import { useQuasar } from 'quasar';
-import PageHeader from 'src/components/PageHeader.vue';
-import LocationMapPicker from 'src/components/LocationMapPicker.vue';
+import PageHeader from '@/components/PageHeader.vue';
+import LocationMapPicker from '@/components/LocationMapPicker.vue';
 
 const $q = useQuasar();
 const { t } = useI18n();

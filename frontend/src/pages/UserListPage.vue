@@ -126,11 +126,11 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useUserStore } from 'src/stores/user';
-import { useAuthStore } from 'src/stores/auth';
-import { config } from 'src/config';
-import AvatarDisplay from 'src/components/AvatarDisplay.vue';
-import PageHeader from 'src/components/PageHeader.vue';
+import { useUserStore } from '@/stores/user';
+import { useAuthStore } from '@/stores/auth';
+import { config } from '@/config';
+import AvatarDisplay from '@/components/AvatarDisplay.vue';
+import PageHeader from '@/components/PageHeader.vue';
 
 const userStore = useUserStore();
 const authStore = useAuthStore();

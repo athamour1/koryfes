@@ -151,11 +151,11 @@
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { useAuthStore } from 'src/stores/auth';
-import { api } from 'src/api';
-import { config } from 'src/config';
+import { useAuthStore } from '@/stores/auth';
+import { api } from '@/api';
+import { config } from '@/config';
 import { date } from 'quasar';
-import AvatarDisplay from 'src/components/AvatarDisplay.vue';
+import AvatarDisplay from '@/components/AvatarDisplay.vue';
 
 const route = useRoute();
 const router = useRouter();

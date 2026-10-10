@@ -70,9 +70,9 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { useUnitStore } from 'src/stores/unit';
-import { config } from 'src/config';
-import AvatarDisplay from 'src/components/AvatarDisplay.vue';
+import { useUnitStore } from '@/stores/unit';
+import { config } from '@/config';
+import AvatarDisplay from '@/components/AvatarDisplay.vue';
 
 const route = useRoute();
 const unitStore = useUnitStore();

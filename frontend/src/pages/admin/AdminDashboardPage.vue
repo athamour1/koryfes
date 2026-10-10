@@ -275,10 +275,10 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useAuthStore } from 'src/stores/auth';
-import { api } from 'src/api';
-import { getAvatarUrl } from 'src/utils/avatar';
-import PageHeader from 'src/components/PageHeader.vue';
+import { useAuthStore } from '@/stores/auth';
+import { api } from '@/api';
+import { getAvatarUrl } from '@/utils/avatar';
+import PageHeader from '@/components/PageHeader.vue';
 
 const authStore = useAuthStore();
 const { t } = useI18n();

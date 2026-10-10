@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { api } from 'src/api';
+import { api } from '@/api';
 
 export const useProgressStore = defineStore('progress', {
     state: () => ({

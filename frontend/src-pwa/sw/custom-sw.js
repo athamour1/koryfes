@@ -1,5 +1,3 @@
-/* eslint-env serviceworker */
-
 /*
  * This file (which will be your service worker)
  * is picked up by the build system ONLY if
@@ -7,8 +5,12 @@
  */
 
 import { clientsClaim } from 'workbox-core'
-import { precacheAndRoute, cleanupOutdatedCaches, createHandlerBoundToURL } from 'workbox-precaching'
-import { registerRoute, NavigationRoute } from 'workbox-routing'
+import { NavigationRoute, registerRoute } from 'workbox-routing'
+import {
+  cleanupOutdatedCaches,
+  createHandlerBoundToURL,
+  precacheAndRoute
+} from 'workbox-precaching'
 
 self.skipWaiting()
 clientsClaim()
@@ -18,13 +20,18 @@ precacheAndRoute(self.__WB_MANIFEST)
 
 cleanupOutdatedCaches()
 
-// Non-SSR fallbacks to index.html
-// Production SSR fallbacks to offline.html (except for dev)
-if (process.env.MODE !== 'ssr' || process.env.PROD) {
+if (import.meta.env.QUASAR_PROD) {
+  // Non-SSR/SSG fallbacks to index.html
+  // Production SSR/SSG fallbacks to offline.html (except for dev)
   registerRoute(
     new NavigationRoute(
-      createHandlerBoundToURL(process.env.PWA_FALLBACK_HTML),
-      { denylist: [new RegExp(process.env.PWA_SERVICE_WORKER_REGEX), /workbox-(.)*\.js$/] }
+      createHandlerBoundToURL(import.meta.env.QUASAR_PWA_FALLBACK_HTML),
+      {
+        denylist: [
+          new RegExp(import.meta.env.QUASAR_PWA_SERVICE_WORKER_REGEX),
+          /workbox-(.)*\.js$/
+        ]
+      }
     )
   )
 }

@@ -314,11 +314,11 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useAuthStore } from 'src/stores/auth';
-import { useUserStore } from 'src/stores/user';
+import { useAuthStore } from '@/stores/auth';
+import { useUserStore } from '@/stores/user';
 import { useQuasar } from 'quasar';
-import AvatarDisplay from 'src/components/AvatarDisplay.vue';
-import PageHeader from 'src/components/PageHeader.vue';
+import AvatarDisplay from '@/components/AvatarDisplay.vue';
+import PageHeader from '@/components/PageHeader.vue';
 
 const authStore = useAuthStore();
 const userStore = useUserStore();
