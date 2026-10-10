@@ -281,6 +281,12 @@
         "noLocation": "No Location"
     },
     "unitPage": {
+        "viewPhoto": "View photo",
+        "errors": {
+            "tooManyPhotos": "A unit can have up to 9 activity photos.",
+            "tooLarge": "The photo is too large (max 5MB).",
+            "notImage": "The file is not an image (JPEG, PNG, WebP or GIF)."
+        },
         "edit": "Edit",
         "done": "Done",
         "yell": "Yell",

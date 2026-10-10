@@ -2,7 +2,7 @@
   <!-- Ένα πλακίδιο της γκαλερί: φωτογραφία (πατιέται για μεγέθυνση) ή, σε
        επεξεργασία, κενή θέση «+». Σε επεξεργασία δείχνει αλλαγή/αφαίρεση. -->
   <div class="photo-tile" :class="{ 'photo-tile--empty': !src }" :style="{ aspectRatio: ratio }">
-    <img v-if="src" :src="src" alt="" loading="lazy" role="button" tabindex="0" @click="$emit('open')" @keydown.enter="$emit('open')" />
+    <img v-if="src" :src="src" :alt="$t('unitPage.viewPhoto')" loading="lazy" role="button" tabindex="0" @click="$emit('open')" @keydown.enter="$emit('open')" />
     <button v-else-if="editing" type="button" class="photo-tile__add" :disabled="busy" @click="pick">
       <q-spinner v-if="busy" size="28px" />
       <template v-else>

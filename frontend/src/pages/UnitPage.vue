@@ -53,7 +53,8 @@
           <div class="tf-card-head"><q-icon name="campaign" />{{ $t('unitPage.yell') }}</div>
           <template v-if="editing">
             <q-input v-model="yell" outlined autogrow :maxlength="300" />
-            <div class="row justify-end q-mt-sm">
+            <div class="row justify-end q-gutter-sm q-mt-sm">
+              <q-btn flat no-caps color="grey-8" :label="$t('general.cancel')" :disable="yell === (unit.description || '')" @click="yell = unit.description || ''" />
               <q-btn color="primary" no-caps :label="$t('general.save')" :disable="yell === (unit.description || '')" :loading="busy === 'yell'" @click="saveYell" />
             </div>
           </template>
@@ -132,6 +133,12 @@
 
       <PhotoLightbox v-model="lightbox" :photos="galleryUrls" />
     </template>
+
+    <div v-else class="column items-center q-pa-xl text-center">
+      <div class="tf-tile" style="--tile-size: 64px"><q-icon name="groups" size="32px" /></div>
+      <div class="section-title q-mt-md">{{ $t('unitPage.notFound') }}</div>
+      <q-btn flat no-caps color="primary" icon="arrow_back" :label="$t('general.back')" class="q-mt-sm" @click="$router.back()" />
+    </div>
   </q-page>
 </template>
 
@@ -155,8 +162,9 @@ const $q = useQuasar();
 const unitStore = useUnitStore();
 const authStore = useAuthStore();
 
-const unit = computed(() => unitStore.currentUnit);
-const loading = computed(() => unitStore.loading && !unitStore.currentUnit);
+// only the unit of this URL: never the previous one while the next loads
+const unit = computed(() => (String(unitStore.currentUnit?.id) === String(route.params.id) ? unitStore.currentUnit : null));
+const loading = ref(true);
 
 const url = (path) => (path?.startsWith('http') ? path : `${config.apiUrl}${path}`);
 
@@ -191,7 +199,14 @@ const toggleEditing = () => {
   yell.value = unit.value.description || '';
 };
 
-const notifyError = () => $q.notify({ color: 'negative', icon: 'report_problem', message: unitStore.error || t('unitPage.uploadError') });
+// the server answers in English; show the known cases in the user's language
+const errorMessage = (error) => {
+  if (/at most \d+ activity photos/i.test(error)) return t('unitPage.errors.tooManyPhotos');
+  if (/too large/i.test(error)) return t('unitPage.errors.tooLarge');
+  if (/not a readable image|only jpeg/i.test(error)) return t('unitPage.errors.notImage');
+  return t('unitPage.uploadError');
+};
+const notifyError = () => $q.notify({ color: 'negative', icon: 'report_problem', message: errorMessage(unitStore.error || '') });
 
 const run = async (key, action) => {
   busy.value = key;
@@ -228,9 +243,12 @@ const memberRole = (member) => {
   return member.role === 'admin' ? t('unitPage.roles.captain') : t('unitPage.roles.guide');
 };
 
-watch(() => route.params.id, (id) => {
+watch(() => route.params.id, async (id) => {
   editing.value = false;
-  if (id) unitStore.fetchUnit(id);
+  lightbox.value = null;
+  loading.value = true;
+  if (id) await unitStore.fetchUnit(id);
+  loading.value = false;
 }, { immediate: true });
 </script>
 
