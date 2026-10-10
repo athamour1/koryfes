@@ -79,18 +79,22 @@ export class UnitsController {
         const unit = await this.unitsService.findOne(unitId);
         assertCanEditUnit(req.user, unit);
 
+        // The flag only changes through POST /units/:id/image: its old object is
+        // deleted on replace, so a hand-set path could point at someone else's
+        delete updateUnitDto.flag;
+
         if (req.user.role === 'admin') {
             // Prevent changing location
             delete updateUnitDto.location;
         }
 
         if (req.user.role === 'user') {
-            // Unit Leaders can only update description and flag
-            const allowedUpdates = ['description', 'flag'];
+            // Unit Leaders can only update description
+            const allowedUpdates = ['description'];
             const invalidUpdates = Object.keys(updateUnitDto).filter(key => !allowedUpdates.includes(key));
 
             if (invalidUpdates.length > 0) {
-                throw new UnauthorizedException('Unit Leaders can only update description and flag');
+                throw new UnauthorizedException('Unit Leaders can only update the description');
             }
         }
 

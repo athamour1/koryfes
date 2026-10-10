@@ -123,6 +123,24 @@ describe('Unit images (e2e)', () => {
         });
     });
 
+    describe('flag path cannot point at another unit\'s objects', () => {
+        it('ignores a flag set through PATCH, so a later upload deletes nothing of unit B', async () => {
+            const victim = await upload(superToken, unitB.id, 'activity').expect(201);
+            const victimKey = victim.body.path.replace('/uploads/', '');
+            await http()
+                .patch(`/units/${unitA.id}`)
+                .set('Authorization', `Bearer ${leaderToken}`)
+                .send({ flag: victim.body.path })
+                .expect(200);
+            await http()
+                .post(`/units/${unitA.id}/image`)
+                .set('Authorization', `Bearer ${leaderToken}`)
+                .attach('file', photoJpeg, { filename: 'f.jpg', contentType: 'image/jpeg' })
+                .expect(201);
+            expect(storage.objects.has(victimKey)).toBe(true);
+        });
+    });
+
     describe('DELETE /units/:id/photos/:photoId', () => {
         it('removes the photo and its object', async () => {
             const unit = await http().get(`/units/${unitA.id}`).set('Authorization', `Bearer ${leaderToken}`).expect(200);

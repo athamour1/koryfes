@@ -5,6 +5,12 @@ import { Unit } from './entities/unit.entity';
 import { Location } from '../locations/entities/location.entity';
 import { StorageService } from '../storage/storage.service';
 import { keyFromUploadPath, newImageKey, toUploadPath } from '../storage/upload-paths';
+
+/** Key of the unit's own flag object, or null (never another kind of object). */
+const flagKey = (path: string | null | undefined) => {
+    const key = keyFromUploadPath(path);
+    return key?.startsWith('unit-flags/') ? key : null;
+};
 import { IMAGE_MAX_SIDE, processImage } from '../common/image-upload';
 import { UnitPhotosService } from './unit-photos.service';
 
@@ -46,7 +52,9 @@ export class UnitsService {
     }
 
     async update(id: number, updateUnitDto: Partial<Unit>): Promise<Unit> {
-        await this.unitsRepository.update(id, updateUnitDto);
+        if (Object.keys(updateUnitDto).length) {
+            await this.unitsRepository.update(id, updateUnitDto);
+        }
         return this.findOne(id);
     }
 
@@ -54,9 +62,9 @@ export class UnitsService {
         const unit = await this.findOne(id);
         // rows go by cascade; the stored objects have to be deleted here
         await this.unitPhotos.removeAllObjects(id);
-        const flagKey = keyFromUploadPath(unit.flag);
-        if (flagKey) {
-            await this.storage.delete(flagKey);
+        const oldFlag = flagKey(unit.flag);
+        if (oldFlag) {
+            await this.storage.delete(oldFlag);
         }
         await this.unitsRepository.delete(id);
     }
@@ -66,7 +74,7 @@ export class UnitsService {
         const key = newImageKey('unit-flags');
         await this.storage.put(key, await processImage(file, IMAGE_MAX_SIDE.flag), 'image/webp');
         await this.unitsRepository.update(id, { flag: toUploadPath(key) });
-        const oldKey = keyFromUploadPath(unit.flag);
+        const oldKey = flagKey(unit.flag);
         if (oldKey) {
             await this.storage.delete(oldKey);
         }
