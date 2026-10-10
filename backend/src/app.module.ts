@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ServeStaticModule } from '@nestjs/serve-static';
-import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -15,6 +16,8 @@ import { GuideDiplomasModule } from './guide-diplomas/guide-diplomas.module';
 import { ElectiveDiplomasModule } from './elective-diplomas/elective-diplomas.module';
 import { UserProgressModule } from './user-progress/user-progress.module';
 
+const isSqlite = process.env.DB_TYPE === 'sqlite';
+
 @Module({
   imports: [
     TypeOrmModule.forRoot({
@@ -25,7 +28,11 @@ import { UserProgressModule } from './user-progress/user-progress.module';
       password: process.env.DB_PASSWORD || 'postgres',
       database: process.env.DB_DATABASE || 'guide_badges',
       autoLoadEntities: true,
-      synchronize: true,
+      // Postgres schema is managed by migrations (src/migrations); the local
+      // SQLite dev database is still synchronized from the entities
+      synchronize: isSqlite,
+      migrations: isSqlite ? [] : [join(__dirname, 'migrations', '*.js')],
+      migrationsRun: !isSqlite,
     }),
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'uploads'),
@@ -33,7 +40,7 @@ import { UserProgressModule } from './user-progress/user-progress.module';
     }),
     ThrottlerModule.forRoot([{
       ttl: 60000, // 1 minute
-      limit: 100, // 100 requests per minute
+      limit: parseInt(process.env.THROTTLE_LIMIT) || 100, // requests per minute per IP
     }]),
     UsersModule,
     AuthModule,
@@ -46,7 +53,10 @@ import { UserProgressModule } from './user-progress/user-progress.module';
     UserProgressModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+  ],
 })
 export class AppModule { }
 
