@@ -11,7 +11,7 @@ with `./release.sh`, and the server only pulls the published images.
 
 Asks for a version, bumps `backend/` and `frontend/` `package.json` (+ lockfiles),
 commits, builds and pushes the `backend` and `frontend` images to
-`ghcr.io/athamour1/seo-test-app/*` (tagged `vX.Y.Z` and `latest`), then pushes a
+`ghcr.io/athamour1/koryfes/*` (tagged `vX.Y.Z` and `latest`), then pushes a
 git tag and creates a GitHub release with generated notes. Needs `docker`,
 `npm` and an authenticated `gh` CLI, and a clean working tree.
 

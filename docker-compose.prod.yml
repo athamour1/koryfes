@@ -28,7 +28,7 @@ services:
     # No published port: only the backend (same Docker network) talks to the DB
 
   backend:
-    image: ghcr.io/athamour1/seo-test-app/backend:${TAG:-latest}
+    image: ghcr.io/athamour1/koryfes/backend:${TAG:-latest}
     restart: always
     logging: *logging
     # No published port: the frontend's nginx proxies /api to it over the
@@ -54,7 +54,7 @@ services:
       - ./uploads:/usr/src/app/uploads
 
   frontend:
-    image: ghcr.io/athamour1/seo-test-app/frontend:${TAG:-latest}
+    image: ghcr.io/athamour1/koryfes/frontend:${TAG:-latest}
     restart: always
     logging: *logging
     # Only this port is published; put a TLS reverse proxy in front of it

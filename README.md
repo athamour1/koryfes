@@ -29,7 +29,7 @@ A full-stack badge management system built with **NestJS**, **Vue 3**, **Quasar*
 
 ### Release & Production
 `./release.sh` builds and pushes the `backend` / `frontend` images to
-`ghcr.io/athamour1/seo-test-app/*` and creates a tagged GitHub release; the server
+`ghcr.io/athamour1/koryfes/*` and creates a tagged GitHub release; the server
 runs them with `docker-compose.prod.yml` + `.env.production`. See the
 [**Deployment Guide**](./devops/DEPLOYMENT.md).
 

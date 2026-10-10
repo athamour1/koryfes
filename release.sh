@@ -2,10 +2,10 @@
 set -euo pipefail
 
 # ─── Configuration ──────────────────────────────────────────────────────────────
-REPO="athamour1/seo-test-app"
+REPO="athamour1/koryfes"
 REGISTRY="ghcr.io"
 # Το path στο GHCR είναι πεζό.
-IMAGE_PREFIX="${REGISTRY}/athamour1/seo-test-app"
+IMAGE_PREFIX="${REGISTRY}/athamour1/koryfes"
 # Κάθε image χτίζεται με context τον φάκελό του (backend/, frontend/).
 # name|context
 IMAGES=(
