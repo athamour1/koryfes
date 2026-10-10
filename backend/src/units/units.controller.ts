@@ -3,10 +3,16 @@ import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UnitsService } from './units.service';
 import { imageUploadOptions } from '../common/image-upload';
+import { UnitPhotosService } from './unit-photos.service';
+import { UNIT_PHOTO_KINDS, UnitPhotoKind } from './entities/unit-photo.entity';
+import { assertCanEditUnit } from './unit-access';
 
 @Controller('units')
 export class UnitsController {
-    constructor(private readonly unitsService: UnitsService) { }
+    constructor(
+        private readonly unitsService: UnitsService,
+        private readonly unitPhotos: UnitPhotosService,
+    ) { }
 
     @UseGuards(AuthGuard('jwt'))
     @Post()
@@ -70,30 +76,18 @@ export class UnitsController {
     @Patch(':id')
     async update(@Param('id') id: string, @Body() updateUnitDto: any, @Request() req) {
         const unitId = +id;
-        const user = req.user;
-        const isSuperAdmin = user.role === 'super_admin';
-        const isAdmin = user.role === 'admin';
-        const isUnitLeader = user.role === 'user' && user.unitId === unitId && user.unitRole === 'leader';
-
-        if (!isSuperAdmin && !isAdmin && !isUnitLeader) {
-            throw new UnauthorizedException('You do not have permission to update this unit');
-        }
-
         const unit = await this.unitsService.findOne(unitId);
+        assertCanEditUnit(req.user, unit);
 
-        if (isAdmin) {
-            if (unit.location.id !== user.locationId) {
-                throw new UnauthorizedException('You can only update units in your location');
-            }
+        if (req.user.role === 'admin') {
             // Prevent changing location
             delete updateUnitDto.location;
         }
 
-        if (isUnitLeader) {
+        if (req.user.role === 'user') {
             // Unit Leaders can only update description and flag
             const allowedUpdates = ['description', 'flag'];
-            const updates = Object.keys(updateUnitDto);
-            const invalidUpdates = updates.filter(key => !allowedUpdates.includes(key));
+            const invalidUpdates = Object.keys(updateUnitDto).filter(key => !allowedUpdates.includes(key));
 
             if (invalidUpdates.length > 0) {
                 throw new UnauthorizedException('Unit Leaders can only update description and flag');
@@ -129,24 +123,33 @@ export class UnitsController {
             throw new BadRequestException('No file uploaded');
         }
 
-        // Allow admins, super admins, or unit leaders of this unit to upload flag
-        const user = req.user;
-        const unitId = +id;
-        const isSuperAdmin = user.role === 'super_admin';
-        const isAdmin = user.role === 'admin';
-        const isUnitLeader = user.role === 'user' && user.unitId === unitId && user.unitRole === 'leader';
-        if (!isSuperAdmin && !isAdmin && !isUnitLeader) {
-            throw new UnauthorizedException('Only admins or unit leaders can upload unit flags');
-        }
-
         const unit = await this.unitsService.findOne(+id);
-
-        if (isAdmin) {
-            if (unit.location.id !== user.locationId) {
-                throw new UnauthorizedException('You can only upload flags for units in your location');
-            }
-        }
+        assertCanEditUnit(req.user, unit);
 
         return this.unitsService.updateFlag(+id, file.buffer);
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Post(':id/photos')
+    @UseInterceptors(FileInterceptor('file', imageUploadOptions()))
+    async addPhoto(@Param('id') id: string, @Query('kind') kind: string, @UploadedFile() file: any, @Request() req) {
+        if (!UNIT_PHOTO_KINDS.includes(kind as UnitPhotoKind)) {
+            throw new BadRequestException('kind must be corner or activity');
+        }
+        if (!file) {
+            throw new BadRequestException('No file uploaded');
+        }
+        const unit = await this.unitsService.findOne(+id);
+        assertCanEditUnit(req.user, unit);
+        return this.unitPhotos.add(unit, kind as UnitPhotoKind, file.buffer);
+    }
+
+    @UseGuards(AuthGuard('jwt'))
+    @Delete(':id/photos/:photoId')
+    async removePhoto(@Param('id') id: string, @Param('photoId') photoId: string, @Request() req) {
+        const unit = await this.unitsService.findOne(+id);
+        assertCanEditUnit(req.user, unit);
+        await this.unitPhotos.remove(unit.id, +photoId);
+        return { ok: true };
     }
 }

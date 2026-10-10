@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
 import { Location } from '../../locations/entities/location.entity';
 import { User } from '../../users/entities/user.entity';
+import { UnitPhoto } from './unit-photo.entity';
 
 @Entity()
 export class Unit {
@@ -21,4 +22,7 @@ export class Unit {
 
     @OneToMany(() => User, (user) => user.unit)
     users: User[];
+
+    @OneToMany(() => UnitPhoto, (photo) => photo.unit)
+    photos: UnitPhoto[];
 }

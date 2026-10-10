@@ -6,6 +6,7 @@ import { Location } from '../locations/entities/location.entity';
 import { StorageService } from '../storage/storage.service';
 import { keyFromUploadPath, newImageKey, toUploadPath } from '../storage/upload-paths';
 import { IMAGE_MAX_SIDE, processImage } from '../common/image-upload';
+import { UnitPhotosService } from './unit-photos.service';
 
 @Injectable()
 export class UnitsService {
@@ -13,6 +14,7 @@ export class UnitsService {
         @InjectRepository(Unit)
         private unitsRepository: Repository<Unit>,
         private readonly storage: StorageService,
+        private readonly unitPhotos: UnitPhotosService,
     ) { }
 
     async create(createUnitDto: { name: string; description?: string; location: Location }): Promise<Unit> {
@@ -34,7 +36,8 @@ export class UnitsService {
     async findOne(id: number): Promise<Unit> {
         const unit = await this.unitsRepository.findOne({
             where: { id },
-            relations: ['location', 'users']
+            relations: ['location', 'users', 'photos'],
+            order: { photos: { createdAt: 'ASC', id: 'ASC' } },
         });
         if (!unit) {
             throw new NotFoundException(`Unit with ID ${id} not found`);
@@ -48,6 +51,13 @@ export class UnitsService {
     }
 
     async remove(id: number): Promise<void> {
+        const unit = await this.findOne(id);
+        // rows go by cascade; the stored objects have to be deleted here
+        await this.unitPhotos.removeAllObjects(id);
+        const flagKey = keyFromUploadPath(unit.flag);
+        if (flagKey) {
+            await this.storage.delete(flagKey);
+        }
         await this.unitsRepository.delete(id);
     }
 
