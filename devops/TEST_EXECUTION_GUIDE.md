@@ -47,7 +47,7 @@ Tests are located in `frontend/test/cypress/e2e/` and organized by user role:
 
 User credentials are defined in `frontend/test/cypress/fixtures/users.json`.
 Common roles:
-- **Super Admin**: `admin` / `admin123`
+- **Super Admin**: `admin` / the `ADMIN_PASSWORD` from your `.env`
 - **Location Admin**: `admin_1` / `test`
 - **Unit Leader**: `αλέξανδρος_παπαδόπουλος_1_1_1` / `test`
 - **Regular User**: `δημήτρης_καραμανλής_1_1_3` / `test`
