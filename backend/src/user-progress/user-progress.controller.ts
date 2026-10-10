@@ -5,12 +5,13 @@ import {
     Body,
     UseGuards,
     Request,
+    ForbiddenException,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 import { UserProgressService } from './user-progress.service';
-import { AwardPathDto, AwardDiplomaDto, UserProgressResponseDto } from './dto/user-progress.dto';
+import { AwardPathDto, AwardDiplomaDto, AwardPeakDto } from './dto/user-progress.dto';
 import { UserRole } from '../users/entities/user.entity';
 
 @Controller('user-progress')
@@ -40,7 +41,8 @@ export class UserProgressController {
     @Post('award-peak')
     @UseGuards(RolesGuard)
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
-    async awardPeak(@Body() body: { userId: number; peakId: number }): Promise<any> {
+    async awardPeak(@Body() body: AwardPeakDto, @Request() req): Promise<any> {
+        await this.assertSameLocation(req.user, body.userId);
         return this.userProgressService.awardPeak(body.userId, body.peakId);
     }
 
@@ -50,7 +52,8 @@ export class UserProgressController {
     @Post('award-path')
     @UseGuards(RolesGuard)
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
-    async awardPath(@Body() awardPathDto: AwardPathDto): Promise<any> {
+    async awardPath(@Body() awardPathDto: AwardPathDto, @Request() req): Promise<any> {
+        await this.assertSameLocation(req.user, awardPathDto.userId);
         return this.userProgressService.awardPath(awardPathDto.userId, awardPathDto.pathId);
     }
 
@@ -60,7 +63,8 @@ export class UserProgressController {
     @Post('award-diploma')
     @UseGuards(RolesGuard)
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
-    async awardDiploma(@Body() awardDiplomaDto: AwardDiplomaDto): Promise<any> {
+    async awardDiploma(@Body() awardDiplomaDto: AwardDiplomaDto, @Request() req): Promise<any> {
+        await this.assertSameLocation(req.user, awardDiplomaDto.userId);
         return this.userProgressService.awardDiploma(
             awardDiplomaDto.userId,
             awardDiplomaDto.diplomaId,
@@ -76,5 +80,18 @@ export class UserProgressController {
     @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN)
     async findAll(): Promise<any[]> {
         return this.userProgressService.findAll();
+    }
+
+    /**
+     * Location admins may only award progress to users in their own location
+     */
+    private async assertSameLocation(user: { role: string; locationId?: number }, targetUserId: number) {
+        if (user.role !== UserRole.ADMIN) {
+            return;
+        }
+        const targetLocationId = await this.userProgressService.getUserLocationId(targetUserId);
+        if (!user.locationId || targetLocationId !== user.locationId) {
+            throw new ForbiddenException('You can only award progress to users in your location');
+        }
     }
 }

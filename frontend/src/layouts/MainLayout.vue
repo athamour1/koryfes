@@ -134,13 +134,6 @@
             </q-item-section>
             <q-item-section>{{ $t('navigation.login') }}</q-item-section>
           </q-item>
-
-          <q-item clickable v-ripple to="/register">
-            <q-item-section avatar>
-              <q-icon name="person_add" />
-            </q-item-section>
-            <q-item-section>{{ $t('navigation.register') }}</q-item-section>
-          </q-item>
         </template>
       </q-list>
     </q-drawer>
@@ -171,9 +164,9 @@ const { t } = useI18n();
 // Open drawer by default on desktop (>768px), closed on mobile
 const drawer = ref($q.screen.gt.sm);
 
-// Check if current route is login or register
+// Check if current route is the login page
 const isAuthPage = computed(() => {
-  return route.path === '/login' || route.path === '/register' || route.path === '/';
+  return route.path === '/login' || route.path === '/';
 });
 
 // Watch for authentication changes and open drawer on login

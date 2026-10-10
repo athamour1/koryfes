@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -6,6 +6,11 @@ import { Repository, LessThan } from 'typeorm';
 import { RefreshToken } from './entities/refresh-token.entity';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
+import { assertPasswordPolicy } from '../common/password-policy';
+
+function hashResetToken(token: string): string {
+    return crypto.createHash('sha256').update(token).digest('hex');
+}
 
 @Injectable()
 export class AuthService {
@@ -151,37 +156,6 @@ export class AuthService {
         });
     }
 
-    async register(createUserDto: any) {
-        const isProd = process.env.NODE_ENV === 'production';
-
-        // Production password validation
-        if (isProd) {
-            const password = createUserDto.password;
-            if (password.length < 8) {
-                throw new Error('Password must be at least 8 characters long');
-            }
-            if (!/[A-Z]/.test(password)) {
-                throw new Error('Password must contain at least one uppercase letter');
-            }
-            if (!/[a-z]/.test(password)) {
-                throw new Error('Password must contain at least one lowercase letter');
-            }
-            if (!/[0-9]/.test(password)) {
-                throw new Error('Password must contain at least one number');
-            }
-        }
-
-        const existingUser = await this.usersService.findByUsername(createUserDto.username);
-        if (existingUser) {
-            throw new ConflictException('Username already exists');
-        }
-
-        const user = await this.usersService.create({
-            ...createUserDto,
-        });
-        return { message: 'User created successfully', userId: user.id };
-    }
-
     async forgotPassword(email: string) {
         // In this app, username is treated as email or we assume username is unique.
         // The prompt asks for "forgot password methods".
@@ -193,31 +167,35 @@ export class AuthService {
             return { message: 'If a user with this username exists, a password reset link has been sent.' };
         }
 
-        const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        const token = crypto.randomBytes(32).toString('hex');
         const expires = new Date();
         expires.setHours(expires.getHours() + 1); // 1 hour expiration
 
         await this.usersService.update(user.id, {
-            resetPasswordToken: token,
+            // Only the hash is stored, so a database leak doesn't leak live tokens
+            resetPasswordToken: hashResetToken(token),
             resetPasswordExpires: expires
         });
 
-        // Mock email sending
-        console.log(`[MOCK EMAIL] Password reset token for ${user.username}: ${token}`);
-        // In a real app, we would send an email here.
+        // No email delivery yet: expose the token in development logs only
+        if (process.env.NODE_ENV !== 'production') {
+            console.log(`[MOCK EMAIL] Password reset token for ${user.username}: ${token}`);
+        }
 
         return { message: 'If a user with this username exists, a password reset link has been sent.' };
     }
 
     async resetPassword(token: string, newPassword: string) {
-        const user = await this.usersService.findByResetToken(token);
-        if (!user) {
+        if (!token) {
             throw new UnauthorizedException('Invalid or expired token');
         }
 
-        if (user.resetPasswordExpires && user.resetPasswordExpires < new Date()) {
-            throw new UnauthorizedException('Token expired');
+        const user = await this.usersService.findByResetToken(hashResetToken(token));
+        if (!user || !user.resetPasswordExpires || user.resetPasswordExpires < new Date()) {
+            throw new UnauthorizedException('Invalid or expired token');
         }
+
+        assertPasswordPolicy(newPassword);
 
         await this.usersService.update(user.id, {
             password: newPassword,

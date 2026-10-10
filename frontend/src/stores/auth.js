@@ -120,18 +120,6 @@ export const useAuthStore = defineStore('auth', {
             }
         },
 
-        async register(userData) {
-            try {
-                await api.post('/auth/register', userData);
-                return { success: true };
-            } catch (error) {
-                console.error('Registration failed', error);
-                if (error.response && error.response.status === 409) {
-                    return { success: false, message: 'Username already exists' };
-                }
-                return { success: false, message: 'Registration failed' };
-            }
-        },
         async forgotPassword(email) {
             try {
                 await api.post('/auth/forgot-password', { email });

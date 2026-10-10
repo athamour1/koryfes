@@ -34,10 +34,10 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     // Check token expiration before any navigation
     const isAuthValid = authStore.checkAuth();
 
-    // Redirect authenticated users away from login/register pages
-    const authPages = ['/login', '/register', '/'];
+    // Redirect authenticated users away from the login page
+    const authPages = ['/login', '/'];
     if (authPages.includes(to.path) && authStore.token && isAuthValid) {
-      // User is authenticated and trying to access login/register
+      // User is authenticated and trying to access login
       // Redirect to appropriate page based on role
       if (authStore.isAdmin) {
         next('/admin/dashboard');

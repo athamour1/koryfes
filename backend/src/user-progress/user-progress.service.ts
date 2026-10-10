@@ -25,6 +25,21 @@ export class UserProgressService {
         private userRepository: Repository<User>,
     ) { }
 
+    async findPeakByName(name: string): Promise<Peak | null> {
+        return this.peakRepository.findOne({ where: { name } });
+    }
+
+    /**
+     * Location id of a user, or undefined if the user doesn't exist / has none
+     */
+    async getUserLocationId(userId: number): Promise<number | undefined> {
+        const user = await this.userRepository.findOne({
+            where: { id: userId },
+            relations: ['location'],
+        });
+        return user?.location?.id;
+    }
+
     /**
      * Initialize progress for a new user WITHOUT any peak
      * User must earn Promise peak before progressing

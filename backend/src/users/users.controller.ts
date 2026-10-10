@@ -5,7 +5,8 @@ import { extname } from 'path';
 import { UsersService } from './users.service';
 import { AuthGuard } from '@nestjs/passport';
 import { UserProgressService } from '../user-progress/user-progress.service';
-import { UnitRole } from './entities/user.entity';
+import { UnitRole, UserRole } from './entities/user.entity';
+import { AdminUpdateUserDto, CreateUserDto, UpdateProfileDto } from './dto/user.dto';
 
 @Controller('users')
 export class UsersController {
@@ -23,7 +24,7 @@ export class UsersController {
 
     @UseGuards(AuthGuard('jwt'))
     @Patch('profile')
-    updateProfile(@Request() req, @Body() updateData: any) {
+    updateProfile(@Request() req, @Body() updateData: UpdateProfileDto) {
         return this.usersService.update(req.user.userId, updateData);
     }
 
@@ -46,7 +47,7 @@ export class UsersController {
 
     @UseGuards(AuthGuard('jwt'))
     @Post()
-    async create(@Body() createUserDto: any, @Request() req) {
+    async create(@Body() createUserDto: CreateUserDto, @Request() req) {
         const userRole = req.user.role;
         if (userRole !== 'super_admin' && userRole !== 'admin') {
             throw new UnauthorizedException('Insufficient permissions');
@@ -60,13 +61,23 @@ export class UsersController {
                 throw new UnauthorizedException('Admin has no location assigned');
             }
             createUserDto.location = { id: req.user.locationId };
+            delete createUserDto.locationName;
             // Admin can only create USER role
-            createUserDto.role = 'user';
+            createUserDto.role = UserRole.USER;
+
+            if (createUserDto.unitId) {
+                await this.assertUnitInLocation(createUserDto.unitId, req.user.locationId);
+            }
         }
 
-        return this.usersService.create(createUserDto);
+        const { unitId, ...userData } = createUserDto;
+        return this.usersService.create({
+            ...userData,
+            ...(unitId ? { unit: { id: unitId } } : {}),
+        } as any);
     }
 
+    @UseGuards(AuthGuard('jwt'))
     @Get(':id')
     findOne(@Param('id') id: string) {
         return this.usersService.findOne(+id);
@@ -74,7 +85,7 @@ export class UsersController {
 
     @UseGuards(AuthGuard('jwt'))
     @Patch(':id')
-    async updateUser(@Param('id') id: string, @Body() updateData: any, @Request() req) {
+    async updateUser(@Param('id') id: string, @Body() updateData: AdminUpdateUserDto, @Request() req) {
         if (!req.user.isAdmin && req.user.role !== 'super_admin' && req.user.role !== 'admin') {
             throw new UnauthorizedException('Only admins can update users');
         }
@@ -92,19 +103,24 @@ export class UsersController {
                 throw new UnauthorizedException('You can only update simple users');
             }
 
-            // Prevent admin from changing location
-            if (updateData.location || updateData.locationName || updateData.locationId) {
-                // Instead of throwing error, just remove the fields to allow other updates
-                delete updateData.location;
-                delete updateData.locationName;
-                delete updateData.locationId;
-            }
+            // Admins can't move users to another location or change roles;
+            // drop those fields so the rest of the update still applies
+            delete updateData.locationName;
+            delete updateData.role;
 
-            // Also remove isAdmin to prevent role escalation
-            delete updateData.isAdmin;
+            if (updateData.unit?.id) {
+                await this.assertUnitInLocation(updateData.unit.id, req.user.locationId);
+            }
         }
 
-        return this.usersService.update(+id, updateData);
+        return this.usersService.update(+id, updateData as any);
+    }
+
+    private async assertUnitInLocation(unitId: number, locationId: number) {
+        const unitLocationId = await this.usersService.getUnitLocationId(unitId);
+        if (unitLocationId !== locationId) {
+            throw new UnauthorizedException('You can only assign units in your location');
+        }
     }
 
 
@@ -195,11 +211,7 @@ export class UsersController {
         // If peakName is provided, find the peak by name
         let peakId = body.peakId;
         if (body.peakName && !peakId) {
-            // Import Peak repository to find by name
-            const { InjectRepository } = require('@nestjs/typeorm');
-            const { Peak } = require('../peaks/peak.entity');
-            const peakRepo = await this.userProgressService['peakRepository'];
-            const peak = await peakRepo.findOne({ where: { name: body.peakName } });
+            const peak = await this.userProgressService.findPeakByName(body.peakName);
             if (!peak) {
                 throw new UnauthorizedException(`Peak "${body.peakName}" not found`);
             }

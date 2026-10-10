@@ -1,9 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, UnauthorizedException, UseInterceptors, UploadedFile, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, UnauthorizedException, BadRequestException, UseInterceptors, UploadedFile, Query } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
 import { UnitsService } from './units.service';
+import { imageUploadOptions } from '../common/image-upload';
 
 @Controller('units')
 export class UnitsController {
@@ -124,16 +123,12 @@ export class UnitsController {
 
     @UseGuards(AuthGuard('jwt'))
     @Post(':id/image')
-    @UseInterceptors(FileInterceptor('file', {
-        storage: diskStorage({
-            destination: './uploads/unit-flags',
-            filename: (req, file, cb) => {
-                const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('');
-                return cb(null, `${randomName}${extname(file.originalname)}`);
-            }
-        })
-    }))
+    @UseInterceptors(FileInterceptor('file', imageUploadOptions('./uploads/unit-flags')))
     async uploadFlag(@Param('id') id: string, @UploadedFile() file: any, @Request() req) {
+        if (!file) {
+            throw new BadRequestException('No file uploaded');
+        }
+
         // Allow admins, super admins, or unit leaders of this unit to upload flag
         const user = req.user;
         const unitId = +id;

@@ -5,6 +5,14 @@ export class CreateUserProgressDto {
     userId: number;
 }
 
+export class AwardPeakDto {
+    @IsNumber()
+    userId: number;
+
+    @IsNumber()
+    peakId: number;
+}
+
 export class AwardPathDto {
     @IsNumber()
     userId: number;
