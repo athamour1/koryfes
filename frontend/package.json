@@ -17,6 +17,7 @@
         "test:component:ci": "cross-env NODE_ENV=test cypress run --component"
     },
     "dependencies": {
+        "@fontsource/inter": "^5.3.0",
         "@quasar/extras": "^2.1.0",
         "axios": "^1.13.2",
         "leaflet": "^1.9.4",

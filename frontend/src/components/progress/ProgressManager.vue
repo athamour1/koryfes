@@ -1,9 +1,6 @@
 <template>
   <div>
-    <div class="text-subtitle1 text-weight-bold q-mb-md flex items-center">
-      <q-icon name="trending_up" class="q-mr-sm" color="primary" />
-      {{ $t('progress.title') }}
-    </div>
+    <div class="tf-card-head"><q-icon name="trending_up" />{{ $t('progress.title') }}</div>
 
     <div v-if="!progress" class="flex flex-center q-pa-xl">
       <q-spinner size="40px" color="primary" />
@@ -28,7 +25,7 @@
             :options="filteredOptions"
             :label="addDialog.type === 'path' ? $t('progress.selectPath') : $t('progress.selectDiploma')"
             option-label="label"
-            filled
+            outlined
             use-input
             input-debounce="0"
             autofocus

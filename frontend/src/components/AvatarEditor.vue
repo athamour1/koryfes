@@ -47,7 +47,7 @@
             v-model="localConfig.skin"
             :options="getOptions('skin')"
             :label="$t('avatar.skinTone')"
-            filled
+            outlined
             dense
             emit-value
             map-options
@@ -71,7 +71,7 @@
             v-model="localConfig.eye"
             :options="getOptions('eye')"
             :label="$t('avatar.eyes')"
-            filled
+            outlined
             dense
             emit-value
             map-options
@@ -86,7 +86,7 @@
             v-model="localConfig.eyebrows"
             :options="getOptions('eyebrows')"
             :label="$t('avatar.eyebrows')"
-            filled
+            outlined
             dense
             emit-value
             map-options
@@ -101,7 +101,7 @@
             v-model="localConfig.mouth"
             :options="getOptions('mouth')"
             :label="$t('avatar.mouth')"
-            filled
+            outlined
             dense
             emit-value
             map-options
@@ -116,7 +116,7 @@
             v-model="localConfig.lipColor"
             :options="getColorOptions('lipColor')"
             :label="$t('avatar.lipColor')"
-            filled
+            outlined
             dense
             emit-value
             map-options
@@ -158,7 +158,7 @@
             v-model="localConfig.hair"
             :options="getOptions('hair')"
             :label="$t('avatar.hairStyle')"
-            filled
+            outlined
             dense
             emit-value
             map-options
@@ -173,7 +173,7 @@
             v-model="localConfig.hairColor"
             :options="getColorOptions('hairColor')"
             :label="$t('avatar.hairColor')"
-            filled
+            outlined
             dense
             emit-value
             map-options
@@ -197,7 +197,7 @@
             v-model="localConfig.hat"
             :options="getOptions('hat')"
             :label="$t('avatar.hat')"
-            filled
+            outlined
             dense
             emit-value
             map-options
@@ -212,7 +212,7 @@
             v-model="localConfig.hatColor"
             :options="getColorOptions('hatColor')"
             :label="$t('avatar.hatColor')"
-            filled
+            outlined
             dense
             emit-value
             map-options
@@ -227,7 +227,7 @@
             v-model="localConfig.accessory"
             :options="getOptions('accessory')"
             :label="$t('avatar.accessory')"
-            filled
+            outlined
             dense
             emit-value
             map-options

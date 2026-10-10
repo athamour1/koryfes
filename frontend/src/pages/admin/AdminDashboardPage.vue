@@ -1,5 +1,5 @@
 <template>
-  <q-page class="q-pa-md">
+  <q-page class="tf-page">
     <!-- Header Section -->
     <PageHeader 
       :title="$t('dashboard.welcome', { name: stats.userName })"
@@ -9,16 +9,18 @@
     <!-- Stats Cards -->
     <div class="row q-col-gutter-md q-mb-lg">
       <div class="col-12 col-sm-6 col-md-3" v-for="(stat, index) in mainStats" :key="index">
-        <q-card flat bordered :data-cy="'stat-card-' + index">
-          <q-card-section class="text-center">
-            <q-icon :name="stat.icon" size="48px" class="q-mb-sm" color="primary" />
-            <div class="text-h3 text-weight-bold" :data-cy="'stat-value-' + index">{{ stat.value }}</div>
-            <div class="text-subtitle2" :data-cy="'stat-label-' + index">{{ stat.label }}</div>
-            <q-chip dense :icon="stat.trend === 'up' ? 'trending_up' : 'trending_flat'" 
-                    :color="stat.trend === 'up' ? 'positive' : 'grey'" 
-                    text-color="white" size="sm" class="q-mt-sm">
+        <q-card flat bordered class="stat-card full-height" :data-cy="'stat-card-' + index">
+          <q-card-section>
+            <q-icon :name="stat.icon" class="stat-icon" />
+            <div class="stat-label" :data-cy="'stat-label-' + index">{{ stat.label }}</div>
+            <div class="stat-value q-mt-xs" :data-cy="'stat-value-' + index">{{ stat.value }}</div>
+            <q-badge
+              :color="stat.trend === 'up' ? 'positive' : 'grey-6'"
+              class="q-mt-sm"
+            >
+              <q-icon :name="stat.trend === 'up' ? 'trending_up' : 'trending_flat'" size="14px" class="q-mr-xs" />
               {{ stat.change }}
-            </q-chip>
+            </q-badge>
           </q-card-section>
         </q-card>
       </div>
@@ -31,14 +33,11 @@
         <!-- Quick Actions -->
         <q-card class="q-mb-md" flat bordered>
           <q-card-section>
-            <div class="text-h6 q-mb-md">
-              <q-icon name="bolt" size="24px" class="q-mr-sm" />
-              {{ $t('dashboard.quickActions.title') }}
-            </div>
+            <div class="tf-card-head"><q-icon name="bolt" />{{ $t('dashboard.quickActions.title') }}</div>
             <q-list separator>
-              <q-item clickable v-ripple @click="$router.push('/admin/users')" class="q-pa-md" data-cy="quick-action-add-guide">
+              <q-item clickable v-ripple @click="$router.push('/admin/users')" class="q-py-sm" data-cy="quick-action-add-guide">
                 <q-item-section avatar>
-                  <q-avatar size="48px" class="gradient-purple text-white">
+                  <q-avatar size="44px" class="tf-tile">
                     <q-icon name="person_add" size="24px" />
                   </q-avatar>
                 </q-item-section>
@@ -51,9 +50,9 @@
                 </q-item-section>
               </q-item>
 
-              <q-item clickable v-ripple @click="$router.push('/admin/progress')" class="q-pa-md" data-cy="quick-action-manage-progress">
+              <q-item clickable v-ripple @click="$router.push('/admin/progress')" class="q-py-sm" data-cy="quick-action-manage-progress">
                 <q-item-section avatar>
-                  <q-avatar size="48px" class="gradient-pink text-white">
+                  <q-avatar size="44px" class="tf-tile tf-tile--pink">
                     <q-icon name="emoji_events" size="24px" />
                   </q-avatar>
                 </q-item-section>
@@ -66,9 +65,9 @@
                 </q-item-section>
               </q-item>
 
-              <q-item clickable v-ripple @click="$router.push('/admin/locations')" class="q-pa-md" data-cy="quick-action-manage-locations">
+              <q-item clickable v-ripple @click="$router.push('/admin/locations')" class="q-py-sm" data-cy="quick-action-manage-locations">
                 <q-item-section avatar>
-                  <q-avatar size="48px" class="gradient-blue text-white">
+                  <q-avatar size="44px" class="tf-tile tf-tile--green">
                     <q-icon name="location_on" size="24px" />
                   </q-avatar>
                 </q-item-section>
@@ -87,16 +86,9 @@
         <!-- Top Guides -->
         <q-card flat bordered>
           <q-card-section>
-            <div class="row items-center q-mb-md">
-              <div class="col">
-                <div class="text-h6">
-                  <q-icon name="stars" size="24px" class="q-mr-sm" />
-                  {{ $t('dashboard.topGuides.title') }}
-                </div>
-              </div>
-              <div class="col-auto">
-                <q-chip color="primary" text-color="white" dense>{{ $t('dashboard.topGuides.thisMonth') }}</q-chip>
-              </div>
+            <div class="tf-card-head">
+              <q-icon name="stars" />{{ $t('dashboard.topGuides.title') }}
+              <q-badge class="tf-card-head__end" color="primary">{{ $t('dashboard.topGuides.thisMonth') }}</q-badge>
             </div>
 
             <q-list separator>
@@ -137,10 +129,7 @@
         <!-- Progress Distribution -->
         <q-card flat bordered class="q-mb-md">
           <q-card-section>
-            <div class="text-h6 q-mb-md">
-              <q-icon name="pie_chart" size="24px" class="q-mr-sm" />
-              {{ $t('dashboard.progress.title') }}
-            </div>
+            <div class="tf-card-head"><q-icon name="pie_chart" />{{ $t('dashboard.progress.title') }}</div>
 
             <div class="text-center q-mb-md">
               <q-circular-progress
@@ -200,10 +189,7 @@
         <!-- Recent Activity -->
         <q-card flat bordered>
           <q-card-section>
-            <div class="text-h6 q-mb-md">
-              <q-icon name="history" size="24px" class="q-mr-sm" />
-              {{ $t('dashboard.activity.title') }}
-            </div>
+            <div class="tf-card-head"><q-icon name="history" />{{ $t('dashboard.activity.title') }}</div>
 
             <q-timeline color="primary">
               <q-timeline-entry
@@ -226,21 +212,18 @@
     <!-- Locations Overview -->
     <q-card class="q-mt-lg" flat bordered>
       <q-card-section>
-        <div class="text-h6 q-mb-md">
-          <q-icon name="public" size="24px" class="q-mr-sm" />
-          {{ $t('dashboard.locations.title') }}
-        </div>
+        <div class="tf-card-head"><q-icon name="public" />{{ $t('dashboard.locations.title') }}</div>
 
         <div class="row q-col-gutter-md">
           <div class="col-12 col-sm-6 col-md-3" v-for="location in locationStats" :key="location.id">
-            <q-card flat class="gradient-purple text-white">
+            <q-card flat bordered class="full-height">
               <q-card-section>
-                <div class="row items-center q-mb-sm">
-                  <q-icon name="location_city" size="32px" class="q-mr-sm" />
-                  <div class="text-h6 text-weight-bold">{{ location.name }}</div>
+                <div class="row items-center no-wrap q-gutter-sm q-mb-sm">
+                  <div class="tf-tile"><q-icon name="location_city" size="22px" /></div>
+                  <div class="text-weight-bold ellipsis">{{ location.name }}</div>
                 </div>
 
-                <q-list dense dark>
+                <q-list dense>
                   <q-item dense class="q-px-none">
                     <q-item-section avatar>
                       <q-icon name="people" />
@@ -257,7 +240,8 @@
 
                 <q-linear-progress
                   :value="location.progress / 100"
-                  color="white"
+                  color="primary"
+                  track-color="grey-3"
                   class="q-mt-md"
                   size="8px"
                   rounded

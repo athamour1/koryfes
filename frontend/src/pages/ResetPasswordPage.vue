@@ -1,14 +1,8 @@
 <template>
-  <q-page class="flex flex-center gradient-purple">
-    <q-card class="auth-card" flat bordered>
-      <q-card-section>
-        <div class="text-h6 text-center">{{ $t('auth.resetPassword.title') }}</div>
-      </q-card-section>
-
-      <q-card-section>
+  <AuthShell :title="$t('auth.resetPassword.title')">
         <q-form @submit="onSubmit" class="q-gutter-md">
           <q-input
-            filled
+            outlined
             v-model="password"
             :label="$t('auth.resetPassword.label')"
             type="password"
@@ -32,9 +26,7 @@
             <q-btn :label="$t('auth.resetPassword.button')" type="submit" color="primary" :loading="loading" />
           </div>
         </q-form>
-      </q-card-section>
-    </q-card>
-  </q-page>
+  </AuthShell>
 </template>
 
 <script setup>
@@ -81,10 +73,3 @@ const onSubmit = async () => {
   loading.value = false;
 };
 </script>
-
-<style scoped>
-.auth-card {
-  width: 100%;
-  max-width: 400px;
-}
-</style>

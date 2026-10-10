@@ -1,5 +1,5 @@
 <template>
-  <q-page class="q-pa-md">
+  <q-page class="tf-page">
     <!-- Hero Header -->
     <PageHeader 
       icon="person"
@@ -8,9 +8,9 @@
     />
 
     <!-- Profile Content -->
-    <div class="q-pa-sm" style="height: calc(100vh - 140px); max-width: 1400px; margin: 0 auto;">
-      <q-card flat bordered class="rounded-borders fit">
-        <q-card-section class="q-pa-sm fit">
+    <div class="profile-body">
+      <q-card flat bordered>
+        <q-card-section>
           <!-- Custom Flex Layout: Column on Mobile, Row on Desktop -->
           <div class="profile-container fit">
             
@@ -18,20 +18,18 @@
             <div class="profile-left column">
               <div class="column items-center q-gutter-sm">
                 <!-- Avatar Preview Card -->
-                <q-card flat bordered class="rounded-borders q-pa-md">
+                <q-card flat bordered class="q-pa-md avatar-preview">
                   <AvatarDisplay :config="avatarConfig" :size="avatarSize" />
                 </q-card>
                 
                 <!-- Randomize Button -->
-                <q-btn 
-                  :label="$t('avatar.randomize')" 
-                  color="secondary" 
-                  outline 
-                  icon="shuffle" 
-                  @click="randomize" 
-                  unelevated
-                  class="full-width"
-                  size="sm"
+                <q-btn
+                  :label="$t('avatar.randomize')"
+                  color="primary"
+                  flat
+                  no-caps
+                  icon="shuffle"
+                  @click="randomize"
                 />
               </div>
             </div>
@@ -39,32 +37,25 @@
             <!-- RIGHT COLUMN: Customization Options + Save Button -->
             <div class="profile-right column no-wrap">
               <!-- Scrollable Options Area -->
-              <q-scroll-area class="col q-pr-sm">
+              <div>
                 <div class="column">
                   
                   <!-- 1. Identity Category -->
-                  <q-card flat bordered class="rounded-borders q-mb-sm">
+                  <q-card flat bordered class="q-mb-sm">
                     <q-card-section class="q-pa-sm">
-                      <div class="row items-center q-mb-sm">
-                        <q-icon name="fingerprint" size="20px" color="primary" class="q-mr-sm" />
-                        <span class="text-subtitle1 text-primary">{{ $t('avatar.identity') }}</span>
-                      </div>
+                      <div class="tf-card-head"><q-icon name="fingerprint" />{{ $t('avatar.identity') }}</div>
                       <div class="row q-col-gutter-sm">
                         <!-- Gender Toggle -->
                         <div class="col-12">
                           <div class="text-caption text-grey-7 q-mb-xs">{{ $t('avatar.gender') }}</div>
-                          <q-btn-toggle
+                          <SegmentedToggle
                             v-model="gender"
-                            toggle-color="primary"
                             :options="[
                               {label: $t('avatar.boy'), value: 'chest', icon: 'male'},
                               {label: $t('avatar.girl'), value: 'breasts', icon: 'female'}
                             ]"
                             spread
-                            no-caps
-                            unelevated
                             dense
-                            size="sm"
                           />
                         </div>
                         <!-- Skin Tone -->
@@ -73,7 +64,7 @@
                             v-model="avatarConfig.skin"
                             :options="getOptions('skin')"
                             :label="$t('avatar.skinTone')"
-                            filled
+                            outlined
                             dense
                             emit-value
                             map-options
@@ -89,19 +80,16 @@
                   </q-card>
 
                   <!-- 2. Face Category -->
-                  <q-card flat bordered class="rounded-borders q-mb-sm">
+                  <q-card flat bordered class="q-mb-sm">
                     <q-card-section class="q-pa-sm">
-                      <div class="row items-center q-mb-sm">
-                        <q-icon name="face" size="20px" color="primary" class="q-mr-sm" />
-                        <span class="text-subtitle1 text-primary">{{ $t('avatar.face') }}</span>
-                      </div>
+                      <div class="tf-card-head"><q-icon name="face" />{{ $t('avatar.face') }}</div>
                       <div class="row q-col-gutter-sm">
                         <div class="col-12 col-sm-6">
                           <q-select
                             v-model="avatarConfig.eye"
                             :options="getOptions('eye')"
                             :label="$t('avatar.eyes')"
-                            filled
+                            outlined
                             dense
                             emit-value
                             map-options
@@ -117,7 +105,7 @@
                             v-model="avatarConfig.eyebrows"
                             :options="getOptions('eyebrows')"
                             :label="$t('avatar.eyebrows')"
-                            filled
+                            outlined
                             dense
                             emit-value
                             map-options
@@ -133,7 +121,7 @@
                             v-model="avatarConfig.mouth"
                             :options="getOptions('mouth')"
                             :label="$t('avatar.mouth')"
-                            filled
+                            outlined
                             dense
                             emit-value
                             map-options
@@ -149,7 +137,7 @@
                             v-model="avatarConfig.lipColor"
                             :options="getColorOptions('lipColor')"
                             :label="$t('avatar.lipColor')"
-                            filled
+                            outlined
                             dense
                             emit-value
                             map-options
@@ -181,19 +169,16 @@
                   </q-card>
 
                   <!-- 3. Hair Category -->
-                  <q-card flat bordered class="rounded-borders q-mb-sm">
+                  <q-card flat bordered class="q-mb-sm">
                     <q-card-section class="q-pa-sm">
-                      <div class="row items-center q-mb-sm">
-                        <q-icon name="face_retouching_natural" size="20px" color="primary" class="q-mr-sm" />
-                        <span class="text-subtitle1 text-primary">{{ $t('avatar.hair') }}</span>
-                      </div>
+                      <div class="tf-card-head"><q-icon name="face_retouching_natural" />{{ $t('avatar.hair') }}</div>
                       <div class="row q-col-gutter-sm">
                         <div class="col-12 col-sm-6">
                           <q-select
                             v-model="avatarConfig.hair"
                             :options="getOptions('hair')"
                             :label="$t('avatar.hairStyle')"
-                            filled
+                            outlined
                             dense
                             emit-value
                             map-options
@@ -209,7 +194,7 @@
                             v-model="avatarConfig.hairColor"
                             :options="getColorOptions('hairColor')"
                             :label="$t('avatar.hairColor')"
-                            filled
+                            outlined
                             dense
                             emit-value
                             map-options
@@ -225,19 +210,16 @@
                   </q-card>
 
                   <!-- 4. Headwear Category -->
-                  <q-card flat bordered class="rounded-borders q-mb-sm">
+                  <q-card flat bordered class="q-mb-sm">
                     <q-card-section class="q-pa-sm">
-                      <div class="row items-center q-mb-sm">
-                        <q-icon name="checkroom" size="20px" color="primary" class="q-mr-sm" />
-                        <span class="text-subtitle1 text-primary">{{ $t('avatar.headwear') }}</span>
-                      </div>
+                      <div class="tf-card-head"><q-icon name="checkroom" />{{ $t('avatar.headwear') }}</div>
                       <div class="row q-col-gutter-sm">
                         <div class="col-12 col-sm-6">
                           <q-select
                             v-model="avatarConfig.hat"
                             :options="getOptions('hat')"
                             :label="$t('avatar.hat')"
-                            filled
+                            outlined
                             dense
                             emit-value
                             map-options
@@ -253,7 +235,7 @@
                             v-model="avatarConfig.hatColor"
                             :options="getColorOptions('hatColor')"
                             :label="$t('avatar.hatColor')"
-                            filled
+                            outlined
                             dense
                             emit-value
                             map-options
@@ -269,7 +251,7 @@
                             v-model="avatarConfig.accessory"
                             :options="getOptions('accessory')"
                             :label="$t('avatar.accessory')"
-                            filled
+                            outlined
                             dense
                             emit-value
                             map-options
@@ -284,10 +266,10 @@
                     </q-card-section>
                   </q-card>
                 </div>
-              </q-scroll-area>
+              </div>
 
               <!-- Save Button -->
-              <div class="row justify-end q-pt-sm">
+              <div class="row justify-end q-pt-md save-row">
                 <q-btn 
                   :label="$t('profilePage.saveButton')" 
                   color="primary" 
@@ -319,6 +301,7 @@ import { useUserStore } from '@/stores/user';
 import { useQuasar } from 'quasar';
 import AvatarDisplay from '@/components/AvatarDisplay.vue';
 import PageHeader from '@/components/PageHeader.vue';
+import SegmentedToggle from '@/components/SegmentedToggle.vue';
 
 const authStore = useAuthStore();
 const userStore = useUserStore();
@@ -449,31 +432,36 @@ const updateProfile = async () => {
 </script>
 
 <style scoped>
-.rounded-borders {
-  border-radius: 16px;
-}
-
 .profile-container {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 16px;
 }
-
 .profile-right {
   flex: 1;
-  min-height: 0;
+  min-width: 0;
 }
-
+.avatar-preview {
+  background: color-mix(in srgb, var(--klados-color) 6%, var(--surface));
+}
+/* Το κουμπί αποθήκευσης μένει ορατό όσο κυλάς τις επιλογές. */
+.save-row {
+  position: sticky;
+  bottom: 0;
+  padding-bottom: 4px;
+  background: linear-gradient(to top, var(--surface) 70%, transparent);
+}
 @media (min-width: 1024px) {
   .profile-container {
     flex-direction: row;
-    gap: 16px;
+    align-items: flex-start;
   }
-  
+  /* Η προεπισκόπηση μένει στη θέση της όσο κυλάς τις επιλογές. */
   .profile-left {
     width: 33.3333%;
+    position: sticky;
+    top: 0;
   }
-  
   .profile-right {
     width: 66.6666%;
   }

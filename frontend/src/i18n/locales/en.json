@@ -147,6 +147,11 @@
             "leader": "Leader",
             "deputyLeader": "Deputy Leader",
             "member": "Member"
+        },
+        "rolesShort": {
+            "superAdmin": "Super admin",
+            "admin": "Leader",
+            "user": "Guide"
         }
     },
     "adminUnits": {
@@ -330,6 +335,10 @@
             "success": "Password reset successfully! Redirecting to login...",
             "invalidToken": "Invalid or missing reset token.",
             "failed": "Failed to reset password"
+        },
+        "brand": {
+            "name": "Korifes",
+            "caption": "Guides' individual progress · SEO"
         }
     },
     "progress": {
@@ -420,7 +429,10 @@
         },
         "diplomasShort": "Diplomas",
         "title": "Individual Progress",
-        "subtitle": "Your Peaks, Paths and Diplomas"
+        "subtitle": "Your Peaks, Paths and Diplomas",
+        "addGuideDiplomaShort": "Guiding",
+        "addElectiveDiplomaShort": "Diploma",
+        "addPathShort": "Path"
     },
     "avatar": {
         "randomize": "Randomize",

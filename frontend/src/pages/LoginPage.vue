@@ -1,69 +1,52 @@
 <template>
-  <q-page class="flex flex-center login-page" @mousemove="handleMouseMove">
-    <div class="interactive-bg" :style="bgStyle"></div>
-    
-    <q-card style="width: 100%; max-width: 400px; margin: 16px; z-index: 1; backdrop-filter: blur(10px); background: rgba(30, 30, 40, 0.85); border: 1px solid rgba(255,255,255,0.1);">
-      <q-card-section class="text-center q-pb-none">
-        <div class="text-h4 text-weight-bold text-grey-4">{{ $t('auth.login.title') }}</div>
-        <div class="text-subtitle2 text-grey-4">{{ $t('auth.login.subtitle') }}</div>
-      </q-card-section>
-
-
-
-          <q-card-section>
-            <q-form @submit="handleLogin">
-              <q-input 
-                v-model="loginForm.username" 
-                :label="$t('auth.form.username')" 
-                outlined 
-                dense 
-                dark
-                class="q-mb-md"
-                :rules="[val => !!val || $t('auth.form.rules.usernameRequired')]"
-                data-cy="username-input"
-              />
-              <q-input 
-                v-model="loginForm.password" 
-                :label="$t('auth.form.password')" 
-                :type="isPwd ? 'password' : 'text'" 
-                outlined 
-                dense 
-                dark
-                class="q-mb-md"
-                :rules="[val => !!val || $t('auth.form.rules.passwordRequired')]"
-                data-cy="password-input"
-              >
-                <template v-slot:append>
-                  <q-icon
-                    :name="isPwd ? 'visibility_off' : 'visibility'"
-                    class="cursor-pointer"
-                    @click="isPwd = !isPwd"
-                  />
-                </template>
-              </q-input>
-              <div class="row items-center q-mb-md">
-                <q-checkbox v-model="rememberMe" :label="$t('auth.login.rememberMe')" dark dense color="primary" class="text-grey-4" />
-              </div>
-              <q-btn 
-                :label="$t('auth.login.button')" 
-                type="submit" 
-                color="primary" 
-                class="full-width" 
-                size="md"
-                unelevated
-                data-cy="login-btn"
-              />
-            </q-form>
-          </q-card-section>
-      <q-card-section v-if="stagingMessage" class="text-center q-pt-none text-warning">
-        <div class="text-caption text-orange">{{ stagingMessage }}</div>
-      </q-card-section>
-    </q-card>
-  </q-page>
+  <AuthShell :title="$t('auth.login.title')" :subtitle="$t('auth.login.subtitle')">
+    <q-form @submit="handleLogin" class="q-gutter-y-sm">
+      <q-input
+        v-model="loginForm.username"
+        :label="$t('auth.form.username')"
+        outlined
+        autocomplete="username"
+        :rules="[val => !!val || $t('auth.form.rules.usernameRequired')]"
+        data-cy="username-input"
+      >
+        <template #prepend><q-icon name="person" /></template>
+      </q-input>
+      <q-input
+        v-model="loginForm.password"
+        :label="$t('auth.form.password')"
+        :type="isPwd ? 'password' : 'text'"
+        outlined
+        autocomplete="current-password"
+        :rules="[val => !!val || $t('auth.form.rules.passwordRequired')]"
+        data-cy="password-input"
+      >
+        <template #prepend><q-icon name="lock" /></template>
+        <template #append>
+          <q-icon :name="isPwd ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="isPwd = !isPwd" />
+        </template>
+      </q-input>
+      <q-checkbox v-model="rememberMe" :label="$t('auth.login.rememberMe')" dense />
+      <q-btn
+        :label="$t('auth.login.button')"
+        type="submit"
+        color="primary"
+        class="full-width q-mt-md"
+        unelevated
+        size="md"
+        :loading="loading"
+        data-cy="login-btn"
+      />
+    </q-form>
+    <template v-if="stagingMessage" #footer>
+      <q-separator />
+      <q-card-section class="text-center text-caption text-warning">{{ stagingMessage }}</q-card-section>
+    </template>
+  </AuthShell>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref } from 'vue';
+import AuthShell from '@/components/AuthShell.vue';
 import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
 import { useQuasar } from 'quasar';
@@ -80,24 +63,10 @@ const loginForm = ref({ username: '', password: '' });
 const rememberMe = ref(false);
 const isPwd = ref(true);
 const stagingMessage = config.stagingMessage;
-const mouseX = ref(50);
-const mouseY = ref(50);
-
-const bgStyle = computed(() => ({
-  '--mouse-x': `${mouseX.value}%`,
-  '--mouse-y': `${mouseY.value}%`
-}));
-
-const handleMouseMove = (event) => {
-  const { clientX, clientY } = event;
-  const { innerWidth, innerHeight } = window;
-  mouseX.value = (clientX / innerWidth) * 100;
-  mouseY.value = (clientY / innerHeight) * 100;
-};
-
-
+const loading = ref(false);
 
 const handleLogin = async () => {
+  loading.value = true;
   try {
     const success = await authStore.login(loginForm.value.username, loginForm.value.password, rememberMe.value);
     
@@ -126,33 +95,10 @@ const handleLogin = async () => {
       icon: 'report_problem',
       position: 'top'
     });
+  } finally {
+    loading.value = false;
   }
 };
 
 
 </script>
-
-<style scoped>
-.login-page {
-  position: relative;
-  overflow: hidden;
-  background: #1a1a2e; /* Fallback */
-}
-
-.interactive-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: 
-    radial-gradient(
-      circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-      rgba(138, 43, 226, 0.4) 0%,
-      rgba(0, 0, 0, 0) 50%
-    ),
-    linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  z-index: 0;
-  transition: background 0.1s ease;
-}
-</style>

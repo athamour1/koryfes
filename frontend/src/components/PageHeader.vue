@@ -1,14 +1,19 @@
 <template>
-  <div class="page-header-wrapper">
-    <div class="page-header-content gradient-purple text-white">
-      <div class="text-center page-header-inner">
-        <q-icon v-if="icon" :name="icon" size="32px" class="q-mb-xs header-icon" />
-        <div class="page-header-title">{{ title }}</div>
-        <div v-if="subtitle" class="page-header-subtitle">{{ subtitle }}</div>
-        <div class="header-extra">
-          <slot name="extra"></slot>
-        </div>
+  <!-- Κεφαλίδα σελίδας: λιτή, μέσα στη σελίδα (όχι banner) — εικονίδιο σε
+       απαλό πλακίδιο στο χρώμα του κλάδου, τίτλος, υπότιτλος και ενέργειες
+       δεξιά που πέφτουν από κάτω όταν δεν χωρούν. -->
+  <div class="page-header tf-toolbar">
+    <div class="page-header__main">
+      <div v-if="icon" class="page-header__icon">
+        <q-icon :name="icon" size="24px" />
       </div>
+      <div class="page-header__text">
+        <h1 class="page-title">{{ title }}</h1>
+        <div v-if="subtitle" class="page-header__subtitle">{{ subtitle }}</div>
+      </div>
+    </div>
+    <div v-if="$slots.extra" class="tf-actions page-header__extra">
+      <slot name="extra" />
     </div>
   </div>
 </template>
@@ -31,70 +36,46 @@ defineProps({
 </script>
 
 <style scoped>
-.page-header-wrapper {
-  padding: 16px;
-  margin-bottom: 0;
+.page-header {
+  padding: 16px 0 16px;
 }
-
-.page-header-content {
-  background: linear-gradient(135deg, var(--q-primary) 0%, var(--q-secondary) 100%);
+.page-header__main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+.page-header__icon {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
   border-radius: 12px;
-  padding: 16px;
-  max-width: 1200px;
-  margin: 0 auto;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: grid;
+  place-items: center;
+  color: var(--klados-ink);
+  background: color-mix(in srgb, var(--klados-color) 14%, transparent);
 }
-
-.page-header-inner {
-  max-width: 800px;
-  margin: 0 auto;
+.page-header__text {
+  min-width: 0;
 }
-
-.page-header-title {
-  font-size: 1.75rem;
-  font-weight: 600;
-  margin-bottom: 4px;
+.page-title {
+  margin: 0;
+  overflow-wrap: anywhere;
 }
-
-.page-header-subtitle {
-  font-size: 0.95rem;
-  opacity: 0.9;
+.page-header__subtitle {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.92rem;
 }
-
-/* Mobile styles */
-@media (max-width: 768px) {
-  /* Show wrapper if there's content in the extra slot, hide otherwise */
-  .page-header-wrapper {
-    display: block;
+.page-header__extra {
+  flex: 1 1 280px;
+}
+@media (max-width: 599px) {
+  .page-header {
+    padding: 12px 0 10px;
   }
-
-  /* Hide title, subtitle, and icon on mobile */
-  .page-header-title,
-  .page-header-subtitle,
-  .header-icon {
-    display: none !important;
-  }
-
-  /* Keep extra slot content visible (e.g., search) */
-  .header-extra {
-    display: block !important;
-  }
-
-  /* If extra slot is empty, hide the entire wrapper */
-  .page-header-wrapper:has(.header-extra:empty) {
-    display: none;
-  }
-
-  .page-header-content {
-    padding: 12px;
-  }
-
-  .page-header-title {
-    font-size: 1.25rem;
-  }
-
-  .page-header-subtitle {
-    font-size: 0.875rem;
+  .page-title {
+    font-size: 1.35rem;
   }
 }
 </style>

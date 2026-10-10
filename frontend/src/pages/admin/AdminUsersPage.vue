@@ -1,5 +1,5 @@
 <template>
-  <q-page class="users-page">
+  <q-page class="tf-page users-page">
     <!-- Hero Header -->
     <PageHeader 
       icon="people"
@@ -8,7 +8,7 @@
     />
 
     <!-- Content -->
-    <div class="q-pa-md" style="max-width: 1400px; margin: 0 auto;">
+    <div>
 
       <q-card flat bordered>
         <q-table
@@ -127,15 +127,21 @@
       
       <template v-slot:body-cell-role="props">
         <q-td :props="props">
-           <q-chip :color="getRoleColor(props.row.role)" text-color="white" dense class="text-weight-bold">
-             {{ props.row.role }}
+           <q-chip
+             dense
+             square
+             :color="props.row.role === 'user' ? 'grey-2' : 'primary'"
+             :text-color="props.row.role === 'user' ? 'grey-9' : 'white'"
+             :icon="props.row.role === 'user' ? 'person' : 'shield'"
+           >
+             {{ formatRole(props.row.role) }}
            </q-chip>
         </q-td>
       </template>
       
       <template v-slot:body-cell-location="props">
         <q-td :props="props">
-           <q-chip v-if="props.row.location" color="teal" text-color="white" dense outline icon="place">
+           <q-chip v-if="props.row.location" dense square color="grey-2" text-color="grey-9" icon="place">
              {{ props.row.location.name }}
            </q-chip>
            <span v-else class="text-grey-5">-</span>
@@ -144,7 +150,7 @@
 
       <template v-slot:body-cell-unit="props">
         <q-td :props="props">
-           <q-chip v-if="props.row.unit" color="blue-grey" text-color="white" dense outline icon="groups">
+           <q-chip v-if="props.row.unit" dense square color="grey-2" text-color="grey-9" icon="groups">
              {{ props.row.unit.name }}
            </q-chip>
            <span v-else class="text-grey-5">-</span>
@@ -153,7 +159,13 @@
 
       <template v-slot:body-cell-unitRole="props">
         <q-td :props="props">
-          <q-chip v-if="props.row.unit && props.row.unitRole" :color="getUnitRoleColor(props.row.unitRole)" text-color="white" dense size="sm" class="text-weight-bold">
+          <q-chip
+            v-if="props.row.unit && props.row.unitRole"
+            dense
+            square
+            :color="props.row.unitRole === 'member' ? 'grey-2' : 'primary'"
+            :text-color="props.row.unitRole === 'member' ? 'grey-9' : 'white'"
+          >
             {{ formatUnitRole(props.row.unitRole) }}
           </q-chip>
           <span v-else class="text-grey-5">-</span>
@@ -205,12 +217,12 @@
         </q-card-section>
         <q-card-section>
           <q-form @submit="createUser" class="q-gutter-md">
-            <q-input filled v-model="newUser.username" :label="$t('adminUsers.form.username')" :rules="[val => !!val || $t('adminUsers.form.required')]" data-cy="username-input" />
-            <q-input filled v-model="newUser.password" :label="$t('adminUsers.form.password')" type="password" :rules="[val => !!val || $t('adminUsers.form.required')]" data-cy="password-input" />
+            <q-input outlined v-model="newUser.username" :label="$t('adminUsers.form.username')" :rules="[val => !!val || $t('adminUsers.form.required')]" data-cy="username-input" />
+            <q-input outlined v-model="newUser.password" :label="$t('adminUsers.form.password')" type="password" :rules="[val => !!val || $t('adminUsers.form.required')]" data-cy="password-input" />
             
             <!-- Role Selection (Super Admin only) -->
             <q-select
-              filled
+              outlined
               v-model="newUser.role"
               :options="availableRoleOptions"
               :label="$t('adminUsers.filters.role')"
@@ -222,7 +234,7 @@
             <!-- Location Selection -->
             <q-select
               v-if="authStore.isSuperAdmin"
-              filled
+              outlined
               v-model="newUser.locationName"
               :options="locationOptions"
               :label="$t('adminUsers.filters.location')"
@@ -232,12 +244,12 @@
               map-options
               new-value-mode="add-unique"
             />
-            <q-input v-else filled :model-value="authStore.user?.location?.name || $t('adminUsers.form.myLocation')" :label="$t('adminUsers.filters.location')" readonly :hint="$t('adminUsers.form.locationLocked')" />
+            <q-input v-else outlined :model-value="authStore.user?.location?.name || $t('adminUsers.form.myLocation')" :label="$t('adminUsers.filters.location')" readonly :hint="$t('adminUsers.form.locationLocked')" />
 
             <!-- Unit Selection -->
             <q-select
               v-if="newUser.role === 'user'"
-              filled
+              outlined
               v-model="newUser.unitId"
               :options="createUnitOptions"
               :label="$t('adminUsers.filters.unit')"
@@ -252,7 +264,7 @@
             <!-- Unit Role Selection (only when unit selected) -->
             <q-select
               v-if="newUser.unitId"
-              filled
+              outlined
               v-model="newUser.unitRole"
               :options="unitRoleOptions"
               :label="$t('adminUsers.filters.unitRole')"
@@ -272,19 +284,16 @@
 
     <!-- Edit User Dialog -->
     <q-dialog v-model="editDialog">
-      <q-card style="width: 1000px; max-width: 95vw; border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; max-height: 90vh;">
-        <!-- Header with Gradient -->
-        <q-card-section class="text-white q-pa-lg" style="background: linear-gradient(135deg, var(--q-primary) 0%, var(--q-secondary) 100%);">
-          <div class="row items-center no-wrap">
-            <div class="col">
-              <div class="text-h5 text-weight-bold">{{ $t('adminUsers.dialog.editTitle') }}</div>
-              <div class="text-subtitle2 opacity-80">{{ $t('adminUsers.dialog.editSubtitle') }}</div>
-            </div>
-            <div class="col-auto">
-              <q-btn icon="close" flat round dense v-close-popup class="text-white" />
-            </div>
+      <q-card style="width: 1000px; max-width: 95vw; overflow: hidden; display: flex; flex-direction: column; max-height: 90vh;">
+        <q-card-section class="row items-center no-wrap q-gutter-sm">
+          <div class="tf-tile"><q-icon name="manage_accounts" size="22px" /></div>
+          <div class="col">
+            <div class="text-h6 text-weight-bold">{{ $t('adminUsers.dialog.editTitle') }}</div>
+            <div class="text-caption text-grey-7">{{ $t('adminUsers.dialog.editSubtitle') }}</div>
           </div>
+          <q-btn icon="close" flat round dense v-close-popup />
         </q-card-section>
+        <q-separator />
 
         <q-card-section class="q-pa-lg scroll">
           <div class="row q-col-gutter-lg">
@@ -297,15 +306,21 @@
               </div>
               
               <div class="text-h6 q-mb-xs">{{ editingUserData.username }}</div>
-              <q-chip :color="getRoleColor(editingUserData.role)" text-color="white" size="sm" class="q-mb-md">
-                {{ editingUserData.role }}
+              <q-chip
+                dense
+                square
+                class="q-mb-md"
+                :color="editingUserData.role === 'user' ? 'grey-2' : 'primary'"
+                :text-color="editingUserData.role === 'user' ? 'grey-9' : 'white'"
+              >
+                {{ formatRole(editingUserData.role) }}
               </q-chip>
 
-              <q-input filled v-model="editingUserData.username" :label="$t('adminUsers.form.username')" dense class="q-mb-sm" />
+              <q-input outlined v-model="editingUserData.username" :label="$t('adminUsers.form.username')" dense class="q-mb-sm" />
               
               <q-select
                 v-if="authStore.isSuperAdmin"
-                filled
+                outlined
                 v-model="editingUserData.locationName"
                 :options="locationOptions"
                 :label="$t('adminUsers.filters.location')"
@@ -319,7 +334,7 @@
 
               <q-select
                 v-if="editingUserData.role === 'user'"
-                filled
+                outlined
                 v-model="editingUserData.unit"
                 :options="editUnitOptions"
                 :label="$t('adminUsers.filters.unit')"
@@ -333,7 +348,7 @@
 
               <q-select
                 v-if="editingUserData.role === 'user' && editingUserData.unit"
-                filled
+                outlined
                 v-model="editingUserData.unitRole"
                 :options="unitRoleOptions"
                 :label="$t('adminUsers.filters.unitRole')"
@@ -572,23 +587,11 @@ const confirmDeleteUser = (user) => {
   });
 };
 
-const getRoleColor = (role) => {
-  switch (role) {
-    case 'super_admin': return 'purple';
-    case 'admin': return 'orange';
-    case 'user': return 'green';
-    default: return 'grey';
-  }
-};
-
-const getUnitRoleColor = (role) => {
-  switch (role) {
-    case 'leader': return 'deep-orange';
-    case 'deputy_leader': return 'orange';
-    case 'member': return 'blue';
-    default: return 'grey';
-  }
-};
+const formatRole = (role) => ({
+  super_admin: t('adminUsers.rolesShort.superAdmin'),
+  admin: t('adminUsers.rolesShort.admin'),
+  user: t('adminUsers.rolesShort.user'),
+}[role] || role);
 
 const formatUnitRole = (role) => {
   if (!role) return '-';
