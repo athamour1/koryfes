@@ -123,7 +123,7 @@ export class UnitsController {
 
     @UseGuards(AuthGuard('jwt'))
     @Post(':id/image')
-    @UseInterceptors(FileInterceptor('file', imageUploadOptions('./uploads/unit-flags')))
+    @UseInterceptors(FileInterceptor('file', imageUploadOptions()))
     async uploadFlag(@Param('id') id: string, @UploadedFile() file: any, @Request() req) {
         if (!file) {
             throw new BadRequestException('No file uploaded');
@@ -147,6 +147,6 @@ export class UnitsController {
             }
         }
 
-        return this.unitsService.updateFlag(+id, `/uploads/unit-flags/${file.filename}`);
+        return this.unitsService.updateFlag(+id, file.buffer);
     }
 }

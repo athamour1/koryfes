@@ -3,12 +3,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Unit } from './entities/unit.entity';
 import { Location } from '../locations/entities/location.entity';
+import { StorageService } from '../storage/storage.service';
+import { keyFromUploadPath, newImageKey, toUploadPath } from '../storage/upload-paths';
+import { IMAGE_MAX_SIDE, processImage } from '../common/image-upload';
 
 @Injectable()
 export class UnitsService {
     constructor(
         @InjectRepository(Unit)
         private unitsRepository: Repository<Unit>,
+        private readonly storage: StorageService,
     ) { }
 
     async create(createUnitDto: { name: string; description?: string; location: Location }): Promise<Unit> {
@@ -47,8 +51,15 @@ export class UnitsService {
         await this.unitsRepository.delete(id);
     }
 
-    async updateFlag(id: number, flagPath: string): Promise<Unit> {
-        await this.unitsRepository.update(id, { flag: flagPath });
+    async updateFlag(id: number, file: Buffer): Promise<Unit> {
+        const unit = await this.findOne(id);
+        const key = newImageKey('unit-flags');
+        await this.storage.put(key, await processImage(file, IMAGE_MAX_SIDE.flag), 'image/webp');
+        await this.unitsRepository.update(id, { flag: toUploadPath(key) });
+        const oldKey = keyFromUploadPath(unit.flag);
+        if (oldKey) {
+            await this.storage.delete(oldKey);
+        }
         return this.findOne(id);
     }
 }
