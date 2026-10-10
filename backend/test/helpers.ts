@@ -8,13 +8,18 @@ import { UsersService } from '../src/users/users.service';
 import { UserRole } from '../src/users/entities/user.entity';
 import { Location } from '../src/locations/entities/location.entity';
 import { Unit } from '../src/units/entities/unit.entity';
+import { StorageService } from '../src/storage/storage.service';
+import { InMemoryStorage } from './in-memory-storage';
 
 export const PASSWORD = 'Password123!';
 
-export async function createTestApp(): Promise<NestExpressApplication> {
+export async function createTestApp(storage = new InMemoryStorage()): Promise<NestExpressApplication> {
     const moduleFixture = await Test.createTestingModule({
         imports: [AppModule],
-    }).compile();
+    })
+        .overrideProvider(StorageService)
+        .useValue(storage)
+        .compile();
 
     const app = moduleFixture.createNestApplication<NestExpressApplication>();
     configureApp(app);

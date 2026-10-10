@@ -29,9 +29,11 @@ on the internal Docker network, and the PWA calls the API on the same origin
 
 ## Server setup
 
-Only two files go to the server, no clone of the repo is needed:
+Only three files go to the server, no clone of the repo is needed:
 
 - `docker-compose.prod.yml`
+- `garage/garage.toml`, copied next to it as `garage.toml` (config of the Garage
+  S3 store that keeps uploaded images)
 - `.env.production.example`, copied as `.env.production` and filled in
 
 ### Environment (`.env.production`)
@@ -40,6 +42,10 @@ Only two files go to the server, no clone of the repo is needed:
 |---|---|---|---|
 | `DB_PASSWORD` | yes | — | `openssl rand -hex 24`. Postgres only reads it when the volume is first created; don't change it afterwards. |
 | `JWT_SECRET` | yes | — | `openssl rand -base64 48`. The backend refuses to start on a secret shorter than 32 characters, a placeholder or an unexpanded `$(...)`. Rotating it logs everyone out. |
+| `GARAGE_RPC_SECRET` | yes | — | `openssl rand -hex 32`. Garage's internal RPC secret. |
+| `GARAGE_ADMIN_TOKEN` | yes | — | `openssl rand -base64 32`. Used by `garage-init` to set up the bucket and key. |
+| `S3_ACCESS_KEY_ID` / `S3_SECRET_ACCESS_KEY` | yes | — | The backend's key: `echo GK$(openssl rand -hex 12)` / `openssl rand -hex 32` (Garage's key format). `garage-init` imports it; don't change it afterwards. |
+| `S3_BUCKET` | no | `koryfes` | Bucket for uploads. |
 | `ADMIN_USERNAME` / `ADMIN_PASSWORD` | no | — | Super admin, created on first boot and its password **reset to this on every boot**. Must be 8+ characters with upper/lowercase and a number, or the backend refuses to start. Leave empty to skip. |
 | `TAG` | no | `latest` | Image tag to run. Pin a release (`v1.0.0`) so you know what runs and can roll back. |
 | `BIND_ADDR` | no | `127.0.0.1` | Host address the frontend listens on (see *Ports*). |
@@ -61,6 +67,10 @@ cat > .env.production <<EOF
 TAG=v1.0.0
 DB_PASSWORD=$(openssl rand -hex 24)
 JWT_SECRET=$(openssl rand -base64 48 | tr -d '\n')
+GARAGE_RPC_SECRET=$(openssl rand -hex 32)
+GARAGE_ADMIN_TOKEN=$(openssl rand -base64 32)
+S3_ACCESS_KEY_ID=GK$(openssl rand -hex 12)
+S3_SECRET_ACCESS_KEY=$(openssl rand -hex 32)
 ADMIN_USERNAME=admin
 ADMIN_PASSWORD=ChangeMe-Str0ng
 EOF
@@ -116,13 +126,21 @@ database restore.
 
 ### Backups
 
-Two things hold state: the `postgres_data` volume and the `./uploads` directory
-(unit flags) next to the compose file.
+State lives in the `postgres_data` volume and in Garage's `garage_meta` and
+`garage_data` volumes (uploaded images). Stop Garage briefly for a consistent copy
+of its volumes:
 
 ```bash
 dc exec -T db pg_dump -U postgres guide_badges | gzip > backup-$(date +%F).sql.gz
-tar czf uploads-$(date +%F).tar.gz uploads
+dc stop garage
+docker run --rm -v "$(basename "$PWD")_garage_meta":/meta -v "$(basename "$PWD")_garage_data":/data \
+  -v "$PWD":/out alpine tar czf /out/garage-$(date +%F).tar.gz /meta /data
+dc start garage
 ```
+
+The old `./uploads` directory is only read on startup: files in it that are
+missing from the bucket are copied there. Keep it until you have checked that
+every image shows up, then it can go.
 
 ### Changing runtime config
 

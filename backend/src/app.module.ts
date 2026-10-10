@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ServeStaticModule } from '@nestjs/serve-static';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { join } from 'path';
@@ -16,6 +15,7 @@ import { GuideDiplomasModule } from './guide-diplomas/guide-diplomas.module';
 import { ElectiveDiplomasModule } from './elective-diplomas/elective-diplomas.module';
 import { UserProgressModule } from './user-progress/user-progress.module';
 import { CatalogModule } from './catalog/catalog.module';
+import { StorageModule } from './storage/storage.module';
 
 const isSqlite = process.env.DB_TYPE === 'sqlite';
 
@@ -35,10 +35,6 @@ const isSqlite = process.env.DB_TYPE === 'sqlite';
       migrations: isSqlite ? [] : [join(__dirname, 'migrations', '*.js')],
       migrationsRun: !isSqlite,
     }),
-    ServeStaticModule.forRoot({
-      rootPath: join(process.cwd(), 'uploads'),
-      serveRoot: '/uploads',
-    }),
     ThrottlerModule.forRoot([{
       ttl: 60000, // 1 minute
       limit: parseInt(process.env.THROTTLE_LIMIT) || 100, // requests per minute per IP
@@ -53,6 +49,7 @@ const isSqlite = process.env.DB_TYPE === 'sqlite';
     ElectiveDiplomasModule,
     UserProgressModule,
     CatalogModule,
+    StorageModule,
   ],
   controllers: [AppController],
   providers: [
