@@ -5,16 +5,41 @@
     </div>
 
     <template v-else-if="unit">
-      <div class="q-pt-md q-pb-sm">
+      <div class="row items-center q-pt-md q-pb-sm">
         <q-btn flat dense no-caps icon="arrow_back" :label="$t('general.back')" color="primary" @click="$router.back()" />
+        <q-space />
+        <q-btn
+          v-if="canEdit"
+          :outline="!editing"
+          :color="'primary'"
+          no-caps
+          :icon="editing ? 'check' : 'edit'"
+          :label="editing ? $t('unitPage.done') : $t('unitPage.edit')"
+          @click="toggleEditing"
+        />
       </div>
 
-      <!-- Καρτέλα ενωμοτίας -->
+      <!-- Καρτέλα ενωμοτίας: σημαία, όνομα, κραυγή -->
       <q-card flat bordered class="q-mb-lg">
         <q-card-section class="row items-center no-wrap q-gutter-md">
           <div class="unit-flag">
-            <img v-if="unit.flag" :src="`${config.apiUrl}${unit.flag}`" :alt="unit.name" />
+            <img v-if="unit.flag" :src="url(unit.flag)" :alt="unit.name" />
             <q-icon v-else name="flag" size="40px" />
+            <q-btn
+              v-if="editing"
+              round
+              dense
+              size="sm"
+              color="primary"
+              icon="edit"
+              class="unit-flag__edit"
+              :loading="busy === 'flag'"
+              :aria-label="$t('unitPage.changeFlag')"
+              @click="flagInput.click()"
+            >
+              <q-tooltip>{{ $t('unitPage.changeFlag') }}</q-tooltip>
+            </q-btn>
+            <input ref="flagInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden @change="onFlag" />
           </div>
           <div class="col">
             <h1 class="page-title">{{ unit.name }}</h1>
@@ -25,10 +50,60 @@
         </q-card-section>
         <q-separator />
         <q-card-section>
-          <div class="tf-card-head"><q-icon name="info" />{{ $t('unitPage.aboutUnit') }}</div>
-          <div class="text-body1">{{ unit.description || $t('unitPage.noDescription') }}</div>
+          <div class="tf-card-head"><q-icon name="campaign" />{{ $t('unitPage.yell') }}</div>
+          <template v-if="editing">
+            <q-input v-model="yell" outlined autogrow :maxlength="300" />
+            <div class="row justify-end q-mt-sm">
+              <q-btn color="primary" no-caps :label="$t('general.save')" :disable="yell === (unit.description || '')" :loading="busy === 'yell'" @click="saveYell" />
+            </div>
+          </template>
+          <div v-else class="text-body1 yell">{{ unit.description || $t('unitPage.noDescription') }}</div>
         </q-card-section>
       </q-card>
+
+      <!-- Η Γωνιά μας -->
+      <section class="q-mb-lg">
+        <div class="tf-card-head"><q-icon name="home" />{{ $t('unitPage.corner') }}</div>
+        <PhotoTile
+          v-if="corner || editing"
+          class="corner-tile"
+          ratio="16 / 9"
+          :src="corner && url(corner.path)"
+          :editing="editing"
+          replaceable
+          :busy="busy === 'corner'"
+          @open="openPhoto(corner)"
+          @file="(f) => addPhoto('corner', f)"
+          @remove="removePhoto(corner)"
+        />
+        <div v-else class="text-caption text-grey-6">{{ $t('unitPage.noCorner') }}</div>
+      </section>
+
+      <!-- Δράσεις -->
+      <section class="q-mb-lg">
+        <div class="tf-card-head">
+          <q-icon name="photo_library" />{{ $t('unitPage.activities') }}
+          <span v-if="editing" class="text-caption text-grey-7 q-ml-sm">{{ activities.length }}/{{ MAX_ACTIVITIES }}</span>
+        </div>
+        <div v-if="activities.length || editing" class="activity-grid">
+          <PhotoTile
+            v-for="photo in activities"
+            :key="photo.id"
+            :src="url(photo.path)"
+            :editing="editing"
+            :busy="busy === photo.id"
+            @open="openPhoto(photo)"
+            @remove="removePhoto(photo)"
+          />
+          <PhotoTile
+            v-if="editing && activities.length < MAX_ACTIVITIES"
+            editing
+            :busy="busy === 'activity'"
+            @file="(f) => addPhoto('activity', f)"
+          />
+        </div>
+        <div v-else class="text-caption text-grey-6">{{ $t('unitPage.noActivities') }}</div>
+      </section>
 
       <!-- Μέλη -->
       <div class="tf-card-head"><q-icon name="groups" />{{ $t('unitPage.members') }}</div>
@@ -47,49 +122,126 @@
             </div>
             <div class="col">
               <div class="text-weight-bold ellipsis">{{ member.username }}</div>
-              <div class="text-caption text-grey-7">
-                {{ member.role === 'admin' ? $t('unitPage.roles.captain') : $t('unitPage.roles.guide') }}
-              </div>
+              <div class="text-caption text-grey-7">{{ memberRole(member) }}</div>
             </div>
             <q-icon name="chevron_right" color="grey-6" />
           </q-card-section>
         </q-card>
       </div>
       <div v-else class="text-caption text-grey-6 q-pa-md">{{ $t('unitPage.noMembers') }}</div>
+
+      <PhotoLightbox v-model="lightbox" :photos="galleryUrls" />
     </template>
   </q-page>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { useQuasar } from 'quasar';
 import { useUnitStore } from '@/stores/unit';
+import { useAuthStore } from '@/stores/auth';
 import { config } from '@/config';
 import AvatarDisplay from '@/components/AvatarDisplay.vue';
+import PhotoTile from '@/components/unit/PhotoTile.vue';
+import PhotoLightbox from '@/components/unit/PhotoLightbox.vue';
+
+const MAX_ACTIVITIES = 9;
 
 const route = useRoute();
-const unitStore = useUnitStore();
 const { t } = useI18n();
+const $q = useQuasar();
+const unitStore = useUnitStore();
+const authStore = useAuthStore();
 
 const unit = computed(() => unitStore.currentUnit);
-const loading = computed(() => unitStore.loading);
+const loading = computed(() => unitStore.loading && !unitStore.currentUnit);
 
-onMounted(async () => {
-  const unitId = route.params.id;
-  if (unitId) {
-    await unitStore.fetchUnit(unitId);
-  }
+const url = (path) => (path?.startsWith('http') ? path : `${config.apiUrl}${path}`);
+
+// Ίδιος κανόνας με το backend (units/unit-access.ts)
+const canEdit = computed(() => {
+  const user = authStore.user;
+  if (!user || !unit.value) return false;
+  if (authStore.isSuperAdmin) return true;
+  if (user.role === 'admin') return user.location?.id === unit.value.location?.id;
+  return user.unit?.id === unit.value.id && user.unitRole === 'leader';
 });
+
+const editing = ref(false);
+const busy = ref(null); // 'flag' | 'yell' | 'corner' | 'activity' | photo id
+const yell = ref('');
+const flagInput = ref(null);
+const lightbox = ref(null);
+
+const photos = computed(() => unit.value?.photos || []);
+const corner = computed(() => photos.value.find((p) => p.kind === 'corner') || null);
+const activities = computed(() => photos.value.filter((p) => p.kind === 'activity'));
+// η γωνιά πρώτη, μετά οι δράσεις: η ίδια σειρά με τη σελίδα
+const gallery = computed(() => [corner.value, ...activities.value].filter(Boolean));
+const galleryUrls = computed(() => gallery.value.map((p) => url(p.path)));
+
+const openPhoto = (photo) => {
+  lightbox.value = gallery.value.findIndex((p) => p.id === photo.id);
+};
+
+const toggleEditing = () => {
+  editing.value = !editing.value;
+  yell.value = unit.value.description || '';
+};
+
+const notifyError = () => $q.notify({ color: 'negative', icon: 'report_problem', message: unitStore.error || t('unitPage.uploadError') });
+
+const run = async (key, action) => {
+  busy.value = key;
+  try {
+    const ok = await action();
+    if (!ok) notifyError();
+    return ok;
+  } finally {
+    busy.value = null;
+  }
+};
+
+const addPhoto = (kind, file) => run(kind, () => unitStore.uploadUnitPhoto(unit.value.id, kind, file));
+
+const removePhoto = (photo) => {
+  $q.dialog({ message: t('unitPage.confirmRemove'), cancel: true, persistent: true }).onOk(() =>
+    run(photo.id, () => unitStore.deleteUnitPhoto(unit.value.id, photo.id)));
+};
+
+const onFlag = (e) => {
+  const file = e.target.files?.[0];
+  e.target.value = '';
+  if (file) run('flag', () => unitStore.uploadUnitFlag(unit.value.id, file));
+};
+
+const saveYell = async () => {
+  const ok = await run('yell', () => unitStore.updateUnit(unit.value.id, { description: yell.value }));
+  if (ok) $q.notify({ color: 'positive', icon: 'check_circle', message: t('unitPage.saved') });
+};
+
+const memberRole = (member) => {
+  if (member.unitRole === 'leader') return t('adminUsers.roles.leader');
+  if (member.unitRole === 'deputy_leader') return t('adminUsers.roles.deputyLeader');
+  return member.role === 'admin' ? t('unitPage.roles.captain') : t('unitPage.roles.guide');
+};
+
+watch(() => route.params.id, (id) => {
+  editing.value = false;
+  if (id) unitStore.fetchUnit(id);
+}, { immediate: true });
 </script>
 
 <style scoped>
 .unit-flag {
+  position: relative;
   flex: 0 0 auto;
   width: 88px;
   height: 88px;
   border-radius: var(--radius-card);
-  overflow: hidden;
+  overflow: visible;
   display: grid;
   place-items: center;
   color: var(--klados-ink);
@@ -100,6 +252,29 @@ onMounted(async () => {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: inherit;
+}
+.unit-flag__edit {
+  position: absolute;
+  right: -8px;
+  bottom: -8px;
+}
+.yell {
+  white-space: pre-line;
+  font-style: italic;
+}
+.corner-tile {
+  max-width: 720px;
+}
+.activity-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+@media (max-width: 599px) {
+  .activity-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 .member-avatar {
   flex: 0 0 auto;
