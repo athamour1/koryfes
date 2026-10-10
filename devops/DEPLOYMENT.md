@@ -21,9 +21,10 @@ git tag and creates a GitHub release with generated notes. Needs `docker`,
 Internet ──443──▶ your reverse proxy (TLS) ──▶ 127.0.0.1:8080 frontend (nginx)
                                                  ├─ /        → PWA static files
                                                  └─ /api/    → backend ─▶ postgres
+                                                                  └─▶ garage (S3, images)
 ```
 
-Only the frontend publishes a port. The backend and Postgres are reachable only
+Only the frontend publishes a port. The backend, Postgres and Garage are reachable only
 on the internal Docker network, and the PWA calls the API on the same origin
 (`/api`), so no CORS setup is needed.
 
@@ -88,7 +89,7 @@ docker login ghcr.io
 
 dc pull
 dc up -d        # migrations run automatically when the backend starts
-dc ps           # all three services should become (healthy)
+dc ps           # db, backend, frontend (healthy) and garage up; garage-config and garage-init exit 0
 ```
 
 Then sign in with the admin account at `https://<your-domain>/`. There is no
@@ -122,6 +123,32 @@ dc pull && dc up -d     # new migrations apply before the backend serves traffic
 ```
 
 Roll back by setting the previous `TAG` and running the same commands.
+
+#### Upgrading to the first release with Garage (uploads in S3)
+
+This release adds the `garage-config`, `garage` and `garage-init` services, so
+`TAG` alone is not enough:
+
+1. Back up the database and the old `./uploads` folder (see *Backups*).
+2. Replace `docker-compose.prod.yml` with the one from the release.
+3. Add the four new variables to `.env.production` (see the table above):
+   `GARAGE_RPC_SECRET`, `GARAGE_ADMIN_TOKEN`, `S3_ACCESS_KEY_ID`,
+   `S3_SECRET_ACCESS_KEY`. Compose refuses to start while any is missing.
+4. Set the new `TAG` and run `dc pull && dc up -d`.
+5. Check that the init ran and the old images were moved:
+
+   ```bash
+   dc logs garage-init | tail -1     # garage-init: ready
+   dc logs backend | grep -i legacy  # Copied N legacy upload(s) to the bucket
+   ```
+
+   (No "Copied" line means `./uploads` was empty.) Open a few units and check
+   their flags. Keep `./uploads` until you have; it is only read on startup.
+
+If `garage-init` fails, the backend does not start (it waits for it):
+`dc logs garage garage-init` shows why, usually a wrong `GARAGE_ADMIN_TOKEN`
+or an S3 key that doesn't match Garage's format (`GK` + 24 hex / 64 hex).
+Rolling back to a release before Garage needs the old compose file too.
 Migrations are forward-only, so a rollback across a schema change needs a
 database restore.
 
