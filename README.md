@@ -27,6 +27,13 @@ A full-stack badge management system built with **NestJS**, **Vue 3**, **Quasar*
     -   **Frontend:** [http://localhost:8080](http://localhost:8080)
     -   **Backend API:** [http://localhost:3000](http://localhost:3000)
 
+### Uploaded images
+Images (unit flags and gallery photos) are stored in **Garage**, an S3-compatible
+store that runs as the `garage` service; the one-shot `garage-init` creates its
+bucket and key on startup. Uploads are scaled down and re-encoded as WebP (in the
+browser and again on the server, which also drops EXIF/GPS data) and served by
+the backend at `/uploads/...`.
+
 ### Release & Production
 `./release.sh` builds and pushes the `backend` / `frontend` images to
 `ghcr.io/athamour1/koryfes/*` and creates a tagged GitHub release; the server
@@ -75,6 +82,7 @@ For detailed information about the specific technologies and features, please re
 | Vue 3 | NestJS | Docker |
 | Quasar | PostgreSQL | Nginx |
 | Pinia | TypeORM | GHCR |
+| | sharp | Garage (S3) |
 | Vite | Passport/JWT | |
 
 ## ⚙️ Runtime Configuration
