@@ -28,8 +28,19 @@ NC='\033[0m'
 
 info()  { echo -e "${CYAN}ℹ ${NC}$1"; }
 ok()    { echo -e "${GREEN}✔ ${NC}$1"; }
-warn()  { echo -e "${YELLOW}⚠ ${NC}$1"; }
+warn()  { echo -e "${YELLOW}⚠ ${NC}$1" >&2; }
 error() { echo -e "${RED}✖ ${NC}$1"; exit 1; }
+
+# Ξαναδοκιμάζει εντολές δικτύου (το GitHub API κάνει πού και πού TLS timeouts)
+retry() {
+  local attempt
+  for attempt in 1 2 3 4 5; do
+    "$@" && return 0
+    warn "Failed (attempt ${attempt}/5): $*"
+    sleep $((attempt * 3))
+  done
+  return 1
+}
 
 cd "$ROOT_DIR"
 
@@ -38,6 +49,14 @@ command -v gh     >/dev/null || error "gh CLI not found. Install: https://cli.gi
 command -v docker >/dev/null || error "docker not found."
 command -v npm    >/dev/null || error "npm not found."
 gh auth status    >/dev/null 2>&1 || error "Not logged in to GitHub CLI. Run: gh auth login"
+
+# Login στο GHCR ΠΡΙΝ από οποιοδήποτε commit, ώστε ένα πρόβλημα δικτύου/token
+# να μην αφήνει πίσω του version commit χωρίς release.
+info "Logging in to ${REGISTRY}..."
+GH_USER="$(retry gh api user -q .login)" || error "Could not reach the GitHub API. Check your connection and retry."
+retry sh -c 'gh auth token | docker login "$1" -u "$2" --password-stdin' _ "$REGISTRY" "$GH_USER" \
+  || error "docker login to ${REGISTRY} failed (the gh token needs the write:packages scope: gh auth refresh -s write:packages)"
+ok "Logged in to ${REGISTRY} as ${GH_USER}"
 
 # ─── Ask for version ───────────────────────────────────────────────────────────
 echo ""
@@ -76,7 +95,9 @@ fi
 
 BRANCH="$(git rev-parse --abbrev-ref HEAD)"
 if [ "$BRANCH" != "master" ]; then
-  warn "You are on '${BRANCH}', not 'master'."
+  warn "You are on '${BRANCH}', not 'master': the tag and release will point at this branch."
+  read -rp "$(echo -e "${YELLOW}Release from '${BRANCH}' anyway? (y/N): ${NC}")" BRANCH_OK
+  [[ "$BRANCH_OK" =~ ^[Yy]$ ]] || { warn "Aborted."; exit 0; }
 fi
 
 # ─── Confirmation ───────────────────────────────────────────────────────────────
@@ -111,13 +132,13 @@ done
 for pkg in "${VERSIONED_PACKAGES[@]}"; do
   git add "${pkg}/package.json" "${pkg}/package-lock.json"
 done
-git commit -m "chore(release): bump version to ${VERSION}"
-ok "Version commit created"
-
-# ─── Login to GHCR ─────────────────────────────────────────────────────────────
-info "Logging in to ${REGISTRY}..."
-gh auth token | docker login "$REGISTRY" -u "$(gh api user -q .login)" --password-stdin
-ok "Logged in to ${REGISTRY}"
+# Σε re-run μετά από αποτυχία η έκδοση είναι ήδη bumped — τίποτα να γίνει commit
+if git diff --cached --quiet; then
+  ok "Already at ${VERSION}, no version commit needed"
+else
+  git commit -m "chore(release): bump version to ${VERSION}"
+  ok "Version commit created"
+fi
 
 # ─── Build & push images ───────────────────────────────────────────────────────
 # Οι ρυθμίσεις του frontend είναι runtime (config.js από τον entrypoint), οπότε
@@ -135,20 +156,20 @@ for entry in "${IMAGES[@]}"; do
   ok "${name} image built"
 
   info "Pushing ${name} image..."
-  docker push "${image}:${TAG}"
-  docker push "${image}:latest"
+  retry docker push "${image}:${TAG}"
+  retry docker push "${image}:latest"
   ok "${name} image pushed"
 done
 
 # ─── Create Git tag & GitHub release ────────────────────────────────────────────
 info "Creating Git tag ${TAG}..."
 git tag -a "$TAG" -m "Release ${TAG}"
-git push origin HEAD
-git push origin "$TAG"
+retry git push origin HEAD
+retry git push origin "$TAG"
 ok "Tag ${TAG} pushed"
 
 info "Creating GitHub release..."
-gh release create "$TAG" \
+retry gh release create "$TAG" \
   --repo "$REPO" \
   --title "⛰️ Korifes ${TAG}" \
   --generate-notes
