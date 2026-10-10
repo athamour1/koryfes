@@ -143,8 +143,10 @@ onMounted(() => store.fetchCatalog());
 
 <style scoped>
 .peak-image {
+  display: block;
   width: 140px;
   height: 140px;
+  margin: 0 auto;
   object-fit: contain;
 }
 .path-number {

@@ -1,50 +1,38 @@
-import { PathCategory } from '../paths/path-category.enum';
 import { PeakType } from '../peaks/peak-type.enum';
 import { evaluateProgress } from './progress-rules';
 
-const { ME_AND_MY_CAPABILITIES: SELF, SOCIETY_AND_VOLUNTEERING: SOCIETY, NATURE, ARTS } = PathCategory;
-const oneEach = [SELF, SOCIETY, NATURE, ARTS];
-
 const evaluate = (overrides: Partial<Parameters<typeof evaluateProgress>[0]>) =>
-    evaluateProgress({ hasPromise: true, pathCategories: [], guideDiplomaLevels: [], electiveDiplomaCount: 0, ...overrides });
+    evaluateProgress({ hasPromise: true, pathCount: 0, guideDiplomaLevels: [], electiveDiplomaCount: 0, ...overrides });
 
-describe('evaluateProgress (book p. 9)', () => {
+describe('evaluateProgress', () => {
     it('nothing counts before the Promise', () => {
-        const result = evaluate({ hasPromise: false, pathCategories: oneEach, guideDiplomaLevels: [1], electiveDiplomaCount: 1 });
-        expect(result.peak).toBeNull();
+        expect(evaluate({ hasPromise: false, pathCount: 4, guideDiplomaLevels: [1], electiveDiplomaCount: 1 }).peak).toBeNull();
     });
 
     it('Promise alone', () => {
         expect(evaluate({}).peak).toBe(PeakType.PROMISE);
     });
 
-    it('bronze: one path from each chapter + Guide Α\' + 1 diploma', () => {
-        expect(evaluate({ pathCategories: oneEach, guideDiplomaLevels: [1], electiveDiplomaCount: 1 }).peak).toBe(PeakType.BRONZE);
+    it('bronze: 4 paths from any chapter + Guide Α\' + 1 diploma', () => {
+        expect(evaluate({ pathCount: 4, guideDiplomaLevels: [1], electiveDiplomaCount: 1 }).peak).toBe(PeakType.BRONZE);
     });
 
-    it('bronze needs every chapter, not just four paths', () => {
-        const result = evaluate({ pathCategories: [SELF, SELF, NATURE, ARTS], guideDiplomaLevels: [1], electiveDiplomaCount: 1 });
+    it('bronze lists what is still missing', () => {
+        const result = evaluate({ pathCount: 3, guideDiplomaLevels: [1], electiveDiplomaCount: 1 });
         expect(result.peak).toBe(PeakType.PROMISE);
-        const missing = result.peaks[1].requirements.filter((r) => !r.met);
-        expect(missing).toEqual([expect.objectContaining({ key: 'chapterPaths', category: SOCIETY, current: 0, required: 1 })]);
+        expect(result.peaks[1].requirements.filter((r) => !r.met))
+            .toEqual([{ key: 'totalPaths', current: 3, required: 4, met: false }]);
     });
 
-    it('silver: a second path in every chapter + Guide Β\' + 2 diplomas', () => {
-        const result = evaluate({ pathCategories: [...oneEach, ...oneEach], guideDiplomaLevels: [1, 2], electiveDiplomaCount: 2 });
-        expect(result.peak).toBe(PeakType.SILVER);
+    it('silver: 4 more paths + Guide Β\' + 1 more diploma', () => {
+        expect(evaluate({ pathCount: 8, guideDiplomaLevels: [1, 2], electiveDiplomaCount: 2 }).peak).toBe(PeakType.SILVER);
     });
 
-    it('gold: 4 more paths from any chapter + Guide Γ\' + 4 diplomas', () => {
-        const result = evaluate({
-            pathCategories: [...oneEach, ...oneEach, ARTS, ARTS, ARTS, ARTS],
-            guideDiplomaLevels: [1, 2, 3],
-            electiveDiplomaCount: 4,
-        });
-        expect(result.peak).toBe(PeakType.GOLD);
+    it('gold: 4 more paths + Guide Γ\' + 2 more diplomas', () => {
+        expect(evaluate({ pathCount: 12, guideDiplomaLevels: [1, 2, 3], electiveDiplomaCount: 4 }).peak).toBe(PeakType.GOLD);
     });
 
     it('peaks are earned in order: Guide Β\' without Α\' stops at the Promise', () => {
-        const result = evaluate({ pathCategories: [...oneEach, ...oneEach], guideDiplomaLevels: [2], electiveDiplomaCount: 2 });
-        expect(result.peak).toBe(PeakType.PROMISE);
+        expect(evaluate({ pathCount: 8, guideDiplomaLevels: [2], electiveDiplomaCount: 2 }).peak).toBe(PeakType.PROMISE);
     });
 });

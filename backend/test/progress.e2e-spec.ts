@@ -65,13 +65,13 @@ describe('Individual progress (e2e)', () => {
             expect(res.body.currentPeak.code).toBe('promise');
         });
 
-        it('bronze is earned automatically once the book\'s requirements are met', async () => {
+        it('bronze is earned automatically with 4 paths, Guiding Α\' and 1 diploma', async () => {
             for (const c of chapters.slice(0, 3)) {
                 await award('paths', { pathId: pathOf(c) });
             }
             await award('diplomas', { type: 'guide', diplomaId: catalog.guide[0].id });
             let res = await award('diplomas', { type: 'elective', diplomaId: catalog.electives[0].id });
-            expect(res.body.currentPeak.code).toBe('promise'); // still missing the arts chapter
+            expect(res.body.currentPeak.code).toBe('promise'); // only 3 of 4 paths
 
             res = await award('paths', { pathId: pathOf('arts') });
             expect(res.body.currentPeak.code).toBe('bronze');

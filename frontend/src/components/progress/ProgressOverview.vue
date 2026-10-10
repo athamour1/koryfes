@@ -145,7 +145,6 @@ const peakName = (type) => props.peaks.find((p) => p.type === type)?.name || typ
 
 const requirementLabel = (r, peakType) => {
   switch (r.key) {
-    case 'chapterPaths': return t('progress.req.chapterPaths', { chapter: t(`progress.chapters.${r.category}`) });
     case 'guideDiploma': return t('progress.req.guideDiploma', { level: GUIDE_LEVEL[peakType] });
     default: return t(`progress.req.${r.key}`);
   }
@@ -176,8 +175,10 @@ const pathsByChapter = computed(() => PATH_CHAPTERS.map((category) => ({
 
 <style scoped>
 .peak-image {
+  display: block;
   width: 180px;
   height: 180px;
+  margin: 0 auto;
   object-fit: contain;
   filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.2));
 }

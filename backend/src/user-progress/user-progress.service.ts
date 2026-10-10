@@ -146,7 +146,7 @@ export class UserProgressService {
     private evaluate(progress: UserProgress): ProgressEvaluation {
         return evaluateProgress({
             hasPromise: progress.currentPeak !== null,
-            pathCategories: progress.completedPaths.map((p) => p.category),
+            pathCount: progress.completedPaths.length,
             guideDiplomaLevels: progress.guideDiplomas.map((d) => d.level),
             electiveDiplomaCount: progress.electiveDiplomas.length,
         });

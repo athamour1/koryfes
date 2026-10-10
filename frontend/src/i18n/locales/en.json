@@ -395,7 +395,6 @@
         "allPeaksReached": "All three Peaks reached!",
         "req": {
             "promise": "Promise",
-            "chapterPaths": "Paths: {chapter}",
             "totalPaths": "Paths in total",
             "guideDiploma": "Guiding Diploma {level}'",
             "electiveDiplomas": "Diplomas of your choice"

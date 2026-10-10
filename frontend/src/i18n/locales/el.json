@@ -394,7 +394,6 @@
         "allPeaksReached": "Κατέκτησε και τις τρεις Κορυφές!",
         "req": {
             "promise": "Υπόσχεση",
-            "chapterPaths": "Μονοπάτια: {chapter}",
             "totalPaths": "Μονοπάτια συνολικά",
             "guideDiploma": "Πτυχίο Οδηγισμού {level}'",
             "electiveDiplomas": "Πτυχία της επιλογής σου"
