@@ -1,4 +1,5 @@
 import { Controller, Get } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import { AppService } from './app.service';
 
 @Controller()
@@ -8,5 +9,12 @@ export class AppController {
   @Get()
   getHello(): string {
     return this.appService.getHello();
+  }
+
+  // Used by the Docker HEALTHCHECK
+  @SkipThrottle()
+  @Get('health')
+  health() {
+    return { status: 'ok' };
   }
 }

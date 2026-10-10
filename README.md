@@ -9,21 +9,41 @@ A full-stack badge management system built with **NestJS**, **Vue 3**, **Quasar*
 1.  **Clone the repository**
     ```bash
     git clone <repository-url>
-    cd guide-badges
+    cd seo-test-app
     ```
 
-2.  **Start the application**
+2.  **Configure environment**
+    ```bash
+    cp .env.example .env
+    # set JWT_SECRET, DB_PASSWORD and ADMIN_PASSWORD
+    ```
+
+3.  **Start the application**
     ```bash
     docker compose up --build
     ```
 
-3.  **Access the application**
+4.  **Access the application**
     -   **Frontend:** [http://localhost:8080](http://localhost:8080)
     -   **Backend API:** [http://localhost:3000](http://localhost:3000)
 
-### Default Admin Credentials
--   **Username:** `admin`
--   **Password:** `admin123`
+### Admin Account
+On startup the backend creates (or resets) a super admin from `ADMIN_USERNAME` /
+`ADMIN_PASSWORD`. There is no public sign-up; admins create all other users.
+
+### Requirements
+-   Node.js 24+ for local development (Docker images use `node:24-alpine`)
+
+### Database Migrations
+The Postgres schema is managed by TypeORM migrations in `backend/src/migrations`,
+applied automatically on backend startup. After changing an entity:
+
+```bash
+cd backend
+npm run migration:generate -- src/migrations/DescribeYourChange
+```
+
+Local development with `DB_TYPE=sqlite` still auto-syncs the schema from the entities.
 
 ---
 

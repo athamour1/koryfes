@@ -2,6 +2,14 @@ import { Controller, Request, Post, UseGuards, Body, Get, UnauthorizedException 
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { UsersService } from '../users/users.service';
+import { Throttle } from '@nestjs/throttler';
+import { ForgotPasswordDto, LoginDto, LogoutDto, RefreshTokenDto, ResetPasswordDto } from './dto/auth.dto';
+
+// Stricter limit for credential endpoints: per IP per minute (default 10).
+// Raise AUTH_THROTTLE_LIMIT only for automated test environments.
+const AUTH_THROTTLE = {
+    default: { limit: parseInt(process.env.AUTH_THROTTLE_LIMIT) || 10, ttl: 60000 },
+};
 
 @Controller('auth')
 export class AuthController {
@@ -10,18 +18,14 @@ export class AuthController {
         private usersService: UsersService
     ) { }
 
+    @Throttle(AUTH_THROTTLE)
     @Post('login')
-    async login(@Body() req) {
-        const user = await this.authService.validateUser(req.username, req.password);
+    async login(@Body() body: LoginDto) {
+        const user = await this.authService.validateUser(body.username, body.password);
         if (!user) {
             throw new UnauthorizedException('Invalid credentials');
         }
-        return this.authService.login(user, req.rememberMe);
-    }
-
-    @Post('register')
-    async register(@Body() req) {
-        return this.authService.register(req);
+        return this.authService.login(user, body.rememberMe);
     }
 
     @UseGuards(AuthGuard('jwt'))
@@ -31,28 +35,27 @@ export class AuthController {
     }
 
     @Post('refresh')
-    async refresh(@Body('refresh_token') refreshToken: string) {
-        if (!refreshToken) {
-            throw new UnauthorizedException('Refresh token required');
-        }
-        return this.authService.refreshAccessToken(refreshToken);
+    async refresh(@Body() body: RefreshTokenDto) {
+        return this.authService.refreshAccessToken(body.refresh_token);
     }
 
     @Post('logout')
-    async logout(@Body('refresh_token') refreshToken: string) {
-        if (refreshToken) {
-            await this.authService.revokeRefreshToken(refreshToken);
+    async logout(@Body() body: LogoutDto) {
+        if (body.refresh_token) {
+            await this.authService.revokeRefreshToken(body.refresh_token);
         }
         return { message: 'Logged out successfully' };
     }
 
+    @Throttle(AUTH_THROTTLE)
     @Post('forgot-password')
-    async forgotPassword(@Body('email') email: string) {
-        return this.authService.forgotPassword(email);
+    async forgotPassword(@Body() body: ForgotPasswordDto) {
+        return this.authService.forgotPassword(body.email);
     }
 
+    @Throttle(AUTH_THROTTLE)
     @Post('reset-password')
-    async resetPassword(@Body() body: any) {
+    async resetPassword(@Body() body: ResetPasswordDto) {
         return this.authService.resetPassword(body.token, body.password);
     }
 }

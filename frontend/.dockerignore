@@ -1,0 +1,10 @@
+node_modules
+src-pwa/node_modules
+dist
+.quasar
+test/cypress/videos
+test/cypress/screenshots
+coverage
+.nyc_output
+.env
+.env.*

@@ -1,5 +1,5 @@
 <template>
-  <q-page class="q-pa-md admin-page">
+  <q-page class="tf-page">
     <!-- Hero Section -->
     <PageHeader 
       icon="groups"
@@ -7,7 +7,7 @@
       :subtitle="$t('myUnit.subtitle')"
     />
 
-    <div class="page-content">
+    <div>
       <div v-if="loading" class="row justify-center q-pa-xl">
         <q-spinner color="primary" size="3em" />
       </div>
@@ -19,12 +19,12 @@
       <div v-else class="row q-col-gutter-lg">
         <!-- Unit Details Card -->
         <div class="col-12 col-md-8">
-          <q-card class="modern-card">
+          <q-card flat bordered>
             <q-card-section>
-              <div class="text-h6 q-mb-md">{{ $t('myUnit.infoTitle') }}</div>
+              <div class="section-title q-mb-md">{{ $t('myUnit.infoTitle') }}</div>
               <q-form @submit="saveUnit" class="q-gutter-md">
                 <q-input
-                  filled
+                  outlined
                   v-model="unitForm.name"
                   :label="$t('myUnit.nameLabel')"
                   readonly
@@ -32,7 +32,7 @@
                 />
 
                 <q-input
-                  filled
+                  outlined
                   v-model="unitForm.description"
                   :label="$t('myUnit.descriptionLabel')"
                   type="textarea"
@@ -46,7 +46,6 @@
                     type="submit"
                     color="primary"
                     :loading="saving"
-                    class="gradient-btn"
                   />
                 </div>
               </q-form>
@@ -56,11 +55,11 @@
 
         <!-- Flag Card -->
         <div class="col-12 col-md-4">
-          <q-card class="modern-card text-center">
+          <q-card flat bordered class="text-center">
             <q-card-section>
-              <div class="text-h6 q-mb-md">{{ $t('myUnit.flagTitle') }}</div>
+              <div class="section-title q-mb-md">{{ $t('myUnit.flagTitle') }}</div>
               <div class="relative-position inline-block q-mb-md">
-                <q-avatar size="200px" square class="shadow-3" style="border-radius: 12px">
+                <q-avatar size="200px" square class="flag-box">
                   <img 
                     v-if="previewImage || unit.flag" 
                     :src="previewImage || getFlagUrl(unit.flag)" 
@@ -97,12 +96,9 @@
 
         <!-- Unit Members Card - Only for Leaders and Deputies -->
         <div v-if="isLeader" class="col-12">
-          <q-card class="modern-card">
+          <q-card flat bordered>
             <q-card-section>
-              <div class="text-h6 q-mb-md">
-                <q-icon name="groups" class="q-mr-sm" />
-                {{ $t('myUnit.membersTitle') || 'Unit Members' }}
-              </div>
+              <div class="tf-card-head"><q-icon name="groups" />{{ $t('myUnit.membersTitle') || 'Unit Members' }}</div>
               
               <div v-if="loadingMembers" class="row justify-center q-pa-md">
                 <q-spinner color="primary" size="2em" />
@@ -122,32 +118,24 @@
 
                   <q-item-section>
                     <q-item-label>{{ member.username }}</q-item-label>
-                    <q-item-label caption>
-                      <q-chip 
-                        v-if="member.progress?.currentPeak" 
-                        :color="getPeakColor(member.progress.currentPeak.type)" 
-                        text-color="white" 
-                        size="sm"
-                        dense
-                      >
-                        <q-icon name="landscape" class="q-mr-xs" size="xs" />
-                        {{ member.progress.currentPeak.name }}
-                      </q-chip>
-                      <span v-else class="text-grey">
-                        {{ $t('myUnit.noPeak') || 'No peak assigned yet' }}
-                      </span>
+                    <q-item-label caption class="row items-center no-wrap q-gutter-xs">
+                      <template v-if="member.progress?.currentPeak">
+                        <img :src="peakImage(member.progress.currentPeak)" :alt="member.progress.currentPeak.name" class="peak-mini" />
+                        <span>{{ member.progress.currentPeak.name }}</span>
+                      </template>
+                      <span v-else>{{ $t('myUnit.noPeak') || 'No peak assigned yet' }}</span>
                     </q-item-label>
                   </q-item-section>
 
                   <q-item-section side>
                     <q-btn
-                      color="blue"
-                      icon="visibility"
-                      :label="$t('myUnit.viewProgress') || 'View Progress'"
-                      @click="viewMemberProgress(member)"
-                      outline
+                      flat
                       dense
                       no-caps
+                      color="primary"
+                      icon-right="chevron_right"
+                      :label="$t('myUnit.viewProgress') || 'View Progress'"
+                      @click="viewMemberProgress(member)"
                     />
                   </q-item-section>
                 </q-item>
@@ -163,15 +151,16 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
+import { peakImage } from '@/utils/badges';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from 'src/stores/auth';
-import { useUnitStore } from 'src/stores/unit';
-import { api } from 'src/api';
+import { useAuthStore } from '@/stores/auth';
+import { useUnitStore } from '@/stores/unit';
+import { api } from '@/api';
 import { useQuasar } from 'quasar';
-import { config } from 'src/config';
-import PageHeader from 'src/components/PageHeader.vue';
-import AvatarDisplay from 'src/components/AvatarDisplay.vue';
+import { config } from '@/config';
+import PageHeader from '@/components/PageHeader.vue';
+import AvatarDisplay from '@/components/AvatarDisplay.vue';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -206,16 +195,6 @@ const getFlagUrl = (path) => {
 const getImageUrl = (path) => {
   if (!path) return null;
   return path.startsWith('http') ? path : `${config.apiUrl}${path}`;
-};
-
-const getPeakColor = (type) => {
-  const colors = {
-    promise: 'green',
-    bronze: 'deep-orange',
-    silver: 'grey',
-    gold: 'amber'
-  };
-  return colors[type] || 'primary';
 };
 
 const handleImageUpdate = (file) => {
@@ -346,6 +325,14 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-/* Reuse global admin styles */
-@import '../css/admin-pages.css';
+.flag-box {
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border-soft);
+  background: var(--surface-2);
+}
+.peak-mini {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
 </style>

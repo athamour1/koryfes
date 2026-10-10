@@ -137,7 +137,7 @@ This file contains all demo users created by the `populate_demo_data.sh` script.
 
 **Super Admin**:
 - Username: `admin`
-- Password: `admin123`
+- Password: the `ADMIN_PASSWORD` from your `.env`
 
 **Location Admin**:
 - Username: `admin_1`

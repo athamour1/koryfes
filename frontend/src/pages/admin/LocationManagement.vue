@@ -1,5 +1,5 @@
 <template>
-  <q-page class="locations-page">
+  <q-page class="tf-page locations-page">
     <!-- Hero Header -->
     <PageHeader 
       icon="location_on"
@@ -8,7 +8,7 @@
     />
 
     <!-- Content -->
-    <div class="q-pa-md" style="max-width: 1200px; margin: 0 auto;">
+    <div>
       <q-card flat bordered>
         <q-table
           :title="$t('locationManagement.tableTitle')"
@@ -81,16 +81,18 @@
     <!-- Add/Edit Dialog -->
     <q-dialog v-model="showAddDialog">
       <q-card style="width: 700px; max-width: 90vw;">
-        <q-card-section class="gradient-blue text-white">
-          <div class="text-h6">
-            <q-icon name="location_city" size="24px" class="q-mr-sm" />
+        <q-card-section class="row items-center no-wrap q-gutter-sm">
+          <div class="tf-tile"><q-icon name="location_city" size="22px" /></div>
+          <div class="col text-h6 text-weight-bold">
             {{ isEditing ? $t('locationManagement.dialog.editTitle') : $t('locationManagement.dialog.addTitle') }}
           </div>
+          <q-btn icon="close" flat round dense v-close-popup />
         </q-card-section>
+        <q-separator />
 
         <q-card-section class="q-pt-md">
           <q-input 
-            filled
+            outlined
             v-model="locationForm.name" 
             :label="$t('locationManagement.form.name')" 
             autofocus 
@@ -105,7 +107,7 @@
           </q-input>
 
           <q-select
-            filled
+            outlined
             v-model="locationForm.type"
             :options="locationTypeOptions"
             :label="$t('locationManagement.form.type')"
@@ -147,10 +149,10 @@
 <script setup>
 import { ref, onMounted, reactive, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { api } from 'src/api';
+import { api } from '@/api';
 import { useQuasar } from 'quasar';
-import PageHeader from 'src/components/PageHeader.vue';
-import LocationMapPicker from 'src/components/LocationMapPicker.vue';
+import PageHeader from '@/components/PageHeader.vue';
+import LocationMapPicker from '@/components/LocationMapPicker.vue';
 
 const $q = useQuasar();
 const { t } = useI18n();

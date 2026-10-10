@@ -1,5 +1,5 @@
 <template>
-  <q-page class="units-page">
+  <q-page class="tf-page units-page">
     <!-- Hero Header -->
     <PageHeader 
       icon="groups"
@@ -8,7 +8,7 @@
     />
 
     <!-- Content -->
-    <div class="q-pa-md" style="max-width: 1200px; margin: 0 auto;">
+    <div>
 
       <q-card flat bordered>
         <q-table
@@ -23,7 +23,7 @@
       :loading="loading"
     >
       <template v-slot:top-right>
-        <q-input borderless dense debounce="300" v-model="filter" :placeholder="$t('adminUnits.searchPlaceholder')" data-cy="search-input">
+        <q-input outlined dense debounce="300" v-model="filter" :placeholder="$t('adminUnits.searchPlaceholder')" data-cy="search-input">
           <template v-slot:append>
             <q-icon name="search" />
           </template>
@@ -100,13 +100,13 @@
               </div>
             </div>
 
-            <q-input filled v-model="unitForm.name" :label="$t('adminUnits.form.name')" :rules="[val => !!val || $t('adminUnits.form.required')]" data-cy="unit-name-input" />
-            <q-input filled v-model="unitForm.description" :label="$t('adminUnits.form.description')" type="textarea" autogrow />
+            <q-input outlined v-model="unitForm.name" :label="$t('adminUnits.form.name')" :rules="[val => !!val || $t('adminUnits.form.required')]" data-cy="unit-name-input" />
+            <q-input outlined v-model="unitForm.description" :label="$t('adminUnits.form.description')" type="textarea" autogrow />
             
             <!-- Location Selection (Super Admin Only) -->
             <q-select
               v-if="authStore.isSuperAdmin"
-              filled
+              outlined
               v-model="unitForm.locationId"
               :options="locations"
               option-value="id"
@@ -136,12 +136,12 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useUnitStore } from 'src/stores/unit';
-import { useAuthStore } from 'src/stores/auth';
+import { useUnitStore } from '@/stores/unit';
+import { useAuthStore } from '@/stores/auth';
 import { useQuasar } from 'quasar';
-import { config } from 'src/config';
-import { api } from 'src/api';
-import PageHeader from 'src/components/PageHeader.vue';
+import { config } from '@/config';
+import { api } from '@/api';
+import PageHeader from '@/components/PageHeader.vue';
 
 const unitStore = useUnitStore();
 const authStore = useAuthStore();

@@ -23,3 +23,9 @@ uploads/
 # OS
 .DS_Store
 Thumbs.db
+
+# Local secrets and data
+.env
+.env.production
+*.sqlite
+backend/uploads/

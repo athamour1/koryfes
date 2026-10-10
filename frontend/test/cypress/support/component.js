@@ -19,14 +19,17 @@ import '@cypress/code-coverage/support';
 // Quasar styles
 import 'quasar/src/css/index.sass'; // Or 'quasar/dist/quasar.prod.css' if no CSS preprocessor is installed
 // Change this if you have a different entrypoint for the main scss.
-import 'src/css/app.scss'; // Or 'src/css/app.css' if no CSS preprocessor is installed
+import '@/css/app.scss'; // Or 'src/css/app.css' if no CSS preprocessor is installed
 
 // ICON SETS
 // If you use multiple or different icon-sets then the default, be sure to import them here.
 import 'quasar/icon-set/material-icons';
 import '@quasar/extras/material-icons/material-icons.css';
 
-import { installQuasarPlugin } from '@quasar/quasar-app-extension-testing-e2e-cypress';
+import { installQuasarPlugin, registerCommands } from '@quasar/quasar-app-extension-testing-e2e-cypress';
+
+// Quasar helpers: cy.dataCy(), cy.withinDialog(), cy.testRoute(), ...
+registerCommands();
 import { Dialog } from 'quasar';
 
 // Since Cypress v10 we cannot import `config` directly from VTU as Cypress bundles its own version of it
@@ -35,7 +38,7 @@ import { VueTestUtils } from 'cypress/vue';
 const { config } = VueTestUtils;
 
 // Example to import i18n from boot and use as plugin
-// import { i18n } from 'src/boot/i18n';
+// import { i18n } from '@/boot/i18n';
 
 // You can modify the global config here for all tests or pass in the configuration per test
 // For example use the actual i18n instance or mock it

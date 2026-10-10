@@ -1,33 +1,32 @@
 describe('Admin - Progress Assignment', () => {
     beforeEach(() => {
         cy.loginAs('admin');
-        // Navigate to a user profile in their location to award progress
-        // Or use a dedicated progress assignment page if exists
         cy.visit('/admin/users');
     });
 
-    it('should award Promise peak to user', () => {
-        // Select a user
-        cy.get('table tbody tr').first().within(() => {
-            cy.get('[data-cy="view-profile-btn"]').click();
+    it('gives the Promise and awards a path from the user dialog', () => {
+        cy.contains('table tbody tr', 'user').within(() => {
+            cy.get('[data-cy="edit-btn"]').click();
         });
 
-        // Check if we are on user profile
-        cy.url().should('include', '/user/');
+        cy.get('[data-cy="add-path-btn"]').should('be.visible');
+        cy.get('.q-dialog').then(($dialog) => {
+            // the Promise may already have been given in an earlier run
+            if ($dialog.find('[data-cy="give-promise-btn"]').length) {
+                cy.get('[data-cy="give-promise-btn"]').click();
+            }
+        });
+        cy.get('[data-cy="add-path-btn"]').click();
 
-        // Award Promise
-        cy.contains('Award Promise').click();
-        cy.get('.q-dialog').should('be.visible');
-        cy.get('.q-dialog button').contains('Confirm').click();
-
-        cy.get('.q-notification').should('contain', 'Promise awarded');
+        cy.get('[data-cy="award-select"]').click();
+        cy.get('.q-menu .q-item').not('.text-primary').first().click();
+        cy.get('[data-cy="award-confirm-btn"]').click();
+        cy.get('.q-notification').should('be.visible');
     });
 
-    it('cannot modify progress definitions', () => {
-        // Try to access progress management page
+    it('can view the catalog but not edit it', () => {
         cy.visit('/admin/progress');
-
-        // Should be redirected or show error
-        cy.url().should('not.include', '/admin/progress');
+        cy.url().should('include', '/admin/progress');
+        cy.get('[data-cy="create-path-btn"]').should('not.exist');
     });
 });

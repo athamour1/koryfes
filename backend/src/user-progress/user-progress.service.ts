@@ -3,11 +3,22 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserProgress } from './user-progress.entity';
 import { Peak } from '../peaks/peak.entity';
+import { PeakType } from '../peaks/peak-type.enum';
 import { Path } from '../paths/path.entity';
 import { GuideDiploma } from '../guide-diplomas/guide-diploma.entity';
 import { ElectiveDiploma } from '../elective-diplomas/elective-diploma.entity';
 import { User } from '../users/entities/user.entity';
+import { evaluateProgress, ProgressEvaluation } from '../catalog/progress-rules';
 
+export type DiplomaType = 'guide' | 'elective';
+
+const RELATIONS = ['currentPeak', 'completedPaths', 'guideDiplomas', 'electiveDiplomas'];
+
+/**
+ * Individual progress of a Guide. Leaders award the Promise, paths and
+ * diplomas; the current peak is always derived from them with the book's
+ * rules (see catalog/progress-rules.ts) and is never set by hand.
+ */
 @Injectable()
 export class UserProgressService {
     constructor(
@@ -26,190 +37,126 @@ export class UserProgressService {
     ) { }
 
     /**
-     * Initialize progress for a new user WITHOUT any peak
-     * User must earn Promise peak before progressing
+     * Location and unit of a user, for access checks
      */
-    async initializeProgress(userId: number): Promise<UserProgress> {
-        // Check if progress already exists
-        const existing = await this.userProgressRepository.findOne({
-            where: { user: { id: userId } }
+    async getUserScope(userId: number): Promise<{ locationId?: number; unitId?: number }> {
+        const user = await this.userRepository.findOne({
+            where: { id: userId },
+            relations: ['location', 'unit'],
         });
-
-        if (existing) {
-            return existing;
-        }
-
-        const user = await this.userRepository.findOne({ where: { id: userId } });
         if (!user) {
             throw new NotFoundException('User not found');
         }
+        return { locationId: user.location?.id, unitId: user.unit?.id };
+    }
 
-        // Create initial progress WITHOUT a current peak
-        // User must earn Promise peak first
-        const userProgress = this.userProgressRepository.create({
-            user,
+    /**
+     * Progress with all relations, created on first access
+     */
+    async getUserProgress(userId: number): Promise<UserProgress> {
+        const progress = await this.userProgressRepository.findOne({
+            where: { userId },
+            relations: RELATIONS,
+        });
+        if (progress) {
+            return progress;
+        }
+
+        if (!(await this.userRepository.exists({ where: { id: userId } }))) {
+            throw new NotFoundException('User not found');
+        }
+        await this.userProgressRepository.save(this.userProgressRepository.create({
+            userId,
             currentPeak: null,
             completedPaths: [],
             guideDiplomas: [],
             electiveDiplomas: [],
-        });
-
-        return this.userProgressRepository.save(userProgress);
+        }));
+        return this.userProgressRepository.findOneOrFail({ where: { userId }, relations: RELATIONS });
     }
 
     /**
-     * Get user's complete progress with all relations
+     * Progress plus the per-peak checklist of what is met and what is missing
      */
-    async getUserProgress(userId: number): Promise<UserProgress> {
-        const progress = await this.userProgressRepository.findOne({
-            where: { user: { id: userId } },
-            relations: ['currentPeak', 'completedPaths', 'guideDiplomas', 'electiveDiplomas', 'user'],
-        });
+    async getProgressWithEvaluation(userId: number): Promise<UserProgress & { evaluation: ProgressEvaluation }> {
+        const progress = await this.getUserProgress(userId);
+        return Object.assign(progress, { evaluation: this.evaluate(progress) });
+    }
 
-        if (!progress) {
-            // Auto-initialize if not found
-            return this.initializeProgress(userId);
+    async setPromise(userId: number, given: boolean) {
+        const progress = await this.getUserProgress(userId);
+        const hasPromise = progress.currentPeak !== null;
+        if (given === hasPromise) {
+            throw new BadRequestException(given ? 'Promise already given' : 'No Promise to remove');
         }
-
-        return progress;
+        // the Promise is the base peak; recompute() raises it further if earned
+        progress.currentPeak = given ? await this.peakRepository.findOneByOrFail({ type: PeakType.PROMISE }) : null;
+        return this.saveAndRecompute(progress);
     }
 
-    /**
-     * Award a path to the user
-     */
-    async awardPath(userId: number, pathId: number): Promise<UserProgress> {
+    async awardPath(userId: number, pathId: number) {
         const progress = await this.getUserProgress(userId);
         const path = await this.pathRepository.findOne({ where: { id: pathId } });
-
         if (!path) {
             throw new NotFoundException('Path not found');
         }
-
-        // Check if already awarded
-        if (progress.completedPaths.some(p => p.id === pathId)) {
+        if (progress.completedPaths.some((p) => p.id === pathId)) {
             throw new BadRequestException('Path already awarded');
         }
-
         progress.completedPaths.push(path);
-        await this.userProgressRepository.save(progress);
-
-        // Check for peak unlock
-        await this.checkAndUnlockPeaks(userId);
-
-        return this.getUserProgress(userId);
+        return this.saveAndRecompute(progress);
     }
 
-    /**
-     * Award a diploma to the user
-     */
-    async awardDiploma(userId: number, diplomaId: number, type: 'guide' | 'elective'): Promise<UserProgress> {
+    async removePath(userId: number, pathId: number) {
         const progress = await this.getUserProgress(userId);
-
-        if (type === 'guide') {
-            const diploma = await this.guideDiplomaRepository.findOne({ where: { id: diplomaId } });
-            if (!diploma) {
-                throw new NotFoundException('Guide diploma not found');
-            }
-
-            if (progress.guideDiplomas.some(d => d.id === diplomaId)) {
-                throw new BadRequestException('Diploma already awarded');
-            }
-
-            progress.guideDiplomas.push(diploma);
-        } else {
-            const diploma = await this.electiveDiplomaRepository.findOne({ where: { id: diplomaId } });
-            if (!diploma) {
-                throw new NotFoundException('Elective diploma not found');
-            }
-
-            if (progress.electiveDiplomas.some(d => d.id === diplomaId)) {
-                throw new BadRequestException('Diploma already awarded');
-            }
-
-            progress.electiveDiplomas.push(diploma);
+        if (!progress.completedPaths.some((p) => p.id === pathId)) {
+            throw new NotFoundException('Path not awarded');
         }
-
-        await this.userProgressRepository.save(progress);
-
-        // Check for peak unlock
-        await this.checkAndUnlockPeaks(userId);
-
-        return this.getUserProgress(userId);
+        progress.completedPaths = progress.completedPaths.filter((p) => p.id !== pathId);
+        return this.saveAndRecompute(progress);
     }
 
-    /**
-     * Check requirements and auto-unlock peaks
-     * 
-     * Peak Requirements (cumulative):
-     * - Promise (order 1): Must be manually awarded by admin/leader - unlocks paths/diplomas section
-     * - Bronze (order 2): 4 paths (any category) + 1st Guide Diploma + 1 elective diploma
-     * - Silver (order 3): 8 paths (any category) + 2nd Guide Diploma + 2 elective diplomas
-     * - Gold (order 4): 12 paths (any category) + 3rd Guide Diploma + 4 elective diplomas
-     */
-    async checkAndUnlockPeaks(userId: number): Promise<void> {
+    async awardDiploma(userId: number, diplomaId: number, type: DiplomaType) {
         const progress = await this.getUserProgress(userId);
-
-        // If no current peak, user must earn Promise first (manually awarded)
-        if (!progress.currentPeak) {
-            return;
+        const list = type === 'guide' ? progress.guideDiplomas : progress.electiveDiplomas;
+        const diploma = type === 'guide'
+            ? await this.guideDiplomaRepository.findOne({ where: { id: diplomaId } })
+            : await this.electiveDiplomaRepository.findOne({ where: { id: diplomaId } });
+        if (!diploma) {
+            throw new NotFoundException('Diploma not found');
         }
-
-        const currentOrder = progress.currentPeak.order;
-
-        const pathCount = progress.completedPaths.length;
-        const guideDiplomaLevels = progress.guideDiplomas.map(d => d.level).sort();
-        const electiveDiplomaCount = progress.electiveDiplomas.length;
-
-        const hasGuideDiploma = (level: number) => guideDiplomaLevels.includes(level);
-
-        let newPeakOrder = currentOrder;
-
-        // Check for Gold Peak (order 4)
-        if (currentOrder < 4 && pathCount >= 12 && hasGuideDiploma(3) && electiveDiplomaCount >= 4) {
-            newPeakOrder = 4;
+        if (list.some((d) => d.id === diplomaId)) {
+            throw new BadRequestException('Diploma already awarded');
         }
-        // Check for Silver Peak (order 3)
-        else if (currentOrder < 3 && pathCount >= 8 && hasGuideDiploma(2) && electiveDiplomaCount >= 2) {
-            newPeakOrder = 3;
-        }
-        // Check for Bronze Peak (order 2)
-        else if (currentOrder < 2 && pathCount >= 4 && hasGuideDiploma(1) && electiveDiplomaCount >= 1) {
-            newPeakOrder = 2;
-        }
-
-        // Update peak if unlocked
-        if (newPeakOrder > currentOrder) {
-            const newPeak = await this.peakRepository.findOne({ where: { order: newPeakOrder } });
-            if (newPeak) {
-                progress.currentPeak = newPeak;
-                await this.userProgressRepository.save(progress);
-            }
-        }
+        (list as (GuideDiploma | ElectiveDiploma)[]).push(diploma);
+        return this.saveAndRecompute(progress);
     }
 
-    /**
-     * Manually award a peak (for Promise peak or testing)
-     */
-    async awardPeak(userId: number, peakId: number): Promise<UserProgress> {
+    async removeDiploma(userId: number, diplomaId: number, type: DiplomaType) {
         const progress = await this.getUserProgress(userId);
-        const peak = await this.peakRepository.findOne({ where: { id: peakId } });
-
-        if (!peak) {
-            throw new NotFoundException('Peak not found');
+        const key = type === 'guide' ? 'guideDiplomas' : 'electiveDiplomas';
+        const list: { id: number }[] = progress[key];
+        if (!list.some((d) => d.id === diplomaId)) {
+            throw new NotFoundException('Diploma not awarded');
         }
-
-        progress.currentPeak = peak;
-        await this.userProgressRepository.save(progress);
-
-        return this.getUserProgress(userId);
+        (progress as any)[key] = list.filter((d) => d.id !== diplomaId);
+        return this.saveAndRecompute(progress);
     }
 
-    /**
-     * Get all user progress records (admin only)
-     */
-    async findAll(): Promise<UserProgress[]> {
-        return this.userProgressRepository.find({
-            relations: ['currentPeak', 'completedPaths', 'guideDiplomas', 'electiveDiplomas', 'user'],
+    private evaluate(progress: UserProgress): ProgressEvaluation {
+        return evaluateProgress({
+            hasPromise: progress.currentPeak !== null,
+            pathCount: progress.completedPaths.length,
+            guideDiplomaLevels: progress.guideDiplomas.map((d) => d.level),
+            electiveDiplomaCount: progress.electiveDiplomas.length,
         });
+    }
+
+    private async saveAndRecompute(progress: UserProgress) {
+        const { peak } = this.evaluate(progress);
+        progress.currentPeak = peak ? await this.peakRepository.findOneByOrFail({ type: peak }) : null;
+        progress.currentPeakId = progress.currentPeak?.id ?? null;
+        await this.userProgressRepository.save(progress);
+        return this.getProgressWithEvaluation(progress.userId);
     }
 }

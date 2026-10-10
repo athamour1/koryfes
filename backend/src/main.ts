@@ -1,14 +1,14 @@
-import { NestFactory, Reflector } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe, ClassSerializerInterceptor } from '@nestjs/common';
+import { configureApp } from './app.setup';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
-import helmet from 'helmet';
-import compression from 'compression';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  configureApp(app);
 
   // Serve static files from uploads directory
   // In production: __dirname = /usr/src/app/dist/src, so we need '../..' to reach /usr/src/app
@@ -21,17 +21,6 @@ async function bootstrap() {
     prefix: '/uploads/',
   });
 
-  // Global serialization
-  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
-
-  // Security - configure helmet to allow cross-origin resources
-  app.use(helmet({
-    crossOriginResourcePolicy: { policy: "cross-origin" },
-  }));
-
-  // Compression
-  app.use(compression());
-
   // CORS
   const corsOrigin = process.env.CORS_ORIGIN || 'http://localhost:8080';
   app.enableCors({
@@ -39,12 +28,6 @@ async function bootstrap() {
     credentials: true,
   });
 
-  // Global validation pipe
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    forbidNonWhitelisted: true,
-    transform: true,
-  }));
 
   // Swagger API Documentation (Development Only)
   const isDevelopment = process.env.NODE_ENV !== 'production';

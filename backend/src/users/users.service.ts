@@ -2,7 +2,9 @@ import { Injectable, ConflictException, InternalServerErrorException, OnModuleIn
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
 import { User, UserRole, UnitRole } from './entities/user.entity';
+import { Unit } from '../units/entities/unit.entity';
 import { LocationsService } from '../locations/locations.service';
+import { assertPasswordPolicy } from '../common/password-policy';
 import * as bcrypt from 'bcrypt';
 
 import { generateRandomAvatarConfig } from './avatar.utils';
@@ -12,6 +14,8 @@ export class UsersService implements OnModuleInit {
     constructor(
         @InjectRepository(User)
         private usersRepository: Repository<User>,
+        @InjectRepository(Unit)
+        private unitsRepository: Repository<Unit>,
         private locationsService: LocationsService,
     ) { }
 
@@ -63,8 +67,8 @@ export class UsersService implements OnModuleInit {
             locationEntity = location;
         }
 
-        // Hash password if provided and not already hashed
-        if (userData.password && !userData.password.startsWith('$2b$')) {
+        if (userData.password) {
+            assertPasswordPolicy(userData.password);
             userData.password = await bcrypt.hash(userData.password, 10);
         }
 
@@ -97,7 +101,8 @@ export class UsersService implements OnModuleInit {
                 demotedUser
             };
         } catch (error) {
-            if (error.code === 'SQLITE_CONSTRAINT') {
+            // SQLite and Postgres unique-violation codes
+            if (error.code === 'SQLITE_CONSTRAINT' || error.code === '23505') {
                 throw new ConflictException('Username already exists');
             }
             throw new InternalServerErrorException();
@@ -179,7 +184,13 @@ export class UsersService implements OnModuleInit {
         }
 
         if (updateData.password) {
+            assertPasswordPolicy(updateData.password);
             updateData.password = await bcrypt.hash(updateData.password, 10);
+        }
+
+        // Keep the legacy isAdmin flag in sync with role
+        if (updateData.role) {
+            updateData.isAdmin = updateData.role === UserRole.SUPER_ADMIN || updateData.role === UserRole.ADMIN;
         }
 
         // Enforce unique Leader/Deputy Leader per unit
@@ -199,8 +210,20 @@ export class UsersService implements OnModuleInit {
 
 
 
-    async findByResetToken(token: string): Promise<User | undefined> {
-        return this.usersRepository.findOne({ where: { resetPasswordToken: token } });
+    async findByResetToken(tokenHash: string): Promise<User | null> {
+        // An undefined value in a TypeORM where clause matches every row
+        if (!tokenHash) {
+            return null;
+        }
+        return this.usersRepository.findOne({ where: { resetPasswordToken: tokenHash } });
+    }
+
+    async getUnitLocationId(unitId: number): Promise<number | undefined> {
+        const unit = await this.unitsRepository.findOne({
+            where: { id: unitId },
+            relations: ['location'],
+        });
+        return unit?.location?.id;
     }
 
     async remove(id: number): Promise<void> {

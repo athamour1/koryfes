@@ -1,3 +1,994 @@
-// app global css in SCSS form
-@import './app.css';
-@import './admin-pages.css';
+// Καθολικά στυλ — η γλώσσα σχεδιασμού του Trifylli (tokens, κίνηση M3,
+// elevation, πλωτά πάνελ), στο μπλε των Οδηγών.
+
+/* ════════════════════════════════════════════════════════════════════════
+   Χρώμα κλάδου
+   Η εφαρμογή είναι μόνο για Οδηγούς, οπότε το χρώμα του κλάδου είναι σταθερό:
+   το #0094da του Σ.Ε.Ο. για επιφάνειες (μπάρα, χάπια) και μια σκουρότερη
+   απόχρωση («μελάνι») που διαβάζεται ως κείμενο (WCAG 4.5:1 σε λευκό).
+   ════════════════════════════════════════════════════════════════════════ */
+body {
+  --klados-color: #0094da;
+  --klados-on: #fff;
+  --klados-ink: #007cb7;
+  --klados-ink-lg: #0094da;
+}
+body.body--dark {
+  --klados-ink: #3fb0e6;
+  --klados-ink-lg: #3fb0e6;
+}
+
+.bg-klados {
+  background: var(--klados-color) !important;
+}
+.text-klados {
+  color: var(--klados-ink) !important;
+}
+.text-klados-on {
+  color: var(--klados-on) !important;
+}
+
+// Τα πεδία (focus), οι διακόπτες και οι επιλογές των dropdowns ακολουθούν το
+// χρώμα του κλάδου· τα πεδία με σφάλμα (κόκκινο) εξαιρούνται.
+.q-field--focused:not(.q-field--error) {
+  .q-field__label {
+    color: var(--klados-ink) !important;
+  }
+  &.q-field--outlined .q-field__control:after,
+  &.q-field--standard .q-field__control:after {
+    border-color: var(--klados-ink) !important;
+  }
+}
+.q-toggle__inner--truthy,
+.q-checkbox__inner--truthy,
+.q-checkbox__inner--indet,
+.q-radio__inner--truthy {
+  color: var(--klados-ink);
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   Design tokens
+   ════════════════════════════════════════════════════════════════════════ */
+:root {
+  --surface: #ffffff;
+  --app-bg: #f3f6f8;            /* απαλό ψυχρό off-white, όχι κατάλευκο */
+  --border-soft: #e2e7eb;
+  --muted: #5b6872;
+  --ink: #1d2730;               /* σκούρο μπλε-γκρι αντί για καθαρό μαύρο */
+  --radius-card: 14px;
+  --shadow-1: 0 1px 2px rgba(16, 22, 28, 0.04), 0 1px 3px rgba(16, 22, 28, 0.06);
+  --shadow-2: 0 6px 16px rgba(16, 22, 28, 0.09), 0 2px 6px rgba(16, 22, 28, 0.05);
+  --surface-2: #fafbfc;
+  --line: rgba(0, 0, 0, 0.12);
+  --line-soft: rgba(0, 0, 0, 0.08);
+  --line-strong: rgba(0, 0, 0, 0.3);
+  --tint: rgba(0, 0, 0, 0.06);
+  --tint-soft: rgba(0, 0, 0, 0.04);
+  --text-soft: rgba(0, 0, 0, 0.6);
+  --q-card-bg: #ffffff;
+
+  /* Κίνηση (Material 3): μικρές διάρκειες, standard / emphasized easing. */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-emphasized: cubic-bezier(0.3, 0, 0, 1);
+  --dur-short: 120ms;
+  --dur-medium: 200ms;
+  --state-hover: 8%;
+  --state-press: 12%;
+}
+
+body {
+  background: var(--app-bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.006em;
+}
+
+/* ── Τυπογραφία ── */
+.page-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.021em;
+  color: var(--ink);
+}
+.section-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+}
+
+/* ── Κάρτες: απαλό περίγραμμα + διακριτική σκιά + μαλακές γωνίες ── */
+.q-card {
+  border-radius: var(--radius-card);
+  min-width: 0;
+  transition: box-shadow var(--dur-medium) var(--ease-standard), transform var(--dur-medium) var(--ease-standard);
+}
+.q-card--bordered {
+  border-color: var(--border-soft);
+}
+.q-card--flat.q-card--bordered {
+  box-shadow: var(--shadow-1);
+}
+/* Μόνο οι κάρτες που πατιούνται ανασηκώνονται. */
+.q-card.cursor-pointer,
+a.q-card,
+.tf-lift {
+  transition: box-shadow 180ms ease, transform 180ms ease;
+}
+.q-card.cursor-pointer:hover,
+a.q-card:hover,
+.tf-lift:hover {
+  box-shadow: var(--shadow-2);
+  transform: translateY(-2px);
+}
+.tf-lift:active {
+  transform: scale(0.98);
+  transition-duration: 60ms;
+}
+
+/* Κάρτες: μπαίνουν με απαλό ανέβασμα, κλιμακωτά (οι πρώτες 8 ανά σελίδα). */
+@keyframes tf-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.q-page .q-card,
+.tf-rise {
+  animation: tf-rise 260ms var(--ease-emphasized) both;
+}
+@for $i from 1 through 8 {
+  .q-page .q-card:nth-of-type(#{$i}),
+  .tf-rise:nth-child(#{$i}) {
+    animation-delay: #{($i - 1) * 30}ms;
+  }
+}
+
+/* ── Λίστες ── */
+.q-list--bordered {
+  border-color: var(--border-soft);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+.q-item.q-item--clickable {
+  border-radius: 10px;
+  transition: background-color var(--dur-medium) var(--ease-standard), color var(--dur-medium) var(--ease-standard);
+}
+.q-list--bordered > .q-item.q-item--clickable,
+.q-list--separator > .q-item.q-item--clickable {
+  border-radius: 0;
+}
+
+/* ── Κουμπιά: πεζά, επίπεδα σε ηρεμία, ανασηκώνονται στο hover, «πατιούνται» ── */
+.q-btn {
+  text-transform: none;
+  font-weight: 600;
+  letter-spacing: 0;
+  transition:
+    transform var(--dur-short) var(--ease-standard),
+    box-shadow var(--dur-medium) var(--ease-standard),
+    background-color var(--dur-medium) var(--ease-standard),
+    color var(--dur-medium) var(--ease-standard);
+}
+.q-btn.q-btn--standard {
+  box-shadow: none;
+}
+.q-btn.q-btn--standard.q-btn--rectangle:not(.disabled):hover,
+.q-btn.q-btn--unelevated.q-btn--rectangle:not(.disabled):hover,
+.q-btn.q-btn--outline.q-btn--rectangle:not(.disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-2);
+}
+.q-btn:not(.disabled):active {
+  transform: scale(0.97);
+  box-shadow: none;
+  transition-duration: 60ms;
+}
+.q-btn.q-btn--round:not(.disabled):active {
+  transform: scale(0.9);
+}
+.q-focus-helper {
+  transition: background-color var(--dur-medium) var(--ease-standard), opacity var(--dur-medium) var(--ease-standard);
+}
+/* Εικονίδιο μέσα σε κουμπί: μικρό «νεύμα» στο hover. */
+.q-btn__content > .q-icon {
+  transition: transform var(--dur-medium) var(--ease-emphasized);
+}
+.q-btn.q-btn--rectangle:not(.disabled):hover .q-btn__content > .q-icon:first-child {
+  transform: translateX(-1px) scale(1.08);
+}
+
+/* ── Chips & badges ── */
+.q-chip {
+  font-weight: 600;
+  max-width: 100%;
+}
+.q-chip .q-chip__content {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.q-chip--clickable {
+  transition: transform var(--dur-short) var(--ease-standard), box-shadow var(--dur-medium) var(--ease-standard);
+}
+.q-chip--clickable:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-1);
+}
+.q-chip--clickable:active {
+  transform: scale(0.96);
+}
+.q-badge {
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* ── Πίνακες: απαλό hover, να ξέρεις σε ποια γραμμή είσαι ── */
+.q-table__card {
+  border-radius: var(--radius-card);
+}
+.q-table tbody tr {
+  transition: background-color var(--dur-short) var(--ease-standard);
+}
+.q-table tbody tr:hover {
+  background: color-mix(in srgb, var(--klados-ink) 5%, transparent);
+}
+
+/* ── Expansion / slide: emphasized easing ── */
+.q-expansion-item__container,
+.q-expansion-item__content,
+.q-slide-transition {
+  transition-timing-function: var(--ease-emphasized) !important;
+}
+
+/* ── Μετάβαση σελίδας (router-view στο MainLayout) ── */
+.tf-page-enter-active {
+  transition: opacity 160ms var(--ease-standard), transform 160ms var(--ease-emphasized);
+}
+.tf-page-leave-active {
+  transition: opacity 90ms var(--ease-standard);
+}
+.tf-page-enter-from {
+  opacity: 0;
+  transform: translateY(6px);
+}
+.tf-page-leave-to {
+  opacity: 0;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   Μπάρα & συρτάρι
+   ════════════════════════════════════════════════════════════════════════ */
+.q-header {
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04), 0 3px 10px rgba(16, 22, 28, 0.07);
+  transition: background-color 200ms ease, box-shadow var(--dur-medium) var(--ease-standard);
+}
+.q-header.is-scrolled {
+  box-shadow: 0 10px 28px rgba(16, 22, 28, 0.18), 0 2px 8px rgba(16, 22, 28, 0.1);
+}
+.q-drawer {
+  background: #fafbfc;
+}
+.q-drawer--bordered {
+  border-right-color: var(--border-soft) !important;
+}
+
+/* Μενού συρταριού: στοιχεία-«χάπια» και ένα χάπι που γλιστρά στο ενεργό
+   (MainLayout, useSlidingThumb). */
+.drawer-menu {
+  position: relative;
+}
+.drawer-menu .q-item,
+.drawer-menu .q-item-label {
+  position: relative;
+  z-index: 1;
+}
+.drawer-menu .q-item.q-item--clickable {
+  margin: 2px 10px;
+  border-radius: 999px;
+}
+.drawer-menu .q-item.q-item--clickable:not(.klados-active):hover {
+  background: color-mix(in srgb, var(--klados-ink) var(--state-hover), transparent);
+}
+.klados-active {
+  color: var(--klados-ink-lg, var(--klados-ink)) !important;
+  font-weight: 600;
+  transition: background-color var(--dur-medium) var(--ease-standard);
+}
+.drawer-menu__thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--klados-ink) 14%, transparent);
+  pointer-events: none;
+  will-change: transform, height;
+}
+.drawer-menu--ready .drawer-menu__thumb {
+  transition:
+    transform 280ms var(--ease-emphasized),
+    height 280ms var(--ease-emphasized),
+    width 280ms var(--ease-emphasized),
+    opacity var(--dur-medium) var(--ease-standard);
+}
+
+/* Συρτάρι: «ζελέ» στο άνοιγμα, καθαρό κλείσιμο. */
+.q-drawer-container .q-drawer {
+  transition: transform 240ms var(--ease-emphasized), box-shadow var(--dur-medium) var(--ease-standard), background-color var(--dur-medium) var(--ease-standard) !important;
+}
+.q-drawer-container.drawer-bounce .q-drawer {
+  transition: transform 560ms cubic-bezier(0.34, 1.48, 0.64, 1), box-shadow var(--dur-medium) var(--ease-standard), background-color var(--dur-medium) var(--ease-standard) !important;
+}
+.q-drawer-container.drawer-bounce .q-drawer__content {
+  transform-origin: left center;
+  animation: tf-jelly 700ms 80ms var(--ease-standard) both;
+}
+@keyframes tf-jelly {
+  0% {
+    transform: scaleX(1);
+  }
+  30% {
+    transform: scaleX(1.05) scaleY(0.985);
+  }
+  50% {
+    transform: scaleX(0.97) scaleY(1.01);
+  }
+  70% {
+    transform: scaleX(1.015) scaleY(0.997);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.q-drawer-container.drawer-bounce-out .q-drawer {
+  transition: transform 340ms cubic-bezier(0.55, 0, 0.7, 0.2), box-shadow var(--dur-medium) var(--ease-standard), background-color var(--dur-medium) var(--ease-standard) !important;
+}
+.q-drawer-container.drawer-bounce-out .q-drawer__content {
+  transform-origin: left center;
+  animation: tf-jelly-out 340ms var(--ease-standard) both;
+}
+@keyframes tf-jelly-out {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scaleX(0.95) scaleY(1.015);
+  }
+  60% {
+    transform: scaleX(1.015) scaleY(0.995);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.q-drawer__backdrop {
+  transition: background-color 240ms var(--ease-standard) !important;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   Layout: η σελίδα κυλάει κάτω από την μπάρα· σε μεγάλες οθόνες μπάρα,
+   συρτάρι και σελίδα γίνονται τρεις πλωτές στρογγυλεμένες κάρτες.
+   ════════════════════════════════════════════════════════════════════════ */
+html,
+body,
+#q-app {
+  height: 100%;
+}
+.q-layout {
+  height: 100svh;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.q-layout > .q-header {
+  position: static !important;
+  flex: 0 0 auto;
+}
+.q-page-container {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-top: 0 !important;
+  scroll-behavior: smooth;
+}
+
+@media (min-width: 1024px) {
+  .q-layout {
+    padding: 12px;
+    gap: 12px;
+  }
+  .q-layout > .q-drawer-container {
+    display: contents;
+  }
+  .q-header {
+    border-radius: 16px;
+    box-shadow: var(--shadow-2);
+  }
+  .q-drawer {
+    width: calc(var(--q-drawer-width) - 12px) !important;
+    left: 12px;
+    margin-top: 24px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border-soft) !important;
+    border-radius: 16px;
+    box-shadow: var(--shadow-1);
+    overflow: hidden;
+  }
+  .q-page-container {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .q-page-container > .q-page {
+    flex: 1 1 auto;
+    min-height: 0 !important;
+    box-sizing: border-box;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: 16px;
+    box-shadow: var(--shadow-1);
+  }
+}
+@media (max-width: 1023.98px) {
+  .q-drawer {
+    border-radius: 0 18px 18px 0;
+    overflow: hidden;
+  }
+}
+
+/* Μπάρα κύλισης στο χρώμα του κλάδου. */
+.q-page-container,
+.q-page,
+.q-drawer__content {
+  scrollbar-width: thin;
+  scrollbar-color: var(--klados-ink) transparent;
+}
+.q-page-container::-webkit-scrollbar,
+.q-page::-webkit-scrollbar,
+.q-drawer__content::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.q-page-container::-webkit-scrollbar-track,
+.q-page::-webkit-scrollbar-track,
+.q-drawer__content::-webkit-scrollbar-track {
+  background: transparent;
+}
+.q-page-container::-webkit-scrollbar-thumb,
+.q-page::-webkit-scrollbar-thumb,
+.q-drawer__content::-webkit-scrollbar-thumb {
+  background: var(--klados-ink);
+  border-radius: 999px;
+  border: 2px solid var(--surface);
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   Στοιχεία της Quasar: ίδια γλώσσα (γωνίες, elevation, κίνηση)
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* ── Διάλογοι: μεγάλες γωνίες, θολό παρασκήνιο, είσοδος με scale από 96% ── */
+.q-dialog__backdrop {
+  background: rgba(10, 16, 22, 0.38);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+.q-dialog__inner > .q-card,
+.q-dialog__inner > div {
+  border-radius: 20px;
+}
+.q-dialog__inner > .q-card {
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28), 0 6px 16px rgba(0, 0, 0, 0.14);
+}
+.q-dialog__inner--maximized > div {
+  border-radius: 0;
+}
+.q-transition--scale-enter-active,
+.q-transition--scale-leave-active {
+  transition: transform 220ms var(--ease-emphasized), opacity 180ms var(--ease-standard) !important;
+}
+.q-transition--scale-enter-from,
+.q-transition--scale-leave-to {
+  transform: scale(0.96) !important;
+  opacity: 0;
+}
+.q-dialog__inner > div:focus,
+.q-dialog__inner > div:focus-visible,
+.q-dialog__inner:focus,
+.q-dialog__inner:focus-visible {
+  outline: none;
+}
+
+/* ── Μενού, dropdowns, επιλογές select ── */
+.q-menu {
+  border-radius: 14px;
+  border: 1px solid var(--border-soft);
+  box-shadow: var(--shadow-2);
+  padding: 4px;
+}
+.q-menu .q-item {
+  border-radius: 10px;
+  margin: 1px 0;
+  transition: background-color var(--dur-short) var(--ease-standard);
+}
+.q-menu .q-item.q-item--clickable:hover {
+  background: color-mix(in srgb, var(--klados-ink) var(--state-hover), transparent);
+}
+.q-menu .q-item--active,
+.q-menu .q-item.text-primary {
+  color: var(--klados-ink) !important;
+  background: color-mix(in srgb, var(--klados-ink) 12%, transparent);
+}
+
+/* ── Tooltips, toasts, banners ── */
+.q-tooltip {
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.75rem;
+  box-shadow: var(--shadow-1);
+}
+.q-notification {
+  border-radius: 14px;
+  box-shadow: var(--shadow-2);
+}
+.q-banner {
+  border-radius: 12px;
+}
+
+/* ── Πεδία: ποτέ πιο πλατιά από τον περιέκτη· «αναπνέουν» στο focus ── */
+.q-field {
+  min-width: 0;
+  max-width: 100%;
+}
+.q-field__native,
+.q-field__input {
+  min-width: 0;
+}
+.q-field--outlined .q-field__control,
+.q-field--filled .q-field__control {
+  transition: box-shadow var(--dur-medium) var(--ease-standard);
+}
+.q-field--outlined.q-field--focused:not(.q-field--error) .q-field__control,
+.q-field--filled.q-field--focused:not(.q-field--error) .q-field__control {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--klados-ink) 16%, transparent);
+}
+.q-field--outlined .q-field__control:before {
+  transition: border-color var(--dur-medium) var(--ease-standard);
+}
+
+/* ── Tabs: πεζά, δείκτης με στρογγυλή μύτη, hover state layer ── */
+.q-tab {
+  text-transform: none;
+  font-weight: 600;
+  letter-spacing: 0;
+  border-radius: 10px 10px 0 0;
+  transition: color var(--dur-medium) var(--ease-standard), background-color var(--dur-medium) var(--ease-standard);
+}
+.q-tab:hover {
+  background: color-mix(in srgb, var(--klados-ink) 6%, transparent);
+}
+.q-tab__label {
+  text-transform: none;
+}
+.q-tab__indicator {
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+}
+.q-tab-panels,
+.q-tab-panel {
+  background: transparent !important;
+}
+.q-tab-panels > .q-panel.scroll {
+  overflow-x: hidden;
+}
+
+/* ── Μπάρες προόδου: γεμίζουν ομαλά ── */
+.q-linear-progress {
+  border-radius: 999px;
+  overflow: hidden;
+}
+.q-linear-progress__model,
+.q-linear-progress__track {
+  transition: transform 500ms var(--ease-emphasized);
+}
+
+/* ── Avatars: λίγο «νεύμα» όταν περνάς από στοιχείο λίστας ── */
+.q-avatar {
+  transition: transform var(--dur-medium) var(--ease-emphasized);
+}
+.q-item--clickable:hover > .q-item__section--avatar .q-avatar {
+  transform: scale(1.05);
+}
+
+/* ── Χάρτες (Leaflet): ίδιες γωνίες με τις κάρτες ── */
+.leaflet-container {
+  border-radius: 12px;
+  border: 1px solid var(--border-soft);
+}
+
+/* ── Date / time pickers ── */
+.q-date,
+.q-time {
+  border-radius: 16px;
+  box-shadow: var(--shadow-2);
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   Διατάξεις που ακολουθούν τον ΧΩΡΟ, όχι το παράθυρο
+   ════════════════════════════════════════════════════════════════════════ */
+.tf-card-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--tf-min, 260px)), 1fr));
+  align-items: stretch;
+}
+.tf-card-grid > * {
+  min-width: 0;
+}
+.tf-with-aside {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-start;
+}
+.tf-with-aside > .tf-main {
+  flex: 999 1 420px;
+  min-width: 0;
+}
+.tf-with-aside > .tf-aside {
+  flex: 1 1 240px;
+  min-width: 0;
+}
+.row > .col,
+.row > .col-grow {
+  min-width: 0;
+}
+.tf-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-bottom: 16px;
+  > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .tf-actions {
+    margin-bottom: 0;
+  }
+}
+.tf-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+  > .tf-actions {
+    margin-bottom: 0;
+    margin-left: auto;
+  }
+}
+
+/* Πεδία φίλτρων στις σελίδες λίστας. */
+.search-input {
+  min-width: 200px;
+}
+.filter-select {
+  min-width: 140px;
+}
+@media (max-width: 599px) {
+  .search-input,
+  .filter-select,
+  .full-width-mobile {
+    min-width: 100%;
+    width: 100%;
+  }
+}
+
+/* ── Σελίδα: ίδια περιθώρια παντού, περιεχόμενο κεντραρισμένο ως 1400px ── */
+.tf-page {
+  /* Το πλάτος περιορίζεται με padding και όχι με margin στα παιδιά: τα
+     q-col-gutter της Quasar στηρίζονται σε αρνητικά margins. */
+  padding: 8px max(20px, calc((100% - 1400px) / 2)) 28px;
+}
+@media (max-width: 599px) {
+  .tf-page {
+    padding: 4px 12px 20px;
+  }
+}
+
+/* ── Επικεφαλίδα κάρτας: section-title με εικονίδιο στο μελάνι του κλάδου ── */
+.tf-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+  > .q-icon {
+    color: var(--klados-ink);
+    font-size: 20px;
+  }
+  > .tf-card-head__end {
+    margin-left: auto;
+  }
+}
+
+/* ── Πλακίδιο εικονιδίου: απαλή βαφή + μελάνι, όπως στην κεφαλίδα σελίδας ── */
+.tf-tile {
+  --tile-color: var(--klados-color);
+  --tile-ink: var(--klados-ink);
+  flex: 0 0 auto;
+  width: var(--tile-size, 40px);
+  height: var(--tile-size, 40px);
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: var(--tile-ink);
+  background: color-mix(in srgb, var(--tile-color) 14%, transparent);
+  transition: transform var(--dur-medium) var(--ease-emphasized);
+}
+.q-item--clickable:hover .tf-tile {
+  transform: scale(1.05);
+}
+.tf-tile--pink {
+  --tile-color: #e91e63;
+  --tile-ink: #c2185b;
+}
+.tf-tile--green {
+  --tile-color: #2e7d32;
+  --tile-ink: #2e7d32;
+}
+.tf-tile--amber {
+  --tile-color: #f9a825;
+  --tile-ink: #a66d00;
+}
+.tf-tile--brown {
+  --tile-color: #6d4c41;
+  --tile-ink: #6d4c41;
+}
+body.body--dark {
+  .tf-tile--pink {
+    --tile-ink: #f48fb1;
+  }
+  .tf-tile--green {
+    --tile-ink: #81c784;
+  }
+  .tf-tile--amber {
+    --tile-ink: #ffca28;
+  }
+  .tf-tile--brown {
+    --tile-ink: #bcaaa4;
+  }
+}
+
+/* ── Στατιστικές κάρτες (αρχηγείο) ── */
+.stat-card {
+  position: relative;
+  overflow: hidden;
+}
+.stat-card .stat-label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+.stat-card .stat-value {
+  font-size: 2.1rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.stat-card .stat-icon {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  opacity: 0.14;
+  font-size: 2.4rem;
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   Segmented control (SegmentedToggle.vue πάνω στο q-btn-toggle)
+   ════════════════════════════════════════════════════════════════════════ */
+.tf-seg {
+  display: inline-flex;
+  vertical-align: middle;
+  max-width: 100%;
+
+  &__frame {
+    position: relative;
+    display: inline-flex;
+    max-width: 100%;
+    padding: 3px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--surface);
+    isolation: isolate;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+  &__frame::-webkit-scrollbar {
+    display: none;
+  }
+  &--spread,
+  &--spread &__frame {
+    display: flex;
+    width: 100%;
+  }
+  &--spread .q-btn-toggle {
+    flex: 1;
+  }
+  .q-btn-toggle {
+    position: relative;
+    z-index: 1;
+    flex: 0 0 auto;
+    border-radius: 999px;
+    box-shadow: none;
+    background: transparent;
+  }
+  .q-btn-toggle .q-btn {
+    flex: 0 0 auto;
+    border-radius: 999px !important;
+    min-height: 32px;
+    padding-inline: 14px;
+    transition: color var(--dur-medium) var(--ease-standard) 40ms;
+  }
+  .q-btn-toggle .q-btn[aria-pressed='true'] {
+    background: transparent !important;
+    color: var(--klados-on) !important;
+  }
+  .q-btn-toggle .q-btn:not([aria-pressed='true']) {
+    color: var(--muted) !important;
+  }
+  .q-btn-toggle .q-btn:not([aria-pressed='true']):hover {
+    color: var(--ink) !important;
+    transform: none;
+    box-shadow: none;
+  }
+  .q-btn-toggle .q-btn:active {
+    transform: scale(0.98);
+  }
+  .q-btn-toggle .q-btn .q-focus-helper {
+    border-radius: 999px;
+  }
+  &__thumb {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    border-radius: 999px;
+    background: var(--klados-color);
+    box-shadow: var(--shadow-1);
+    pointer-events: none;
+    will-change: transform, width;
+  }
+  &--ready &__thumb {
+    transition:
+      transform 220ms var(--ease-emphasized),
+      width 220ms var(--ease-emphasized),
+      height 220ms var(--ease-emphasized),
+      opacity var(--dur-medium) var(--ease-standard);
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   Σκοτεινό θέμα (Quasar Dark → `body.body--dark`)
+   Επιφάνειες ελαφρά βαμμένες με το μπλε του κλάδου, ίδια θερμοκρασία με το φως.
+   ════════════════════════════════════════════════════════════════════════ */
+body.body--dark {
+  --app-bg: color-mix(in srgb, #111214, var(--klados-color) 7%);
+  --surface: color-mix(in srgb, #1a1c1f, var(--klados-color) 9%);
+  --surface-2: color-mix(in srgb, #212428, var(--klados-color) 10%);
+  --border-soft: color-mix(in srgb, #2b2f34, var(--klados-color) 18%);
+  --muted: #a3acb3;
+  --ink: #e8ebee;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.5);
+  --shadow-2: 0 6px 16px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.4);
+  --line: rgba(255, 255, 255, 0.14);
+  --line-soft: rgba(255, 255, 255, 0.1);
+  --line-strong: rgba(255, 255, 255, 0.32);
+  --tint: rgba(255, 255, 255, 0.07);
+  --tint-soft: rgba(255, 255, 255, 0.05);
+  --text-soft: rgba(255, 255, 255, 0.66);
+  --q-dark-page: var(--app-bg);
+  --q-dark: var(--surface);
+  --q-card-bg: var(--surface);
+
+  background: var(--app-bg);
+  color: var(--ink);
+  transition: background-color var(--dur-medium) var(--ease-standard);
+
+  .q-drawer {
+    background: color-mix(in srgb, #16181b, var(--klados-color) 8%);
+  }
+  .q-header {
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3), 0 3px 10px rgba(0, 0, 0, 0.45);
+  }
+  .q-card--bordered,
+  .q-list--bordered {
+    border-color: var(--border-soft);
+  }
+  .q-drawer--bordered {
+    border-right-color: var(--border-soft) !important;
+  }
+  .text-grey-6,
+  .text-grey-7,
+  .text-grey-8 {
+    color: #a7b0b8 !important;
+  }
+  .text-grey-9,
+  .text-grey-10,
+  .text-dark {
+    color: #e0e6ea !important;
+  }
+  .text-primary {
+    color: var(--klados-ink) !important;
+  }
+  .text-positive {
+    color: #6fbf73 !important;
+  }
+  .text-negative {
+    color: #ef5350 !important;
+  }
+  .text-warning {
+    color: #ffa726 !important;
+  }
+  .text-info {
+    color: #4fc3f7 !important;
+  }
+  .bg-grey-1 {
+    background: rgba(255, 255, 255, 0.04) !important;
+  }
+  .bg-grey-2 {
+    background: rgba(255, 255, 255, 0.07) !important;
+  }
+  .bg-grey-3 {
+    background: rgba(255, 255, 255, 0.1) !important;
+  }
+  .bg-blue-1 {
+    background: rgba(66, 165, 245, 0.16) !important;
+  }
+  .bg-red-1 {
+    background: rgba(239, 83, 80, 0.16) !important;
+  }
+  .bg-green-1 {
+    background: rgba(102, 187, 106, 0.16) !important;
+  }
+  .text-blue-10 {
+    color: #90caf9 !important;
+  }
+}
+
+/* ── Προσβασιμότητα: ορατό focus για πληκτρολόγιο + σεβασμός reduced-motion ── */
+:focus-visible {
+  outline: 2px solid var(--klados-ink);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

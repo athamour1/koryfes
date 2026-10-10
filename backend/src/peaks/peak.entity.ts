@@ -1,10 +1,14 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 import { PeakType } from './peak-type.enum';
 
+// Rows come from the fixed catalog (src/catalog); never edited at runtime
 @Entity('peaks')
 export class Peak {
     @PrimaryGeneratedColumn()
     id: number;
+
+    @Column({ unique: true })
+    code: string;
 
     @Column()
     name: string;
@@ -15,9 +19,6 @@ export class Peak {
         unique: true,
     })
     type: PeakType;
-
-    @Column({ nullable: true })
-    image: string;
 
     @Column('text', { nullable: true })
     description: string;

@@ -4,7 +4,8 @@
         "cancel": "Cancel",
         "award": "Award",
         "back": "Back",
-        "create": "Create"
+        "create": "Create",
+        "close": "Close"
     },
     "navigation": {
         "title": "Korifes",
@@ -15,7 +16,7 @@
         "myUnit": "My Unit",
         "units": "Units",
         "adminUsers": "Admin Users",
-        "progress": "Progress",
+        "progress": "Progress Catalog",
         "locations": "Locations",
         "profile": "Profile",
         "logout": "Logout",
@@ -146,6 +147,11 @@
             "leader": "Leader",
             "deputyLeader": "Deputy Leader",
             "member": "Member"
+        },
+        "rolesShort": {
+            "superAdmin": "Super admin",
+            "admin": "Leader",
+            "user": "Guide"
         }
     },
     "adminUnits": {
@@ -329,6 +335,10 @@
             "success": "Password reset successfully! Redirecting to login...",
             "invalidToken": "Invalid or missing reset token.",
             "failed": "Failed to reset password"
+        },
+        "brand": {
+            "name": "Korifes",
+            "caption": "Guides' individual progress · SEO"
         }
     },
     "progress": {
@@ -367,7 +377,62 @@
                 "diplomaAwarded": "Diploma awarded successfully",
                 "error": "Error"
             }
-        }
+        },
+        "catalogTitle": "Individual Progress Catalog",
+        "catalogSubtitle": "Peaks, Paths and Diplomas as defined in the branch book",
+        "readOnlyNote": "The catalog comes from the book “Κορυφές - Μονοπάτια και Πτυχία Κλάδου Οδηγών” and cannot be changed. Each Guide's progress is recorded by their location's leader from User Management.",
+        "tabs": {
+            "peaks": "Peaks",
+            "paths": "Paths",
+            "guideDiplomas": "Guiding Diplomas",
+            "electiveDiplomas": "Branch Diplomas"
+        },
+        "chapters": {
+            "me_and_my_capabilities": "Myself and my abilities",
+            "society_and_volunteering": "Society - Service",
+            "nature": "Nature & Environment",
+            "arts": "Art & Creativity"
+        },
+        "search": "Search",
+        "requirements": "Requirements",
+        "currentPeak": "Current Peak",
+        "noPromise": "No Promise given yet",
+        "givePromise": "Promise",
+        "removePromise": "Remove Promise",
+        "promiseFirst": "Peaks only count after the Promise.",
+        "nextPeak": "Towards {name}",
+        "allPeaksReached": "All three Peaks reached!",
+        "req": {
+            "promise": "Promise",
+            "totalPaths": "Paths in total",
+            "guideDiploma": "Guiding Diploma {level}'",
+            "electiveDiplomas": "Diplomas of your choice"
+        },
+        "paths": "Paths",
+        "guideDiplomas": "Guiding Diplomas",
+        "electiveDiplomas": "Branch Diplomas",
+        "none": "None yet",
+        "add": "Add",
+        "addPath": "Add Path",
+        "addGuideDiploma": "Add Guiding Diploma",
+        "addElectiveDiploma": "Add Branch Diploma",
+        "selectPath": "Choose a path",
+        "selectDiploma": "Choose a diploma",
+        "remove": "Remove",
+        "confirmRemove": "Remove “{name}”?",
+        "confirmRemovePromise": "Remove the Promise? Peaks are lost until it is given again.",
+        "notifications": {
+            "saved": "Saved",
+            "removed": "Removed",
+            "peakReached": "New Peak: {name}!",
+            "error": "The change was not saved"
+        },
+        "diplomasShort": "Diplomas",
+        "title": "Individual Progress",
+        "subtitle": "Your Peaks, Paths and Diplomas",
+        "addGuideDiplomaShort": "Guiding",
+        "addElectiveDiplomaShort": "Diploma",
+        "addPathShort": "Path"
     },
     "avatar": {
         "randomize": "Randomize",
