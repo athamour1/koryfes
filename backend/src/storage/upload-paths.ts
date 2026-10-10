@@ -23,7 +23,10 @@ export function newImageKey(prefix: string): string {
     return `${prefix}/${randomBytes(16).toString('hex')}.webp`;
 }
 
-/** Keys are our own "a/b/c.ext" names: no empty, dot or dot-dot segments. */
+/**
+ * Keys are our own "a/b/c.ext" names: no empty segments and none starting with
+ * a dot (no . or .., and internal objects like .migrations/ stay private).
+ */
 export function isSafeKey(key: string): boolean {
-    return key.length > 0 && key.split('/').every((s) => s !== '' && s !== '.' && s !== '..');
+    return key.length > 0 && key.split('/').every((s) => s !== '' && !s.startsWith('.'));
 }

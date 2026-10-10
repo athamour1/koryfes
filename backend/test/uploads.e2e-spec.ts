@@ -41,6 +41,11 @@ describe('GET /uploads/* (e2e)', () => {
         return http().get('/uploads/unit-flags/%25zz.webp').expect(404);
     });
 
+    it('does not serve internal objects (dot-prefixed keys)', async () => {
+        await storage.put('.migrations/legacy-uploads-done', Buffer.from('x'), 'text/plain');
+        await http().get('/uploads/.migrations/legacy-uploads-done').expect(404);
+    });
+
     it('is not rate limited', async () => {
         for (let i = 0; i < 120; i++) {
             await http().get('/uploads/unit-flags/abc.webp').expect(200);
