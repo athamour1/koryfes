@@ -27,12 +27,15 @@
         "vue-router": "^5.0.6"
     },
     "devDependencies": {
+        "@cypress/code-coverage": "^4.0.3",
         "@quasar/app-vite": "^3.10.2",
         "@quasar/quasar-app-extension-testing-e2e-cypress": "^7.0.0",
         "autoprefixer": "^10.4.2",
+        "cross-env": "^10.1.0",
         "cypress": "^15.14.0",
         "eslint-plugin-cypress": "^3.6.0",
         "postcss": "^8.4.14",
+        "start-server-and-test": "^3.0.13",
         "vite-plugin-vue-devtools": "^8.0.5"
     },
     "engines": {

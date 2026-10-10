@@ -26,7 +26,10 @@ import '@/css/app.scss'; // Or 'src/css/app.css' if no CSS preprocessor is insta
 import 'quasar/icon-set/material-icons';
 import '@quasar/extras/material-icons/material-icons.css';
 
-import { installQuasarPlugin } from '@quasar/quasar-app-extension-testing-e2e-cypress';
+import { installQuasarPlugin, registerCommands } from '@quasar/quasar-app-extension-testing-e2e-cypress';
+
+// Quasar helpers: cy.dataCy(), cy.withinDialog(), cy.testRoute(), ...
+registerCommands();
 import { Dialog } from 'quasar';
 
 // Since Cypress v10 we cannot import `config` directly from VTU as Cypress bundles its own version of it

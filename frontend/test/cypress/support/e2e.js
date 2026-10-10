@@ -14,4 +14,8 @@
 // ***********************************************************
 
 import './commands';
+
+// The Quasar AE helpers ship as ESM-only and can't be bundled by Cypress's
+// e2e webpack preprocessor; e2e specs only need cy.dataCy()
+Cypress.Commands.add('dataCy', (value, options) => cy.get(`[data-cy=${value}]`, options));
 import '@cypress/code-coverage/support';
