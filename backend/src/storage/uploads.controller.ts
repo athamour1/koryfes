@@ -1,6 +1,6 @@
 import { Controller, Get, NotFoundException, Req, Res } from '@nestjs/common';
 import { SkipThrottle } from '@nestjs/throttler';
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { StorageService } from './storage.service';
 import { isSafeKey } from './upload-paths';
 
