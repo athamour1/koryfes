@@ -11,14 +11,47 @@ services:
     ports:
       - "5432:5432"
 
+  # Γράφει το garage.toml στο volume garage_config και τελειώνει, ώστε στον
+  # server να μη χρειάζεται αρχείο ρυθμίσεων δίπλα στο compose. Τα secrets
+  # (rpc_secret, admin_token) δεν μπαίνουν εδώ· το Garage τα παίρνει από env.
+  garage-config:
+    image: busybox:1.37
+    command:
+      - sh
+      - -c
+      - |
+        cat > /config/garage.toml <<'EOF'
+        metadata_dir = "/var/lib/garage/meta"
+        data_dir = "/var/lib/garage/data"
+        db_engine = "sqlite"
+
+        replication_factor = 1
+
+        rpc_bind_addr = "[::]:3901"
+        rpc_public_addr = "127.0.0.1:3901"
+
+        [s3_api]
+        s3_region = "garage"
+        api_bind_addr = "[::]:3900"
+
+        [admin]
+        api_bind_addr = "[::]:3903"
+        EOF
+    volumes:
+      - garage_config:/config
+
   # Αποθήκευση ανεβασμένων αρχείων (S3). Μόνο στο εσωτερικό δίκτυο.
   garage:
     image: dxflrs/garage:v2.4.1
     environment:
+      GARAGE_CONFIG_FILE: /etc/garage/garage.toml
       GARAGE_RPC_SECRET: ${GARAGE_RPC_SECRET:-0000000000000000000000000000000000000000000000000000000000000001}
       GARAGE_ADMIN_TOKEN: ${GARAGE_ADMIN_TOKEN:-dev-garage-admin-token}
+    depends_on:
+      garage-config:
+        condition: service_completed_successfully
     volumes:
-      - ./garage/garage.toml:/etc/garage.toml:ro
+      - garage_config:/etc/garage:ro
       - garage_meta:/var/lib/garage/meta
       - garage_data:/var/lib/garage/data
 
@@ -80,5 +113,6 @@ services:
 
 volumes:
   postgres_data:
+  garage_config:
   garage_meta:
   garage_data:

@@ -29,12 +29,13 @@ on the internal Docker network, and the PWA calls the API on the same origin
 
 ## Server setup
 
-Only three files go to the server, no clone of the repo is needed:
+Only two files go to the server, no clone of the repo is needed:
 
 - `docker-compose.prod.yml`
-- `garage/garage.toml`, copied next to it as `garage.toml` (config of the Garage
-  S3 store that keeps uploaded images)
 - `.env.production.example`, copied as `.env.production` and filled in
+
+(Garage's `garage.toml` is written into the `garage_config` volume by the
+one-shot `garage-config` service, so it needs no file on the server.)
 
 ### Environment (`.env.production`)
 
