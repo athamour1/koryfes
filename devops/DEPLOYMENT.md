@@ -1,143 +1,144 @@
 # Production Deployment Guide
 
-## Deployment Architecture
+There is no CI/CD in this repo: releases are built and pushed on demand, locally,
+with `./release.sh`, and the server only pulls the published images.
 
-This application supports two deployment architectures:
+## Release
 
-### **Option 1: Reverse Proxy (Recommended - Simpler)**
-
-```
-Internet → [Frontend Container with Nginx]
-              ├─ Serves static files
-              └─ Proxies /api/* → Backend Container
+```bash
+./release.sh
 ```
 
-**Advantages:**
-- Single domain/port exposure
-- No CORS issues
-- Simpler SSL/TLS setup (one certificate)
-- Frontend nginx handles all routing
+Asks for a version, bumps `backend/` and `frontend/` `package.json` (+ lockfiles),
+commits, builds and pushes the `backend` and `frontend` images to
+`ghcr.io/athamour1/seo-test-app/*` (tagged `vX.Y.Z` and `latest`), then pushes a
+git tag and creates a GitHub release with generated notes. Needs `docker`,
+`npm` and an authenticated `gh` CLI, and a clean working tree.
 
-**Configuration:**
-- `VITE_API_URL=/api` (or leave empty)
-- Only expose frontend port (8080) to the internet
-- Backend communicates internally via Docker network
-
-### **Option 2: Separate Subdomains**
+## Architecture
 
 ```
-Internet → [Frontend Container] (yourdomain.com)
-Internet → [Backend Container] (api.yourdomain.com)
+Internet ──443──▶ your reverse proxy (TLS) ──▶ 127.0.0.1:8080 frontend (nginx)
+                                                 ├─ /        → PWA static files
+                                                 └─ /api/    → backend ─▶ postgres
 ```
 
-**Advantages:**
-- Independent scaling of frontend/backend
-- Can use different servers/infrastructure
+Only the frontend publishes a port. The backend and Postgres are reachable only
+on the internal Docker network, and the PWA calls the API on the same origin
+(`/api`), so no CORS setup is needed.
 
-**Disadvantages:**
-- Requires two domains/subdomains
-- Need to configure CORS properly
-- Two SSL certificates needed
-- The nginx reverse proxy in frontend becomes unused
+## Server setup
 
-**Configuration:**
-- `VITE_API_URL=https://api.yourdomain.com`
-- Expose both frontend (8080) and backend (3000) ports
-- Configure backend `CORS_ORIGIN=https://yourdomain.com`
+Only two files go to the server, no clone of the repo is needed:
 
----
+- `docker-compose.prod.yml`
+- `.env.production.example`, copied as `.env.production` and filled in
 
-## Runtime Configuration
+### Environment (`.env.production`)
 
-The frontend application supports **runtime configuration** without requiring image rebuilds. This allows IT staff to modify critical settings by simply updating environment variables and restarting containers.
+| Variable | Required | Default | Notes |
+|---|---|---|---|
+| `DB_PASSWORD` | yes | — | `openssl rand -hex 24`. Postgres only reads it when the volume is first created; don't change it afterwards. |
+| `JWT_SECRET` | yes | — | `openssl rand -base64 48`. The backend refuses to start on a secret shorter than 32 characters, a placeholder or an unexpanded `$(...)`. Rotating it logs everyone out. |
+| `ADMIN_USERNAME` / `ADMIN_PASSWORD` | no | — | Super admin, created on first boot and its password **reset to this on every boot**. Must be 8+ characters with upper/lowercase and a number, or the backend refuses to start. Leave empty to skip. |
+| `TAG` | no | `latest` | Image tag to run. Pin a release (`v1.0.0`) so you know what runs and can roll back. |
+| `BIND_ADDR` | no | `127.0.0.1` | Host address the frontend listens on (see *Ports*). |
+| `HTTP_PORT` | no | `8080` | Host port of the frontend. |
+| `VITE_API_URL` | no | `/api` | Runtime frontend config (written to `config.js` at container start, no rebuild). |
+| `VITE_STAGING_MESSAGE` | no | — | Banner on the login page, e.g. for a staging instance. |
+| `DB_USERNAME` / `DB_DATABASE` | no | `postgres` / `guide_badges` | |
+| `THROTTLE_LIMIT` / `AUTH_THROTTLE_LIMIT` | no | `100` / `10` | Requests per client IP per minute (overall / login & password reset). |
 
-### Configurable Variables
+> **Using a UI (Arcane, Portainer, Dockge…) to edit the env?** Never paste
+> `$(openssl …)` into it: it is stored as literal text. Run the command in a
+> terminal and paste its **output**.
 
-| Variable | Description | Example (Reverse Proxy) | Example (Separate Subdomain) |
-|----------|-------------|------------------------|------------------------------|
-| `VITE_API_URL` | Backend API endpoint URL | `/api` | `https://api.yourdomain.com` |
-| `VITE_ENV` | Environment name | `production` | `production` |
-| `VITE_STAGING_MESSAGE` | Optional staging warning | _(empty)_ | `⚠️ Staging Environment` |
+In a shell on the server, this writes a file with random secrets (edit the tag
+and admin password):
 
-### How It Works
-
-1. The `entrypoint.sh` script generates a `config.js` file at container startup
-2. This file is loaded before the application starts
-3. The application reads configuration from this file, falling back to build-time values if not set
-
-### Deployment Steps
-
-1. **Copy the example environment file:**
-   ```bash
-   cp .env.production.example .env.production
-   ```
-
-2. **Edit `.env.production` with your production values:**
-   ```bash
-   nano .env.production
-   ```
-
-3. **Start the services:**
-   ```bash
-   docker compose -f docker-compose.prod.yml --env-file .env.production up -d
-   ```
-
-4. **To change configuration later:**
-   - Edit `.env.production`
-   - Restart only the frontend: `docker compose -f docker-compose.prod.yml restart frontend`
-   - Or restart all services: `docker compose -f docker-compose.prod.yml restart`
-
-### Security Notes
-
-- **Never commit `.env.production`** to version control (it's in `.gitignore`)
-- Change all default passwords before deploying to production
-- Use a strong, random `JWT_SECRET` (at least 32 characters)
-- Ensure `CORS_ORIGIN` matches your actual frontend domain
-
-### Example Production Configuration (Reverse Proxy - Recommended)
-
-```env
-# Frontend (uses nginx reverse proxy)
-VITE_API_URL=/api
-VITE_ENV=production
-VITE_STAGING_MESSAGE=
-
-# Backend
-JWT_SECRET=your-very-long-and-random-secret-key-here
+```bash
+cat > .env.production <<EOF
+TAG=v1.0.0
+DB_PASSWORD=$(openssl rand -hex 24)
+JWT_SECRET=$(openssl rand -base64 48 | tr -d '\n')
 ADMIN_USERNAME=admin
-ADMIN_PASSWORD=SecurePassword123!
-CORS_ORIGIN=https://scoutbadges.org
-
-# Database
-DB_PASSWORD=SecureDBPassword456!
+ADMIN_PASSWORD=ChangeMe-Str0ng
+EOF
+chmod 600 .env.production
 ```
 
-In this setup, you only need to expose the frontend port (8080) to the internet. The nginx configuration in the frontend container will proxy all `/api/*` requests to the backend container internally.
+### First deploy
 
-### Example Staging Environment
+```bash
+alias dc='docker compose -f docker-compose.prod.yml --env-file .env.production'
 
-For a staging environment, you might want to display a warning message:
+# GHCR packages are private by default: log in once (a token with read:packages)
+docker login ghcr.io
 
-```env
-VITE_API_URL=/api
-VITE_ENV=staging
-VITE_STAGING_MESSAGE=⚠️ This is a staging environment - Data may be reset
+dc pull
+dc up -d        # migrations run automatically when the backend starts
+dc ps           # all three services should become (healthy)
 ```
 
-This message will appear on the login page to warn users they're not on production.
+Then sign in with the admin account at `https://<your-domain>/`. There is no
+public sign-up; the admin creates everyone else.
 
-### Example Separate Subdomain Configuration (Advanced)
+### Ports
 
-If you need to deploy frontend and backend on separate infrastructure:
+- **Proxy on the same host, not in Docker**: keep the defaults.
+- **Proxy in a Docker container on the same host**: it can't reach the host's
+  `127.0.0.1`; set `BIND_ADDR=172.17.0.1` (Docker bridge), or attach the proxy
+  to this stack's network and proxy to `frontend:80`.
+- **Proxy on another machine**: `BIND_ADDR=0.0.0.0` and allow `HTTP_PORT` only
+  from the proxy's IP.
 
-```env
-# Frontend
-VITE_API_URL=https://api.scoutbadges.org
-VITE_ENV=production
-VITE_STAGING_MESSAGE=
+On the host firewall open only 80/443 (plus SSH), never 8080. The proxy must
+send `X-Forwarded-For` / `X-Forwarded-Proto` (Caddy does by default; rate
+limiting relies on them) and should set HSTS. Minimal Caddyfile:
 
-# Backend (must be accessible at api.scoutbadges.org)
-CORS_ORIGIN=https://scoutbadges.org
+```
+korifes.example.gr {
+    reverse_proxy 127.0.0.1:8080
+    header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+}
 ```
 
-**Note:** With this approach, you'll need to expose the backend port (3000) and configure your reverse proxy/load balancer to route `api.scoutbadges.org` to the backend container.
+### Upgrades and rollback
+
+```bash
+sed -i 's/^TAG=.*/TAG=v1.0.1/' .env.production
+dc pull && dc up -d     # new migrations apply before the backend serves traffic
+```
+
+Roll back by setting the previous `TAG` and running the same commands.
+Migrations are forward-only, so a rollback across a schema change needs a
+database restore.
+
+### Backups
+
+Two things hold state: the `postgres_data` volume and the `./uploads` directory
+(unit flags) next to the compose file.
+
+```bash
+dc exec -T db pg_dump -U postgres guide_badges | gzip > backup-$(date +%F).sql.gz
+tar czf uploads-$(date +%F).tar.gz uploads
+```
+
+### Changing runtime config
+
+Edit `.env.production`, then `dc up -d` (compose recreates only the services whose
+config changed). Frontend settings take effect on the next page load: `config.js`,
+`index.html` and the service worker are served with `Cache-Control: no-cache`, and
+the service worker does not precache `config.js`.
+
+## Migrating from the old Docker Hub images
+
+Earlier deployments ran `thanosmourtk/korifes-*` images with the backend published
+on `127.0.0.1:3000` and the frontend on `0.0.0.0:8080`. With the new compose file:
+
+- the backend no longer publishes a port; use `dc exec backend ...` for debugging
+- the frontend binds to `127.0.0.1:8080` by default; set `BIND_ADDR` if your proxy
+  isn't on the same host
+- `ADMIN_PASSWORD` must meet the password policy, or the backend won't start
+- `uploads/` and the `postgres_data` volume are unchanged, so data carries over
+  (keep the same compose project directory)

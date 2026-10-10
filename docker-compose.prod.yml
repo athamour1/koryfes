@@ -1,53 +1,72 @@
+# Production stack: runs the images published by ./release.sh. Nothing is built
+# on the server; only this file and .env.production are needed there.
+#
+#   docker compose -f docker-compose.prod.yml --env-file .env.production up -d
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
 
 services:
   db:
     image: postgres:15-alpine
     restart: always
+    logging: *logging
     environment:
       POSTGRES_USER: ${DB_USERNAME:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set}
       POSTGRES_DB: ${DB_DATABASE:-guide_badges}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     # No published port: only the backend (same Docker network) talks to the DB
 
   backend:
-    image: thanosmourtk/korifes-backend:26.11.25-beta
+    image: ghcr.io/athamour1/seo-test-app/backend:${TAG:-latest}
     restart: always
-    # The frontend's nginx proxies /api to the backend over the Docker network;
-    # only expose it on localhost (for debugging / a host-level reverse proxy)
-    ports:
-      - "127.0.0.1:${PORT:-3000}:3000"
+    logging: *logging
+    # No published port: the frontend's nginx proxies /api to it over the
+    # Docker network (the image has its own /health HEALTHCHECK)
     environment:
       NODE_ENV: production
-      DB_HOST: ${DB_HOST:-db}
-      DB_PORT: ${DB_PORT:-5432}
+      DB_HOST: db
+      DB_PORT: 5432
       DB_USERNAME: ${DB_USERNAME:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD must be set}
       DB_DATABASE: ${DB_DATABASE:-guide_badges}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET must be set}
-      ADMIN_USERNAME: ${ADMIN_USERNAME}
-      ADMIN_PASSWORD: ${ADMIN_PASSWORD}
-      CORS_ORIGIN: ${CORS_ORIGIN}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      CORS_ORIGIN: ${CORS_ORIGIN:-}
       THROTTLE_LIMIT: ${THROTTLE_LIMIT:-100}
       AUTH_THROTTLE_LIMIT: ${AUTH_THROTTLE_LIMIT:-10}
       PORT: 3000
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     volumes:
       - ./uploads:/usr/src/app/uploads
 
   frontend:
-    image: thanosmourtk/korifes-frontend:26.11.25-beta
+    image: ghcr.io/athamour1/seo-test-app/frontend:${TAG:-latest}
     restart: always
+    logging: *logging
+    # Only this port is published; put a TLS reverse proxy in front of it
     ports:
-      - "8080:80"
+      - "${BIND_ADDR:-127.0.0.1}:${HTTP_PORT:-8080}:80"
     environment:
       VITE_API_URL: ${VITE_API_URL:-/api}
       VITE_ENV: ${VITE_ENV:-production}
       VITE_STAGING_MESSAGE: ${VITE_STAGING_MESSAGE:-}
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
 
 volumes:
   postgres_data:
