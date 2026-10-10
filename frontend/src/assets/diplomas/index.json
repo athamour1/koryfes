@@ -1,0 +1,589 @@
+[
+  {
+    "number": 1,
+    "name": "Α' Βοηθειών",
+    "title": "Πτυχίο Α' Βοηθειών",
+    "file": "01-a-voitheion.png",
+    "page": 24,
+    "category": "klados"
+  },
+  {
+    "number": 2,
+    "name": "Αθλητισμού",
+    "title": "Πτυχίο Αθλητισμού",
+    "file": "02-athlitismou.png",
+    "page": 25,
+    "category": "klados"
+  },
+  {
+    "number": 3,
+    "name": "Αρχιτεκτονικής και Περιβαλλοντικής Σχεδίασης",
+    "title": "Πτυχίο Αρχιτεκτονικής και Περιβαλλοντικής Σχεδίασης",
+    "file": "03-architektonikis-kai-perivallontikis-schediasis.png",
+    "page": 26,
+    "category": "klados"
+  },
+  {
+    "number": 4,
+    "name": "Αστρονομίας",
+    "title": "Πτυχίο Αστρονομίας",
+    "file": "04-astronomias.png",
+    "page": 27,
+    "category": "klados"
+  },
+  {
+    "number": 5,
+    "name": "Γαλλικής Σκαπανικής",
+    "title": "Πτυχίο Γαλλικής Σκαπανικής",
+    "file": "05-gallikis-skapanikis.png",
+    "page": 28,
+    "category": "klados"
+  },
+  {
+    "number": 6,
+    "name": "Γλυπτικής",
+    "title": "Πτυχίο Γλυπτικής",
+    "file": "06-glyptikis.png",
+    "page": 29,
+    "category": "klados"
+  },
+  {
+    "number": 7,
+    "name": "Δημοσιογραφίας - Ρεπορτάζ",
+    "title": "Πτυχίο Δημοσιογραφίας - Ρεπορτάζ",
+    "file": "07-dimosiografias-reportaz.png",
+    "page": 30,
+    "category": "klados"
+  },
+  {
+    "number": 8,
+    "name": "Δημοσίων Σχέσεων",
+    "title": "Πτυχίο Δημοσίων Σχέσεων",
+    "file": "08-dimosion-scheseon.png",
+    "page": 31,
+    "category": "klados"
+  },
+  {
+    "number": 9,
+    "name": "Διακόσμησης",
+    "title": "Πτυχίο Διακόσμησης",
+    "file": "09-diakosmisis.png",
+    "page": 32,
+    "category": "klados"
+  },
+  {
+    "number": 10,
+    "name": "Εκδρομέα",
+    "title": "Πτυχίο Εκδρομέα",
+    "file": "10-ekdromea.png",
+    "page": 33,
+    "category": "klados"
+  },
+  {
+    "number": 11,
+    "name": "Έκτακτων Αναγκών SOS",
+    "title": "Πτυχίο Έκτακτων Αναγκών SOS",
+    "file": "11-ektakton-anagkon-sos.png",
+    "page": 34,
+    "category": "klados"
+  },
+  {
+    "number": 12,
+    "name": "Ελληνικών Παραδοσιακών Χορών",
+    "title": "Πτυχίο Ελληνικών Παραδοσιακών Χορών",
+    "file": "12-ellinikon-paradosiakon-choron.png",
+    "page": 35,
+    "category": "klados"
+  },
+  {
+    "number": 13,
+    "name": "Εναλλακτικών Μορφών Ενέργειας",
+    "title": "Πτυχίο Εναλλακτικών Μορφών Ενέργειας",
+    "file": "13-enallaktikon-morfon-energeias.png",
+    "page": 36,
+    "category": "klados"
+  },
+  {
+    "number": 14,
+    "name": "Ενεργού Πολίτη",
+    "title": "Πτυχίο Ενεργού Πολίτη",
+    "file": "14-energou-politi.png",
+    "page": 37,
+    "category": "klados"
+  },
+  {
+    "number": 15,
+    "name": "Ενημερωμένου Καταναλωτή",
+    "title": "Πτυχίο Ενημερωμένου Καταναλωτή",
+    "file": "15-enimeromenou-katanaloti.png",
+    "page": 38,
+    "category": "klados"
+  },
+  {
+    "number": 16,
+    "name": "Εξερεύνησης του Διαστήματος",
+    "title": "Πτυχίο Εξερεύνησης του Διαστήματος",
+    "file": "16-exereynisis-tou-diastimatos.png",
+    "page": 39,
+    "category": "klados"
+  },
+  {
+    "number": 17,
+    "name": "Επικοινωνίας",
+    "title": "Πτυχίο Επικοινωνίας",
+    "file": "17-epikoinonias.png",
+    "page": 40,
+    "category": "klados"
+  },
+  {
+    "number": 18,
+    "name": "Επιχειρηματικού Μυαλού",
+    "title": "Πτυχίο Επιχειρηματικού Μυαλού",
+    "file": "18-epicheirimatikou-myalou.png",
+    "page": 41,
+    "category": "klados"
+  },
+  {
+    "number": 19,
+    "name": "Ευρωπαίου Πολίτη",
+    "title": "Πτυχίο Ευρωπαίου Πολίτη",
+    "file": "19-eyropaiou-politi.png",
+    "page": 42,
+    "category": "klados"
+  },
+  {
+    "number": 20,
+    "name": "Εφαρμογών Ηλεκτρονικού Υπολογιστή",
+    "title": "Πτυχίο Εφαρμογών Ηλεκτρονικού Υπολογιστή",
+    "file": "20-efarmogon-ilektronikou-ypologisti.png",
+    "page": 43,
+    "category": "klados"
+  },
+  {
+    "number": 21,
+    "name": "Ζαχαροπλαστικής",
+    "title": "Πτυχίο Ζαχαροπλαστικής",
+    "file": "21-zacharoplastikis.png",
+    "page": 44,
+    "category": "klados"
+  },
+  {
+    "number": 22,
+    "name": "Ζωγραφικής",
+    "title": "Πτυχίο Ζωγραφικής",
+    "file": "22-zografikis.png",
+    "page": 45,
+    "category": "klados"
+  },
+  {
+    "number": 23,
+    "name": "Ηλεκτρολογίας",
+    "title": "Πτυχίο Ηλεκτρολογίας",
+    "file": "23-ilektrologias.png",
+    "page": 46,
+    "category": "klados"
+  },
+  {
+    "number": 24,
+    "name": "Θαλάσσιων Σπορ",
+    "title": "Πτυχίο Θαλάσσιων Σπορ",
+    "file": "24-thalassion-spor.png",
+    "page": 47,
+    "category": "klados"
+  },
+  {
+    "number": 25,
+    "name": "Θεάτρου",
+    "title": "Πτυχίο Θεάτρου",
+    "file": "25-theatrou.png",
+    "page": 48,
+    "category": "klados"
+  },
+  {
+    "number": 26,
+    "name": "Θεμάτων Παγκόσμιου Ενδιαφέροντος",
+    "title": "Πτυχίο Θεμάτων Παγκόσμιου Ενδιαφέροντος",
+    "file": "26-thematon-pagkosmiou-endiaferontos.png",
+    "page": 49,
+    "category": "klados"
+  },
+  {
+    "number": 27,
+    "name": "Κατασκηνωτικής Ζωής Α'",
+    "title": "Πτυχίο Κατασκηνωτικής Ζωής Α'",
+    "file": "27-kataskinotikis-zois-a.png",
+    "page": 50,
+    "category": "klados"
+  },
+  {
+    "number": 28,
+    "name": "Κατασκηνωτικής Ζωής Β'",
+    "title": "Πτυχίο Κατασκηνωτικής Ζωής Β'",
+    "file": "28-kataskinotikis-zois-v.png",
+    "page": 51,
+    "category": "klados"
+  },
+  {
+    "number": 29,
+    "name": "Κηπουρικής και Βοτανολογίας",
+    "title": "Πτυχίο Κηπουρικής και Βοτανολογίας",
+    "file": "29-kipourikis-kai-votanologias.png",
+    "page": 52,
+    "category": "klados"
+  },
+  {
+    "number": 30,
+    "name": "Κινηματογράφου",
+    "title": "Πτυχίο Κινηματογράφου",
+    "file": "30-kinimatografou.png",
+    "page": 53,
+    "category": "klados"
+  },
+  {
+    "number": 31,
+    "name": "Κίνησης",
+    "title": "Πτυχίο Κίνησης",
+    "file": "31-kinisis.png",
+    "page": 54,
+    "category": "klados"
+  },
+  {
+    "number": 32,
+    "name": "Κολύμβησης",
+    "title": "Πτυχίο Κολύμβησης",
+    "file": "32-kolymvisis.png",
+    "page": 55,
+    "category": "klados"
+  },
+  {
+    "number": 33,
+    "name": "Κόμικ",
+    "title": "Πτυχίο Κόμικ",
+    "file": "33-komik.png",
+    "page": 56,
+    "category": "klados"
+  },
+  {
+    "number": 34,
+    "name": "Κόμπων και Κατασκευών",
+    "title": "Πτυχίο Κόμπων και Κατασκευών",
+    "file": "34-kompon-kai-kataskeyon.png",
+    "page": 57,
+    "category": "klados"
+  },
+  {
+    "number": 35,
+    "name": "Κοσμήματος",
+    "title": "Πτυχίο Κοσμήματος",
+    "file": "35-kosmimatos.png",
+    "page": 58,
+    "category": "klados"
+  },
+  {
+    "number": 36,
+    "name": "Κωπηλασίας",
+    "title": "Πτυχίο Κωπηλασίας",
+    "file": "36-kopilasias.png",
+    "page": 59,
+    "category": "klados"
+  },
+  {
+    "number": 37,
+    "name": "Λαϊκής Τέχνης",
+    "title": "Πτυχίο Λαϊκής Τέχνης",
+    "file": "37-laikis-technis.png",
+    "page": 60,
+    "category": "klados"
+  },
+  {
+    "number": 38,
+    "name": "Λαογραφίας",
+    "title": "Πτυχίο Λαογραφίας",
+    "file": "38-laografias.png",
+    "page": 61,
+    "category": "klados"
+  },
+  {
+    "number": 39,
+    "name": "Λογοτεχνίας",
+    "title": "Πτυχίο Λογοτεχνίας",
+    "file": "39-logotechnias.png",
+    "page": 62,
+    "category": "klados"
+  },
+  {
+    "number": 40,
+    "name": "Μαγειρικής",
+    "title": "Πτυχίο Μαγειρικής",
+    "file": "40-mageirikis.png",
+    "page": 63,
+    "category": "klados"
+  },
+  {
+    "number": 41,
+    "name": "Μετεωρολογίας",
+    "title": "Πτυχίο Μετεωρολογίας",
+    "file": "41-meteorologias.png",
+    "page": 64,
+    "category": "klados"
+  },
+  {
+    "number": 42,
+    "name": "Μοντελισμού",
+    "title": "Πτυχίο Μοντελισμού",
+    "file": "42-montelismou.png",
+    "page": 65,
+    "category": "klados"
+  },
+  {
+    "number": 43,
+    "name": "Μουσικής",
+    "title": "Πτυχίο Μουσικής",
+    "file": "43-mousikis.png",
+    "page": 66,
+    "category": "klados"
+  },
+  {
+    "number": 44,
+    "name": "Μηχανολογίας",
+    "title": "Πτυχίο Μηχανολογίας",
+    "file": "44-michanologias.png",
+    "page": 67,
+    "category": "klados"
+  },
+  {
+    "number": 45,
+    "name": "Ναυτοσύνης",
+    "title": "Πτυχίο Ναυτοσύνης",
+    "file": "45-naytosynis.png",
+    "page": 68,
+    "category": "klados"
+  },
+  {
+    "number": 46,
+    "name": "Νερού",
+    "title": "Πτυχίο Νερού",
+    "file": "46-nerou.png",
+    "page": 69,
+    "category": "klados"
+  },
+  {
+    "number": 47,
+    "name": "Ξεναγού",
+    "title": "Πτυχίο Ξεναγού",
+    "file": "47-xenagou.png",
+    "page": 70,
+    "category": "klados"
+  },
+  {
+    "number": 48,
+    "name": "Ορνιθολογίας",
+    "title": "Πτυχίο Ορνιθολογίας",
+    "file": "48-ornithologias.png",
+    "page": 71,
+    "category": "klados"
+  },
+  {
+    "number": 49,
+    "name": "Παγκόσμιου Οδηγισμού",
+    "title": "Πτυχίο Παγκόσμιου Οδηγισμού",
+    "file": "49-pagkosmiou-odigismou.png",
+    "page": 72,
+    "category": "klados"
+  },
+  {
+    "number": 50,
+    "name": "Παιχνιδιών",
+    "title": "Πτυχίο Παιχνιδιών",
+    "file": "50-paichnidion.png",
+    "page": 73,
+    "category": "klados"
+  },
+  {
+    "number": 51,
+    "name": "Πληροφορικής",
+    "title": "Πτυχίο Πληροφορικής",
+    "file": "51-pliroforikis.png",
+    "page": 74,
+    "category": "klados"
+  },
+  {
+    "number": 52,
+    "name": "Ποδηλασίας",
+    "title": "Πτυχίο Ποδηλασίας",
+    "file": "52-podilasias.png",
+    "page": 75,
+    "category": "klados"
+  },
+  {
+    "number": 53,
+    "name": "Πολεμικών Τεχνών",
+    "title": "Πτυχίο Πολεμικών Τεχνών",
+    "file": "53-polemikon-technon.png",
+    "page": 76,
+    "category": "klados"
+  },
+  {
+    "number": 54,
+    "name": "Πολίτη του Κόσμου",
+    "title": "Πτυχίο Πολίτη του Κόσμου",
+    "file": "54-politi-tou-kosmou.png",
+    "page": 77,
+    "category": "klados"
+  },
+  {
+    "number": 55,
+    "name": "Πολιτισμοί του Κόσμου",
+    "title": "Πτυχίο Πολιτισμοί του Κόσμου",
+    "file": "55-politismoi-tou-kosmou.png",
+    "page": 78,
+    "category": "klados"
+  },
+  {
+    "number": 56,
+    "name": "Πρόληψης και Ασφάλειας",
+    "title": "Πτυχίο Πρόληψης και Ασφάλειας",
+    "file": "56-prolipsis-kai-asfaleias.png",
+    "page": 79,
+    "category": "klados"
+  },
+  {
+    "number": 57,
+    "name": "Προστασίας του Περιβάλλοντος",
+    "title": "Πτυχίο Προστασίας του Περιβάλλοντος",
+    "file": "57-prostasias-tou-perivallontos.png",
+    "page": 80,
+    "category": "klados"
+  },
+  {
+    "number": 58,
+    "name": "Σοκολάτας",
+    "title": "Πτυχίο Σοκολάτας",
+    "file": "58-sokolatas.png",
+    "page": 81,
+    "category": "klados"
+  },
+  {
+    "number": 59,
+    "name": "Τεχνίτη",
+    "title": "Πτυχίο Τεχνίτη",
+    "file": "59-techniti.png",
+    "page": 82,
+    "category": "klados"
+  },
+  {
+    "number": 60,
+    "name": "Τραγουδιού",
+    "title": "Πτυχίο Τραγουδιού",
+    "file": "60-tragoudiou.png",
+    "page": 83,
+    "category": "klados"
+  },
+  {
+    "number": 61,
+    "name": "Φιλοξενίας",
+    "title": "Πτυχίο Φιλοξενίας",
+    "file": "61-filoxenias.png",
+    "page": 84,
+    "category": "klados"
+  },
+  {
+    "number": 62,
+    "name": "Φίλου της Θάλασσας",
+    "title": "Πτυχίο Φίλου της Θάλασσας",
+    "file": "62-filou-tis-thalassas.png",
+    "page": 85,
+    "category": "klados"
+  },
+  {
+    "number": 63,
+    "name": "Φίλου της Μουσικής",
+    "title": "Πτυχίο Φίλου της Μουσικής",
+    "file": "63-filou-tis-mousikis.png",
+    "page": 86,
+    "category": "klados"
+  },
+  {
+    "number": 64,
+    "name": "Φίλου της Τέχνης",
+    "title": "Πτυχίο Φίλου της Τέχνης",
+    "file": "64-filou-tis-technis.png",
+    "page": 87,
+    "category": "klados"
+  },
+  {
+    "number": 65,
+    "name": "Φίλου των Ζώων",
+    "title": "Πτυχίο Φίλου των Ζώων",
+    "file": "65-filou-ton-zoon.png",
+    "page": 88,
+    "category": "klados"
+  },
+  {
+    "number": 66,
+    "name": "Φροντίδας των Ρούχων",
+    "title": "Πτυχίο Φροντίδας των Ρούχων",
+    "file": "66-frontidas-ton-rouchon.png",
+    "page": 89,
+    "category": "klados"
+  },
+  {
+    "number": 67,
+    "name": "Φωτογραφίας",
+    "title": "Πτυχίο Φωτογραφίας",
+    "file": "67-fotografias.png",
+    "page": 90,
+    "category": "klados"
+  },
+  {
+    "number": 68,
+    "name": "Χειροτεχνίας και Κατασκευών",
+    "title": "Πτυχίο Χειροτεχνίας και Κατασκευών",
+    "file": "68-cheirotechnias-kai-kataskeyon.png",
+    "page": 91,
+    "category": "klados"
+  },
+  {
+    "number": 69,
+    "name": "Χορού",
+    "title": "Πτυχίο Χορού",
+    "file": "69-chorou.png",
+    "page": 92,
+    "category": "klados"
+  },
+  {
+    "number": 70,
+    "name": "Ψυχαγωγίας",
+    "title": "Πτυχίο Ψυχαγωγίας",
+    "file": "70-psychagogias.png",
+    "page": 93,
+    "category": "klados"
+  },
+  {
+    "number": null,
+    "name": "Οδηγισμού Α'",
+    "title": "Πτυχίο Οδηγισμού Α'",
+    "file": "odigismou-a.png",
+    "svg": "odigismou-a.svg",
+    "page": 94,
+    "category": "odigismou"
+  },
+  {
+    "number": null,
+    "name": "Οδηγισμού Β'",
+    "title": "Πτυχίο Οδηγισμού Β'",
+    "file": "odigismou-b.png",
+    "svg": "odigismou-b.svg",
+    "page": 95,
+    "category": "odigismou"
+  },
+  {
+    "number": null,
+    "name": "Οδηγισμού Γ'",
+    "title": "Πτυχίο Οδηγισμού Γ'",
+    "file": "odigismou-g.png",
+    "svg": "odigismou-g.svg",
+    "page": 95,
+    "category": "odigismou"
+  }
+]
