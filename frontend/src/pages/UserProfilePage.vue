@@ -51,96 +51,12 @@
           <div class="section-header">
             <h2>
               <q-icon name="insights" size="32px" />
-              {{ $t('progress.admin.title') || 'Individual Progress' }}
+              {{ $t('progress.title') }}
             </h2>
-            <p>{{ $t('progress.admin.extraStageInfo') || 'Track your journey through peaks, paths, and diplomas.' }}</p>
+            <p>{{ $t('progress.subtitle') }}</p>
           </div>
 
-          <div class="row q-col-gutter-xl q-mb-xl">
-        <!-- 1. Current Peak (Left) -->
-        <div class="col-12 col-md-4 text-center">
-          <div v-if="user?.progress?.currentPeak">
-            <q-avatar size="200px" class="peak-avatar shadow-10">
-              <img :src="`${config.apiUrl}${user?.progress?.currentPeak?.image}`" style="object-fit: cover" />
-            </q-avatar>
-          </div>
-          <div v-else class="empty-state-card">
-            <q-icon name="landscape" size="60px" color="grey-4" />
-            <div class="text-h6 text-grey-6 q-mt-md">{{ $t('progress.admin.noPeak') || 'No Peak Earned Yet' }}</div>
-          </div>
-        </div>
-
-        <!-- 2. Diplomas (Right) -->
-        <div class="col-12 col-md-8">
-          <h3 class="text-h5 q-mb-md flex items-center">
-            <q-icon name="school" class="q-mr-sm" color="accent" />
-            {{ $t('progress.admin.diplomas.title') || 'Diplomas' }}
-          </h3>
-          
-          <q-card class="diplomas-card">
-            <q-card-section>
-              <!-- Guide Diplomas -->
-              <div v-if="user?.progress?.guideDiplomas && user?.progress?.guideDiplomas.length > 0">
-                <div class="text-subtitle2 text-grey-7 q-mb-sm">{{ $t('progress.admin.diplomas.guide') || 'Guide Diplomas' }}</div>
-                <div class="diplomas-grid">
-                  <div v-for="diploma in user?.progress?.guideDiplomas" :key="diploma.id" class="diploma-item">
-                    <q-avatar size="60px" class="diploma-avatar">
-                      <img v-if="diploma.image" :src="`${config.apiUrl}${diploma.image}`" style="object-fit: contain" />
-                      <q-icon v-else name="school" color="accent" size="30px" />
-                    </q-avatar>
-                    <div class="diploma-name">{{ diploma.name }}</div>
-                  </div>
-                </div>
-              </div>
-              <div v-else class="text-grey-5 q-mb-md">{{ $t('progress.admin.noEarnedGuideDiplomas') || 'No Guide Diplomas Yet' }}</div>
-
-              <q-separator class="q-my-md" />
-
-              <!-- Elective Diplomas -->
-              <div v-if="user?.progress?.electiveDiplomas && user?.progress?.electiveDiplomas.length > 0">
-                <div class="text-subtitle2 text-grey-7 q-mb-sm">{{ $t('progress.admin.diplomas.elective') || 'Elective Diplomas' }}</div>
-                <div class="diplomas-grid">
-                  <div v-for="diploma in user?.progress?.electiveDiplomas" :key="diploma.id" class="diploma-item">
-                    <q-avatar size="60px" class="diploma-avatar">
-                      <img v-if="diploma.image" :src="`${config.apiUrl}${diploma.image}`" style="object-fit: contain" />
-                      <q-icon v-else name="star" color="purple" size="30px" />
-                    </q-avatar>
-                    <div class="diploma-name">{{ diploma.name }}</div>
-                  </div>
-                </div>
-              </div>
-              <div v-else class="text-grey-5">{{ $t('progress.admin.noEarnedElectiveDiplomas') || 'No Elective Diplomas Yet' }}</div>
-            </q-card-section>
-          </q-card>
-        </div>
-      </div>
-
-      <!-- 3. Completed Paths (Bottom) -->
-      <div>
-        <h3 class="text-h5 q-mb-md flex items-center">
-          <q-icon name="explore" class="q-mr-sm" color="secondary" />
-          {{ $t('progress.admin.paths.title') || 'Completed Paths' }} ({{ user?.progress?.completedPaths?.length || 0 }})
-        </h3>
-        
-        <div v-if="user?.progress?.completedPaths && user?.progress?.completedPaths.length > 0">
-          <q-card class="paths-text-card">
-            <q-card-section>
-              <div class="row q-col-gutter-md">
-                <div v-for="path in user?.progress?.completedPaths" :key="path.id" class="col-12 col-sm-6 col-md-4">
-                  <div class="flex items-center path-item-text">
-                    <q-icon name="check_circle" color="secondary" size="sm" class="q-mr-sm flex-shrink-0" />
-                    <span class="text-body1 path-name-text">{{ path.name }}</span>
-                  </div>
-                </div>
-              </div>
-            </q-card-section>
-          </q-card>
-        </div>
-        <div v-else class="empty-state-card">
-          <q-icon name="map" size="60px" color="grey-4" />
-          <div class="text-h6 text-grey-6 q-mt-md">{{ $t('progress.admin.noEarnedPaths') || 'No Paths Completed Yet' }}</div>
-        </div>
-      </div>
+          <ProgressOverview :progress="user?.progress" :peaks="progressStore.peaks" />
         </q-card-section>
       </q-card>
     </div>
@@ -153,13 +69,15 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import { api } from '@/api';
-import { config } from '@/config';
 import { date } from 'quasar';
 import AvatarDisplay from '@/components/AvatarDisplay.vue';
+import ProgressOverview from '@/components/progress/ProgressOverview.vue';
+import { useProgressStore } from '@/stores/progress';
 
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
+const progressStore = useProgressStore();
 const { t } = useI18n();
 const user = ref(null);
 
@@ -217,6 +135,7 @@ const formatUnitRole = (unitRole) => {
 
 onMounted(() => {
   fetchUserProfile();
+  progressStore.fetchCatalog();
 });
 
 onBeforeUnmount(() => {

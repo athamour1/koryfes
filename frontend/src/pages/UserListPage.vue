@@ -83,12 +83,10 @@
             </h4>
 
             <div v-if="user.progress?.currentPeak" style="display: flex; align-items: center; gap: 16px;">
-              <q-avatar size="50px" class="badge-avatar">
-                <img :src="`${config.apiUrl}${user.progress.currentPeak.image}`" style="object-fit: cover" />
-              </q-avatar>
+              <img :src="peakImage(user.progress.currentPeak)" :alt="user.progress.currentPeak.name" style="width: 50px; height: 50px; object-fit: contain" />
               <div style="flex: 1; min-width: 0;">
                 <div class="text-weight-bold text-subtitle1" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ user.progress.currentPeak.name }}</div>
-                <div class="text-caption text-grey-7">{{ $t('progress.admin.peaks.' + user.progress.currentPeak.name.toLowerCase()) }}</div>
+                <div class="text-caption text-grey-7">{{ user.progress.completedPaths?.length || 0 }} {{ $t('progress.paths') }} · {{ (user.progress.guideDiplomas?.length || 0) + (user.progress.electiveDiplomas?.length || 0) }} {{ $t('progress.diplomasShort') }}</div>
               </div>
             </div>
 
@@ -128,7 +126,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user';
 import { useAuthStore } from '@/stores/auth';
-import { config } from '@/config';
+import { peakImage } from '@/utils/badges';
 import AvatarDisplay from '@/components/AvatarDisplay.vue';
 import PageHeader from '@/components/PageHeader.vue';
 

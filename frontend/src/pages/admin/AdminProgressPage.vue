@@ -1,324 +1,113 @@
 <template>
   <q-page class="progress-page">
-    <!-- Hero Header -->
-    <PageHeader 
+    <PageHeader
       icon="trending_up"
-      title="Individual Progress Management"
-      subtitle="Manage peaks, diplomas, and paths for guide progression"
+      :title="$t('progress.catalogTitle')"
+      :subtitle="$t('progress.catalogSubtitle')"
     />
 
-    <!-- Tabs Content -->
     <div class="q-pa-md" style="max-width: 1400px; margin: 0 auto;">
-      <q-card flat bordered>
-        <q-tabs
-          v-model="tab"
-          dense
-          class="text-grey"
-          active-color="primary"
-          indicator-color="primary"
-          align="justify"
-          narrow-indicator
-        >
-          <q-tab name="peaks" icon="landscape" label="Peaks" data-cy="tab-peaks" />
-          <q-tab name="guideDiplomas" icon="school" label="Guide Diplomas" data-cy="tab-guide-diplomas" />
-          <q-tab name="electiveDiplomas" icon="stars" label="Elective Diplomas" data-cy="tab-elective-diplomas" />
-          <q-tab name="paths" icon="route" label="Paths" data-cy="tab-paths" />
-        </q-tabs>
+      <q-banner rounded class="bg-blue-1 text-blue-10 q-mb-md" dense>
+        <template #avatar><q-icon name="menu_book" color="primary" /></template>
+        {{ $t('progress.readOnlyNote') }}
+      </q-banner>
 
+      <q-card flat bordered>
+        <q-tabs v-model="tab" dense class="text-grey" active-color="primary" indicator-color="primary" align="justify" narrow-indicator>
+          <q-tab name="peaks" icon="landscape" :label="$t('progress.tabs.peaks')" data-cy="tab-peaks" />
+          <q-tab name="paths" icon="route" :label="`${$t('progress.tabs.paths')} (${store.paths.length})`" data-cy="tab-paths" />
+          <q-tab name="guide" icon="school" :label="$t('progress.tabs.guideDiplomas')" data-cy="tab-guide-diplomas" />
+          <q-tab name="elective" icon="stars" :label="`${$t('progress.tabs.electiveDiplomas')} (${store.electiveDiplomas.length})`" data-cy="tab-elective-diplomas" />
+        </q-tabs>
         <q-separator />
 
-        <q-tab-panels v-model="tab" animated>
-          <!-- Peaks Tab -->
+        <div v-if="!store.loaded" class="flex flex-center q-pa-xl">
+          <q-spinner size="40px" color="primary" />
+        </div>
+
+        <q-tab-panels v-else v-model="tab" animated>
+          <!-- Peaks -->
           <q-tab-panel name="peaks">
-            <div class="text-h6 q-mb-md">Progression Peaks</div>
-            <q-table
-              :rows="progressStore.peaks"
-              :columns="peakColumns"
-              row-key="id"
-              flat
-              :pagination="{ rowsPerPage: 10 }"
-            >
-              <!-- Create button removed - Peaks are fixed entries -->
-
-              <template v-slot:body-cell-image="props">
-                <q-td :props="props">
-                  <q-avatar size="50px">
-                    <img v-if="props.row.image" :src="`${config.apiUrl}${props.row.image}`" style="object-fit: cover" />
-                    <q-icon v-else name="landscape" size="40px" color="grey-5" />
-                  </q-avatar>
-                </q-td>
-              </template>
-
-              <template v-slot:body-cell-actions="props">
-                <q-td :props="props">
-                  <q-btn flat dense color="primary" icon="edit" @click="openEditPeakDialog(props.row)" data-cy="edit-peak-btn" />
-                </q-td>
-              </template>
-            </q-table>
-          </q-tab-panel>
-
-          <!-- Guide Diplomas Tab -->
-          <q-tab-panel name="guideDiplomas">
-            <div class="text-h6 q-mb-md">Guide Diplomas</div>
-            <q-table
-              :rows="progressStore.guideDiplomas"
-              :columns="guideDiplomaColumns"
-              row-key="id"
-              flat
-              :pagination="{ rowsPerPage: 10 }"
-            >
-              <!-- Create button removed - Guide Diplomas are fixed entries -->
-
-              <template v-slot:body-cell-image="props">
-                <q-td :props="props">
-                  <q-avatar size="50px">
-                    <img v-if="props.row.image" :src="`${config.apiUrl}${props.row.image}`" style="object-fit: cover" />
-                    <q-icon v-else name="school" size="40px" color="grey-5" />
-                  </q-avatar>
-                </q-td>
-              </template>
-
-              <template v-slot:body-cell-actions="props">
-                <q-td :props="props">
-                  <q-btn flat dense color="primary" icon="edit" @click="openEditGuideDiplomaDialog(props.row)" data-cy="edit-guide-diploma-btn" />
-                </q-td>
-              </template>
-            </q-table>
-          </q-tab-panel>
-
-          <!-- Elective Diplomas Tab -->
-          <q-tab-panel name="electiveDiplomas">
-            <div class="row items-center q-mb-md">
-              <div class="text-h6">Elective Diplomas</div>
-              <q-space />
-              <q-input 
-                outlined 
-                dense 
-                debounce="300" 
-                v-model="electiveDiplomaSearch" 
-                placeholder="Search diplomas..."
-                style="min-width: 250px"
-                data-cy="search-elective-diploma"
-              >
-                <template v-slot:append>
-                  <q-icon name="search" />
-                </template>
-              </q-input>
+            <div class="row q-col-gutter-lg">
+              <div v-for="peak in store.peaks" :key="peak.id" class="col-12 col-sm-6 col-md-3">
+                <q-card flat bordered class="text-center full-height q-pa-md">
+                  <img :src="peakImage(peak)" :alt="peak.name" class="peak-image" />
+                  <div class="text-h6 q-mt-sm">{{ peak.name }}</div>
+                  <div class="text-body2 text-grey-8 q-mt-sm">{{ peak.description }}</div>
+                </q-card>
+              </div>
             </div>
-            <q-table
-              :rows="filteredElectiveDiplomas"
-              :columns="electiveDiplomaColumns"
-              row-key="id"
-              flat
-              :pagination="{ rowsPerPage: 10 }"
-            >
-
-              <template v-slot:body-cell-image="props">
-                <q-td :props="props">
-                  <q-avatar size="50px">
-                    <img v-if="props.row.image" :src="`${config.apiUrl}${props.row.image}`" style="object-fit: cover" />
-                    <q-icon v-else name="stars" size="40px" color="grey-5" />
-                  </q-avatar>
-                </q-td>
-              </template>
-
-              <template v-slot:body-cell-actions="props">
-                <q-td :props="props">
-                  <q-btn flat dense color="primary" icon="edit" @click="openEditElectiveDiplomaDialog(props.row)" data-cy="edit-elective-diploma-btn" />
-                </q-td>
-              </template>
-            </q-table>
           </q-tab-panel>
 
-          <!-- Paths Tab -->
+          <!-- Paths -->
           <q-tab-panel name="paths">
-            <div class="row items-center q-mb-md q-gutter-md">
-              <div class="text-h6">Learning Paths</div>
-              <q-space />
-              <q-input 
-                outlined 
-                dense 
-                debounce="300" 
-                v-model="pathSearch" 
-                placeholder="Search paths..."
-                style="min-width: 250px"
-                data-cy="search-path"
+            <q-input v-model="search" dense filled clearable :label="$t('progress.search')" class="q-mb-md">
+              <template #prepend><q-icon name="search" /></template>
+            </q-input>
+            <q-list bordered separator class="rounded-borders">
+              <q-expansion-item
+                v-for="chapter in filteredChapters"
+                :key="chapter.category"
+                :label="$t(`progress.chapters.${chapter.category}`)"
+                :caption="`${chapter.paths.length} ${$t('progress.paths')}`"
+                :default-opened="!!search"
+                header-class="text-weight-medium"
               >
-                <template v-slot:append>
-                  <q-icon name="search" />
-                </template>
-              </q-input>
-              <q-btn-toggle
-                v-model="pathCategoryFilter"
-                toggle-color="primary"
-                :options="pathCategoryToggleOptions"
-                @update:model-value="filterPathsByCategory"
-              />
+                <q-list dense separator>
+                  <q-item v-for="p in chapter.paths" :key="p.id">
+                    <q-item-section avatar class="path-number">{{ p.number }}.</q-item-section>
+                    <q-item-section>
+                      <q-item-label class="text-weight-medium">{{ p.name }}</q-item-label>
+                      <q-item-label caption>{{ p.description }}</q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </q-list>
+              </q-expansion-item>
+            </q-list>
+          </q-tab-panel>
+
+          <!-- Guiding diplomas -->
+          <q-tab-panel name="guide">
+            <div class="diploma-grid">
+              <div v-for="d in store.guideDiplomas" :key="d.id" class="diploma-card" @click="selected = d">
+                <img :src="diplomaImage(d)" :alt="d.name" />
+                <div>{{ d.name }}</div>
+              </div>
             </div>
+          </q-tab-panel>
 
-            <q-table
-              :rows="filteredPaths"
-              :columns="pathColumns"
-              row-key="id"
-              flat
-              :pagination="{ rowsPerPage: 10 }"
-            >
-
-              <!-- No image column needed for paths -->
-
-              <template v-slot:body-cell-category="props">
-                <q-td :props="props">
-                  <q-chip :color="getCategoryColor(props.row.category)" text-color="white" dense>
-                    {{ formatCategory(props.row.category) }}
-                  </q-chip>
-                </q-td>
-              </template>
-
-              <template v-slot:body-cell-actions="props">
-                <q-td :props="props">
-                  <q-btn flat dense color="primary" icon="edit" @click="openEditPathDialog(props.row)" data-cy="edit-path-btn" />
-                </q-td>
-              </template>
-            </q-table>
+          <!-- Branch diplomas -->
+          <q-tab-panel name="elective">
+            <q-input v-model="search" dense filled clearable :label="$t('progress.search')" class="q-mb-md">
+              <template #prepend><q-icon name="search" /></template>
+            </q-input>
+            <div class="diploma-grid">
+              <div v-for="d in filteredElectives" :key="d.id" class="diploma-card" @click="selected = d">
+                <img :src="diplomaImage(d)" :alt="d.name" loading="lazy" />
+                <div><span class="text-grey-6">{{ d.number }}.</span> {{ d.name.replace(/^Πτυχίο /, '') }}</div>
+              </div>
+            </div>
           </q-tab-panel>
         </q-tab-panels>
       </q-card>
     </div>
 
-    <!-- Peak Dialog - Image Upload Only -->
-    <q-dialog v-model="peakDialog">
-      <q-card style="min-width: 400px">
-        <q-card-section>
-          <div class="text-h6">Edit Peak Image</div>
+    <!-- Diploma requirements -->
+    <q-dialog :model-value="!!selected" @update:model-value="selected = null">
+      <q-card v-if="selected" style="width: 560px; max-width: 95vw">
+        <q-card-section class="row items-center no-wrap q-gutter-md">
+          <img :src="diplomaImage(selected)" :alt="selected.name" style="width: 80px; height: 80px" />
+          <div class="text-h6">{{ selected.name }}</div>
         </q-card-section>
-
-        <q-separator />
-
-        <q-card-section class="q-gutter-md">
-          <!-- Name (Read-only) -->
-          <q-input filled v-model="peakForm.name" label="Name" readonly />
-          
-          <!-- Image Upload -->
-          <q-file 
-            filled 
-            v-model="peakForm.imageFile" 
-            label="Peak Image" 
-            accept=".jpg, .png, .jpeg"
-          >
-            <template v-slot:prepend>
-              <q-icon name="cloud_upload" />
-            </template>
-          </q-file>
+        <q-card-section class="q-pt-none">
+          <div v-if="selected.intro" class="text-body2 text-italic q-mb-sm">{{ selected.intro }}</div>
+          <div class="text-subtitle2 q-mb-xs">{{ $t('progress.requirements') }}</div>
+          <ol class="requirements">
+            <li v-for="r in selected.requirements" :key="r.n" :value="r.n">{{ r.text }}</li>
+          </ol>
         </q-card-section>
-
-        <q-separator />
-
         <q-card-actions align="right">
-          <q-btn flat label="Cancel" color="grey" v-close-popup />
-          <q-btn flat label="Save" color="primary" @click="submitPeak" data-cy="save-peak-btn" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-
-    <!-- Guide Diploma Dialog - Image Upload Only -->
-    <q-dialog v-model="guideDiplomaDialog">
-      <q-card style="min-width: 400px">
-        <q-card-section>
-          <div class="text-h6">Edit Guide Diploma Image</div>
-        </q-card-section>
-
-        <q-separator />
-
-        <q-card-section class="q-gutter-md">
-          <!-- Name (Read-only) -->
-          <q-input filled v-model="guideDiplomaForm.name" label="Name" readonly />
-          
-          <!-- Image Upload -->
-          <q-file 
-            filled 
-            v-model="guideDiplomaForm.imageFile" 
-            label="Diploma Image" 
-            accept=".jpg, .png, .jpeg"
-          >
-            <template v-slot:prepend>
-              <q-icon name="cloud_upload" />
-            </template>
-          </q-file>
-        </q-card-section>
-
-        <q-separator />
-
-        <q-card-actions align="right">
-          <q-btn flat label="Cancel" color="grey" v-close-popup />
-          <q-btn flat label="Save" color="primary" @click="submitGuideDiploma" data-cy="save-guide-diploma-btn" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-
-    <!-- Elective Diploma Dialog -->
-    <q-dialog v-model="electiveDiplomaDialog">
-      <q-card style="min-width: 500px">
-        <q-card-section>
-          <div class="text-h6">{{ editMode ? 'Edit Elective Diploma' : 'Create Elective Diploma' }}</div>
-        </q-card-section>
-
-        <q-separator />
-
-        <q-card-section class="q-gutter-md">
-          <q-input filled v-model="electiveDiplomaForm.name" label="Name *" :rules="[val => !!val || 'Name is required']" data-cy="elective-diploma-name-input" />
-          
-          <q-input filled v-model="electiveDiplomaForm.description" label="Description" type="textarea" rows="3" />
-          
-          <q-file 
-            filled 
-            v-model="electiveDiplomaForm.imageFile" 
-            label="Diploma Image" 
-            accept=".jpg, .png, .jpeg"
-          >
-            <template v-slot:prepend>
-              <q-icon name="cloud_upload" />
-            </template>
-          </q-file>
-        </q-card-section>
-
-        <q-separator />
-
-        <q-card-actions align="right">
-          <q-btn flat label="Cancel" color="grey" v-close-popup />
-          <q-btn flat label="Save" color="primary" @click="submitElectiveDiploma" data-cy="save-elective-diploma-btn" />
-        </q-card-actions>
-      </q-card>
-    </q-dialog>
-
-    <!-- Path Dialog -->
-    <q-dialog v-model="pathDialog">
-      <q-card style="min-width: 500px">
-        <q-card-section>
-          <div class="text-h6">{{ editMode ? 'Edit Path' : 'Create Path' }}</div>
-        </q-card-section>
-
-        <q-separator />
-
-        <q-card-section class="q-gutter-md">
-          <q-input filled v-model="pathForm.name" label="Name *" :rules="[val => !!val || 'Name is required']" data-cy="path-name-input" />
-          
-          <q-select 
-            filled 
-            v-model="pathForm.category" 
-            :options="pathCategoryFormOptions" 
-            label="Category *" 
-            emit-value 
-            map-options
-          />
-          
-          <q-input filled v-model="pathForm.description" label="Description" type="textarea" rows="3" />
-        </q-card-section>
-
-        <q-separator />
-
-        <q-card-actions align="right">
-          <q-btn flat label="Cancel" color="grey" v-close-popup />
-          <q-btn flat label="Save" color="primary" @click="submitPath" data-cy="save-path-btn" />
+          <q-btn flat :label="$t('general.close')" color="primary" v-close-popup />
         </q-card-actions>
       </q-card>
     </q-dialog>
@@ -326,294 +115,72 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useProgressStore } from '@/stores/progress';
-import { config } from '@/config';
+import { diplomaImage, peakImage } from '@/utils/badges';
 import PageHeader from '@/components/PageHeader.vue';
 
+const store = useProgressStore();
 const tab = ref('peaks');
-const progressStore = useProgressStore();
-const pathCategoryFilter = ref('all');
-const electiveDiplomaSearch = ref('');
-const pathSearch = ref('');
+const search = ref('');
+const selected = ref(null);
 
+watch(tab, () => { search.value = ''; });
 
-const peakColumns = computed(() => [
-  { name: 'image', label: 'Image', field: 'image', align: 'center' },
-  { name: 'type', label: 'Type', field: 'type', sortable: true, align: 'left' },
-  { name: 'description', label: 'Description', field: 'description', align: 'left' },
-  { name: 'actions', label: 'Actions', field: 'actions', align: 'right' }
-]);
-
-const guideDiplomaColumns = computed(() => [
-  { name: 'image', label: 'Image', field: 'image', align: 'center' },
-  { name: 'description', label: 'Description', field: 'description', align: 'left' },
-  { name: 'actions', label: 'Actions', field: 'actions', align: 'right' }
-]);
-
-const electiveDiplomaColumns = computed(() => [
-  { name: 'image', label: 'Image', field: 'image', align: 'center' },
-  { name: 'name', label: 'Name', field: 'name', sortable: true, align: 'left' },
-  { name: 'description', label: 'Description', field: 'description', align: 'left' },
-  { name: 'actions', label: 'Actions', field: 'actions', align: 'right' }
-]);
-
-const pathColumns = computed(() => [
-  { name: 'name', label: 'Name', field: 'name', sortable: true, align: 'left' },
-  { name: 'category', label: 'Category', field: 'category', sortable: true, align: 'left' },
-  { name: 'description', label: 'Description', field: 'description', align: 'left' },
-  { name: 'actions', label: 'Actions', field: 'actions', align: 'right' }
-]);
-
-const pathCategoryOptions = [
-  { label: 'All', value: 'all' },
-  { label: 'Me & My Capabilities', value: 'me_and_my_capabilities' },
-  { label: 'Society & Volunteering', value: 'society_and_volunteering' },
-  { label: 'Nature', value: 'nature' },
-  { label: 'Arts', value: 'arts' }
-];
-
-const pathCategoryToggleOptions = [
-  { label: 'All', value: 'all' },
-  { label: 'Me & Capabilities', value: 'me_and_my_capabilities' },
-  { label: 'Society', value: 'society_and_volunteering' },
-  { label: 'Nature', value: 'nature' },
-  { label: 'Arts', value: 'arts' }
-];
-
-const filteredElectiveDiplomas = computed(() => {
-  if (!electiveDiplomaSearch.value) return progressStore.electiveDiplomas;
-  const search = electiveDiplomaSearch.value.toLowerCase();
-  return progressStore.electiveDiplomas.filter(diploma => 
-    diploma.name?.toLowerCase().includes(search) || 
-    diploma.description?.toLowerCase().includes(search)
-  );
-});
-
-const filteredPaths = computed(() => {
-  let paths = progressStore.paths;
-  
-  // Filter by search
-  if (pathSearch.value) {
-    const search = pathSearch.value.toLowerCase();
-    paths = paths.filter(path => 
-      path.name?.toLowerCase().includes(search) || 
-      path.description?.toLowerCase().includes(search)
-    );
-  }
-  
-  return paths;
-});
-
-const filterPathsByCategory = () => {
-  const category = pathCategoryFilter.value === 'all' ? null : pathCategoryFilter.value;
-  progressStore.fetchPaths(category);
+const matches = (...fields) => {
+  const q = (search.value || '').trim().toLowerCase();
+  return !q || fields.some((f) => f?.toLowerCase().includes(q));
 };
 
-const getCategoryColor = (category) => {
-  const colors = {
-    me_and_my_capabilities: 'blue',
-    society_and_volunteering: 'green',
-    nature: 'teal',
-    arts: 'purple'
-  };
-  return colors[category] || 'grey';
-};
+const filteredChapters = computed(() => store.pathsByChapter
+  .map((c) => ({ ...c, paths: c.paths.filter((p) => matches(p.name, p.description)) }))
+  .filter((c) => c.paths.length));
 
-const formatCategory = (category) => {
-  const labels = {
-    me_and_my_capabilities: 'Me & My Capabilities',
-    society_and_volunteering: 'Society & Volunteering',
-    nature: 'Nature',
-    arts: 'Arts'
-  };
-  return labels[category] || category;
-};
+const filteredElectives = computed(() => store.electiveDiplomas.filter((d) => matches(d.name)));
 
-// Dialog state
-const peakDialog = ref(false);
-const guideDiplomaDialog = ref(false);
-const electiveDiplomaDialog = ref(false);
-const pathDialog = ref(false);
-const editMode = ref(false);
-
-// Form data
-const peakForm = ref({ id: null, name: '', type: 'promise', description: '', order: 1, imageFile: null });
-const guideDiplomaForm = ref({ id: null, name: '', level: 1, description: '', imageFile: null });
-const electiveDiplomaForm = ref({ id: null, name: '', description: '', imageFile: null });
-const pathForm = ref({ id: null, name: '', category: 'me_and_my_capabilities', description: '', imageFile: null });
-
-// Peak type options
-const peakTypeOptions = [
-  { label: 'Promise', value: 'promise' },
-  { label: 'Bronze', value: 'bronze' },
-  { label: 'Silver', value: 'silver' },
-  { label: 'Gold', value: 'gold' }
-];
-
-// Guide Diploma level options
-const guideDiplomaLevelOptions = [
-  { label: '1st Guide Diploma', value: 1 },
-  { label: '2nd Guide Diploma', value: 2 },
-  { label: '3rd Guide Diploma', value: 3 }
-];
-
-// Path category options for form
-const pathCategoryFormOptions = [
-  { label: 'Me & My Capabilities', value: 'me_and_my_capabilities' },
-  { label: 'Society & Volunteering', value: 'society_and_volunteering' },
-  { label: 'Nature', value: 'nature' },
-  { label: 'Arts', value: 'arts' }
-];
-
-// Dialog functions
-const openCreatePeakDialog = () => {
-  editMode.value = false;
-  peakForm.value = { id: null, name: '', type: 'promise', description: '', order: 1, imageFile: null };
-  peakDialog.value = true;
-};
-
-const openEditPeakDialog = (peak) => {
-  editMode.value = true;
-  peakForm.value = { ...peak, imageFile: null };
-  peakDialog.value = true;
-};
-
-const openCreateGuideDiplomaDialog = () => {
-  editMode.value = false;
-  guideDiplomaForm.value = { id: null, name: '', level: 1, description: '', imageFile: null };
-  guideDiplomaDialog.value = true;
-};
-
-const openEditGuideDiplomaDialog = (diploma) => {
-  editMode.value = true;
-  guideDiplomaForm.value = { ...diploma, imageFile: null };
-  guideDiplomaDialog.value = true;
-};
-
-const openCreateElectiveDiplomaDialog = () => {
-  editMode.value = false;
-  electiveDiplomaForm.value = { id: null, name: '', description: '', imageFile: null };
-  electiveDiplomaDialog.value = true;
-};
-
-const openEditElectiveDiplomaDialog = (diploma) => {
-  editMode.value = true;
-  electiveDiplomaForm.value = { ...diploma, imageFile: null };
-  electiveDiplomaDialog.value = true;
-};
-
-const openCreatePathDialog = () => {
-  editMode.value = false;
-  pathForm.value = { id: null, name: '', category: 'me_and_my_capabilities', description: '', imageFile: null };
-  pathDialog.value = true;
-};
-
-const openEditPathDialog = (path) => {
-  editMode.value = true;
-  pathForm.value = { ...path, imageFile: null };
-  pathDialog.value = true;
-};
-
-// Submit handlers
-const submitPeak = async () => {
-  try {
-    const formData = new FormData();
-    formData.append('name', peakForm.value.name);
-    formData.append('type', peakForm.value.type);
-    formData.append('description', peakForm.value.description || '');
-    formData.append('order', peakForm.value.order);
-    if (peakForm.value.imageFile) {
-      formData.append('image', peakForm.value.imageFile);
-    }
-
-    if (editMode.value) {
-      await progressStore.updatePeak(peakForm.value.id, formData);
-    } else {
-      await progressStore.createPeak(formData);
-    }
-    peakDialog.value = false;
-  } catch (error) {
-    console.error('Error submitting peak:', error);
-  }
-};
-
-const submitGuideDiploma = async () => {
-  try {
-    const formData = new FormData();
-    formData.append('name', guideDiplomaForm.value.name);
-    formData.append('level', guideDiplomaForm.value.level);
-    formData.append('description', guideDiplomaForm.value.description || '');
-    if (guideDiplomaForm.value.imageFile) {
-      formData.append('image', guideDiplomaForm.value.imageFile);
-    }
-
-    if (editMode.value) {
-      await progressStore.updateGuideDiploma(guideDiplomaForm.value.id, formData);
-    } else {
-      await progressStore.createGuideDiploma(formData);
-    }
-    guideDiplomaDialog.value = false;
-  } catch (error) {
-    console.error('Error submitting guide diploma:', error);
-  }
-};
-
-const submitElectiveDiploma = async () => {
-  try {
-    const formData = new FormData();
-    formData.append('name', electiveDiplomaForm.value.name);
-    formData.append('description', electiveDiplomaForm.value.description || '');
-    if (electiveDiplomaForm.value.imageFile) {
-      formData.append('image', electiveDiplomaForm.value.imageFile);
-    }
-
-    if (editMode.value) {
-      await progressStore.updateElectiveDiploma(electiveDiplomaForm.value.id, formData);
-    } else {
-      await progressStore.createElectiveDiploma(formData);
-    }
-    electiveDiplomaDialog.value = false;
-  } catch (error) {
-    console.error('Error submitting elective diploma:', error);
-  }
-};
-
-const submitPath = async () => {
-  try {
-    const formData = new FormData();
-    formData.append('name', pathForm.value.name);
-    formData.append('category', pathForm.value.category);
-    formData.append('description', pathForm.value.description || '');
-    if (pathForm.value.imageFile) {
-      formData.append('image', pathForm.value.imageFile);
-    }
-
-    if (editMode.value) {
-      await progressStore.updatePath(pathForm.value.id, formData);
-    } else {
-      await progressStore.createPath(formData);
-    }
-    pathDialog.value = false;
-  } catch (error) {
-    console.error('Error submitting path:', error);
-  }
-};
-
-onMounted(async () => {
-  await Promise.all([
-    progressStore.fetchPeaks(),
-    progressStore.fetchGuideDiplomas(),
-    progressStore.fetchElectiveDiplomas(),
-    progressStore.fetchPaths()
-  ]);
-});
+onMounted(() => store.fetchCatalog());
 </script>
 
 <style scoped>
-.gradient-purple {
-  background: linear-gradient(135deg, var(--q-primary) 0%, var(--q-secondary) 100%);
+.peak-image {
+  width: 140px;
+  height: 140px;
+  object-fit: contain;
 }
-
-
+.path-number {
+  min-width: 36px;
+  font-weight: 600;
+  color: var(--q-primary);
+}
+.diploma-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 16px;
+}
+.diploma-card {
+  text-align: center;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 12px;
+  transition: background 0.15s;
+  font-size: 0.85rem;
+  line-height: 1.25;
+}
+.diploma-card:hover {
+  background: rgba(128, 128, 128, 0.12);
+}
+.diploma-card img {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto 6px;
+}
+.requirements {
+  padding-left: 1.4em;
+  margin: 0;
+}
+.requirements li {
+  margin-bottom: 6px;
+}
 </style>

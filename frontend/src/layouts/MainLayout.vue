@@ -99,7 +99,7 @@
               <q-item-section>{{ $t('navigation.adminUsers') }}</q-item-section>
             </q-item>
 
-            <q-item clickable v-ripple to="/admin/progress" v-if="authStore.isSuperAdmin" data-cy="nav-admin-progress">
+            <q-item clickable v-ripple to="/admin/progress" v-if="authStore.isAdmin" data-cy="nav-admin-progress">
               <q-item-section avatar>
                 <q-icon name="trending_up" />
               </q-item-section>
