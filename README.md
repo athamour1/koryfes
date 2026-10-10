@@ -27,6 +27,12 @@ A full-stack badge management system built with **NestJS**, **Vue 3**, **Quasar*
     -   **Frontend:** [http://localhost:8080](http://localhost:8080)
     -   **Backend API:** [http://localhost:3000](http://localhost:3000)
 
+### Release & Production
+`./release.sh` builds and pushes the `backend` / `frontend` images to
+`ghcr.io/athamour1/koryfes/*` and creates a tagged GitHub release; the server
+runs them with `docker-compose.prod.yml` + `.env.production`. See the
+[**Deployment Guide**](./devops/DEPLOYMENT.md).
+
 ### Admin Account
 On startup the backend creates (or resets) a super admin from `ADMIN_USERNAME` /
 `ADMIN_PASSWORD`. There is no public sign-up; admins create all other users.
@@ -68,7 +74,7 @@ For detailed information about the specific technologies and features, please re
 |----------|---------|----------------|
 | Vue 3 | NestJS | Docker |
 | Quasar | PostgreSQL | Nginx |
-| Pinia | TypeORM | GitHub Actions |
+| Pinia | TypeORM | GHCR |
 | Vite | Passport/JWT | |
 
 ## ⚙️ Runtime Configuration
@@ -86,7 +92,7 @@ The frontend uses a **runtime configuration** approach to allow environment vari
 | Variable | Description | Default |
 |----------|-------------|---------|
 | `VITE_API_URL` | Backend API URL | `/api` |
-| `VITE_ENV` | Environment (development/production) | `development` |
+| `VITE_ENV` | Environment (development/production) | `production` |
 | `VITE_STAGING_MESSAGE` | Optional staging banner message | _(empty)_ |
 
 ### Usage Example

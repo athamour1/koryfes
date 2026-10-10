@@ -1,39 +1,34 @@
 # Build Stage
-FROM node:24-alpine as build-stage
+FROM node:24-alpine AS build-stage
 
 WORKDIR /app
 
-# Accept build arguments
-ARG VITE_API_URL
-ARG VITE_ENV
-ARG VITE_STAGING_MESSAGE
+# Install dependencies first so they're cached until a lockfile changes.
+# Scripts are skipped here: postinstall (quasar prepare) needs the sources.
+COPY package.json package-lock.json ./
+COPY src-pwa/package.json src-pwa/package-lock.json ./src-pwa/
+RUN npm ci --ignore-scripts && npm ci --ignore-scripts --prefix src-pwa
 
-# Set them as environment variables for the build
-ENV VITE_API_URL=$VITE_API_URL
-ENV VITE_ENV=$VITE_ENV
-ENV VITE_STAGING_MESSAGE=$VITE_STAGING_MESSAGE
-
-# Copy all application files
 COPY . .
 
-# Install dependencies
-RUN npm install
-
-# Build the application
+# The image is environment-agnostic: API URL etc. are written to config.js at
+# container start by entrypoint.sh, so no build args here
 RUN npx quasar build -m pwa
 
 # Production Stage
-FROM nginx:stable-alpine as production-stage
+FROM nginx:stable-alpine AS production-stage
 
-# Copy built application
 COPY --from=build-stage /app/dist/pwa /usr/share/nginx/html
 
-# Copy nginx configuration and entrypoint script
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY security-headers.conf /etc/nginx/snippets/security-headers.conf
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
 EXPOSE 80
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+    CMD wget -q --spider http://127.0.0.1/ || exit 1
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]
