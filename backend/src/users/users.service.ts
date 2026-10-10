@@ -24,6 +24,14 @@ export class UsersService implements OnModuleInit {
         const adminPassword = process.env.ADMIN_PASSWORD;
 
         if (adminUsername && adminPassword) {
+            // The super admin password is reset from the env on every boot, so
+            // a weak one must stop the boot rather than silently go live
+            try {
+                assertPasswordPolicy(adminPassword);
+            } catch (e) {
+                throw new Error(`ADMIN_PASSWORD rejected: ${e.message}`);
+            }
+
             let adminUser = await this.usersRepository.findOne({ where: { username: adminUsername } });
 
             if (!adminUser) {

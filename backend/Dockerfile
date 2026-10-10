@@ -30,6 +30,8 @@ RUN npm run build
 # ============================================
 FROM node:24-alpine AS production
 
+ENV NODE_ENV=production
+
 # Install dumb-init and su-exec
 RUN apk add --no-cache dumb-init su-exec
 

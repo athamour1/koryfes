@@ -10,6 +10,9 @@ async function bootstrap() {
 
   configureApp(app);
 
+  // Close the DB pool cleanly on SIGTERM (docker stop / compose up recreate)
+  app.enableShutdownHooks();
+
   // Serve static files from uploads directory
   // In production: __dirname = /usr/src/app/dist/src, so we need '../..' to reach /usr/src/app
   // In development: __dirname = /backend/src, so we need '..' to reach /backend
