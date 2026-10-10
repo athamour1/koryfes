@@ -132,22 +132,28 @@ describe('Security regressions (e2e)', () => {
         });
     });
 
-    describe('/user-progress/award-*', () => {
-        it('blocks a location admin from awarding users in another location', async () => {
+    describe('/users/:id/progress', () => {
+        it('blocks a location admin from changing progress in another location', async () => {
             await http()
-                .post('/user-progress/award-peak')
+                .post(`/users/${userB.id}/progress/promise`)
                 .set('Authorization', `Bearer ${adminAToken}`)
-                .send({ userId: userB.id, peakId: 1 })
                 .expect(403);
             await http()
-                .post('/user-progress/award-path')
+                .post(`/users/${userB.id}/progress/paths`)
                 .set('Authorization', `Bearer ${adminAToken}`)
-                .send({ userId: userB.id, pathId: 1 })
+                .send({ pathId: 1 })
                 .expect(403);
             await http()
-                .post('/user-progress/award-diploma')
+                .post(`/users/${userB.id}/progress/diplomas`)
                 .set('Authorization', `Bearer ${adminAToken}`)
-                .send({ userId: userB.id, diplomaId: 1, type: 'elective' })
+                .send({ diplomaId: 1, type: 'elective' })
+                .expect(403);
+        });
+
+        it('blocks plain users from awarding themselves', () => {
+            return http()
+                .post(`/users/${userA.id}/progress/promise`)
+                .set('Authorization', `Bearer ${userAToken}`)
                 .expect(403);
         });
     });

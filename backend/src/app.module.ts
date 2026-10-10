@@ -15,6 +15,7 @@ import { PathsModule } from './paths/paths.module';
 import { GuideDiplomasModule } from './guide-diplomas/guide-diplomas.module';
 import { ElectiveDiplomasModule } from './elective-diplomas/elective-diplomas.module';
 import { UserProgressModule } from './user-progress/user-progress.module';
+import { CatalogModule } from './catalog/catalog.module';
 
 const isSqlite = process.env.DB_TYPE === 'sqlite';
 
@@ -51,6 +52,7 @@ const isSqlite = process.env.DB_TYPE === 'sqlite';
     GuideDiplomasModule,
     ElectiveDiplomasModule,
     UserProgressModule,
+    CatalogModule,
   ],
   controllers: [AppController],
   providers: [

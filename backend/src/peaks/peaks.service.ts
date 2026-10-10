@@ -1,34 +1,25 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Peak } from './peak.entity';
 
+// Read-only: the catalog is fixed in code (src/catalog) and synced on startup
 @Injectable()
 export class PeaksService {
     constructor(
         @InjectRepository(Peak)
-        private peaksRepository: Repository<Peak>,
+        private repository: Repository<Peak>,
     ) { }
 
     async findAll(): Promise<Peak[]> {
-        return this.peaksRepository.find({ order: { order: 'ASC' } });
+        return this.repository.find({ order: { order: 'ASC' } });
     }
 
     async findOne(id: number): Promise<Peak> {
-        return this.peaksRepository.findOne({ where: { id } });
-    }
-
-    async create(peakData: Partial<Peak>): Promise<Peak> {
-        const peak = this.peaksRepository.create(peakData);
-        return this.peaksRepository.save(peak);
-    }
-
-    async update(id: number, peakData: Partial<Peak>): Promise<Peak> {
-        await this.peaksRepository.update(id, peakData);
-        return this.findOne(id);
-    }
-
-    async remove(id: number): Promise<void> {
-        await this.peaksRepository.delete(id);
+        const item = await this.repository.findOne({ where: { id } });
+        if (!item) {
+            throw new NotFoundException();
+        }
+        return item;
     }
 }

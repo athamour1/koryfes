@@ -30,8 +30,8 @@ export class UserProgress {
     @JoinColumn({ name: 'currentPeakId' })
     currentPeak: Peak | null;
 
-    @Column({ nullable: true })
-    currentPeakId: number;
+    @Column({ type: 'int', nullable: true })
+    currentPeakId: number | null;
 
     @ManyToMany(() => Path)
     @JoinTable({

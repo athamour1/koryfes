@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserProgressService } from './user-progress.service';
 import { UserProgressController } from './user-progress.controller';
+import { ProgressAwardsController } from './progress-awards.controller';
 import { UserProgress } from './user-progress.entity';
 import { Peak } from '../peaks/peak.entity';
 import { Path } from '../paths/path.entity';
@@ -20,7 +21,7 @@ import { User } from '../users/entities/user.entity';
             User,
         ]),
     ],
-    controllers: [UserProgressController],
+    controllers: [UserProgressController, ProgressAwardsController],
     providers: [UserProgressService],
     exports: [UserProgressService],
 })

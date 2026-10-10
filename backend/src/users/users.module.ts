@@ -1,16 +1,14 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
 import { Unit } from '../units/entities/unit.entity';
-import { UserProgressModule } from '../user-progress/user-progress.module';
 import { LocationsModule } from '../locations/locations.module';
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([User, Unit]),
-        forwardRef(() => UserProgressModule),
         LocationsModule,
     ],
     controllers: [UsersController],
