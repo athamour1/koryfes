@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { api } from '@/api';
+import { compressImage } from '@/utils/compressImage';
 
 export const useUnitStore = defineStore('unit', {
     state: () => ({
@@ -104,7 +105,7 @@ export const useUnitStore = defineStore('unit', {
             this.error = null;
             try {
                 const formData = new FormData();
-                formData.append('file', file);
+                formData.append('file', await compressImage(file, 800));
 
                 const response = await api.post(`/units/${id}/image`, formData, {
                     headers: {
@@ -127,6 +128,42 @@ export const useUnitStore = defineStore('unit', {
             } finally {
                 this.loading = false;
             }
-        }
+        },
+
+        async uploadUnitPhoto(id, kind, file) {
+            this.error = null;
+            try {
+                const formData = new FormData();
+                formData.append('file', await compressImage(file, 1600));
+                const response = await api.post(`/units/${id}/photos`, formData, {
+                    params: { kind },
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+                if (this.currentUnit && this.currentUnit.id === id) {
+                    const others = (this.currentUnit.photos || []).filter(p => kind !== 'corner' || p.kind !== 'corner');
+                    this.currentUnit.photos = [...others, response.data];
+                }
+                return response.data;
+            } catch (error) {
+                console.error('Error uploading unit photo:', error);
+                this.error = error.response?.data?.message || 'Failed to upload photo';
+                return null;
+            }
+        },
+
+        async deleteUnitPhoto(id, photoId) {
+            this.error = null;
+            try {
+                await api.delete(`/units/${id}/photos/${photoId}`);
+                if (this.currentUnit && this.currentUnit.id === id) {
+                    this.currentUnit.photos = this.currentUnit.photos.filter(p => p.id !== photoId);
+                }
+                return true;
+            } catch (error) {
+                console.error('Error deleting unit photo:', error);
+                this.error = error.response?.data?.message || 'Failed to delete photo';
+                return false;
+            }
+        },
     }
 });
