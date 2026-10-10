@@ -1,6 +1,7 @@
 import { Controller, Get, NotFoundException, Req, Res } from '@nestjs/common';
 import { SkipThrottle } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
+import { pipeline } from 'stream';
 import { StorageService } from './storage.service';
 import { isSafeKey } from './upload-paths';
 
@@ -27,6 +28,10 @@ export class UploadsController {
         }
         // keys are random and never rewritten
         res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-        object.body.pipe(res);
+        // pipeline, not pipe: a reset from the bucket must not crash the process,
+        // and a client that goes away must release the bucket connection
+        pipeline(object.body, res, (err) => {
+            if (err) res.destroy(err);
+        });
     }
 }

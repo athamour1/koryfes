@@ -1,3 +1,4 @@
+import { Readable } from 'stream';
 import { mkdtempSync, mkdirSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
@@ -57,6 +58,28 @@ describe('legacy uploads migration (e2e)', () => {
             expect(storage.objects.has('unit-flags/notes.txt')).toBe(false);
         } finally {
             delete process.env.UPLOADS_DIR;
+            await app.close();
+        }
+    });
+});
+describe('GET /uploads/* when the bucket stream fails (e2e)', () => {
+    it('drops that response and keeps serving', async () => {
+        const storage = new InMemoryStorage();
+        await storage.put('unit-flags/ok.webp', Buffer.from('ok'), 'image/webp');
+        const realGet = storage.get.bind(storage);
+        storage.get = async (key: string) => {
+            if (key !== 'unit-flags/broken.webp') return realGet(key);
+            // the connection to Garage resets after the first chunk
+            const body = new Readable({ read() {} });
+            body.push(Buffer.from('partial'));
+            setTimeout(() => body.destroy(new Error('ECONNRESET')), 20);
+            return { body, contentType: 'image/webp' };
+        };
+        const app = await createTestApp(storage);
+        try {
+            await expect(request(app.getHttpServer()).get('/uploads/unit-flags/broken.webp')).rejects.toThrow();
+            await request(app.getHttpServer()).get('/uploads/unit-flags/ok.webp').expect(200);
+        } finally {
             await app.close();
         }
     });
