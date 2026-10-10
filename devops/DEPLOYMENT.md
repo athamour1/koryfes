@@ -161,8 +161,9 @@ of its volumes:
 ```bash
 dc exec -T db pg_dump -U postgres guide_badges | gzip > backup-$(date +%F).sql.gz
 dc stop garage
-docker run --rm -v "$(basename "$PWD")_garage_meta":/meta -v "$(basename "$PWD")_garage_data":/data \
-  -v "$PWD":/out alpine tar czf /out/garage-$(date +%F).tar.gz /meta /data
+# --volumes-from finds Garage's volumes whatever the compose project is called
+docker run --rm --volumes-from "$(dc ps -aq garage)" -v "$PWD":/out alpine \
+  tar czf /out/garage-$(date +%F).tar.gz /var/lib/garage
 dc start garage
 ```
 

@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Unit } from './unit.entity';
 
 export type UnitPhotoKind = 'corner' | 'activity';
@@ -20,6 +20,7 @@ export class UnitPhoto {
     @CreateDateColumn()
     createdAt: Date;
 
+    @Index()
     @ManyToOne(() => Unit, (unit) => unit.photos, { onDelete: 'CASCADE' })
     unit: Unit;
 }
