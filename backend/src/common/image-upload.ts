@@ -26,14 +26,14 @@ export function imageUploadOptions(): MulterOptions {
 }
 
 /**
- * Re-encodes an upload as WebP: upright (EXIF orientation applied), at most
+ * Re-encodes an upload as WebP (animated GIFs stay animated): upright (EXIF orientation applied), at most
  * maxSide px on its longest side, without metadata (no EXIF/GPS). Anything
  * sharp can't decode is rejected as a bad request.
  */
 export async function processImage(buffer: Buffer, maxSide: number): Promise<Buffer> {
     try {
         // a small file can still decode into a huge bitmap; refuse anything beyond 40MP
-        return await sharp(buffer, { limitInputPixels: 40_000_000 })
+        return await sharp(buffer, { limitInputPixels: 40_000_000, animated: true })
             .rotate()
             .resize({ width: maxSide, height: maxSide, fit: 'inside', withoutEnlargement: true })
             .webp({ quality: 80 })

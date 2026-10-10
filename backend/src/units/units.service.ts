@@ -13,6 +13,7 @@ const flagKey = (path: string | null | undefined) => {
 };
 import { IMAGE_MAX_SIDE, processImage } from '../common/image-upload';
 import { UnitPhotosService } from './unit-photos.service';
+import { deleteQuietly } from '../storage/delete-quietly';
 
 @Injectable()
 export class UnitsService {
@@ -60,13 +61,11 @@ export class UnitsService {
 
     async remove(id: number): Promise<void> {
         const unit = await this.findOne(id);
-        // rows go by cascade; the stored objects have to be deleted here
-        await this.unitPhotos.removeAllObjects(id);
-        const oldFlag = flagKey(unit.flag);
-        if (oldFlag) {
-            await this.storage.delete(oldFlag);
-        }
+        // photo rows go by cascade; their objects (and the flag's) are deleted
+        // after the rows, so a bucket failure can't leave rows without images
+        const keys = [...(await this.unitPhotos.objectKeys(id)), flagKey(unit.flag)];
         await this.unitsRepository.delete(id);
+        await deleteQuietly(this.storage, keys);
     }
 
     async updateFlag(id: number, file: Buffer): Promise<Unit> {
@@ -74,10 +73,7 @@ export class UnitsService {
         const key = newImageKey('unit-flags');
         await this.storage.put(key, await processImage(file, IMAGE_MAX_SIDE.flag), 'image/webp');
         await this.unitsRepository.update(id, { flag: toUploadPath(key) });
-        const oldKey = flagKey(unit.flag);
-        if (oldKey) {
-            await this.storage.delete(oldKey);
-        }
+        await deleteQuietly(this.storage, [flagKey(unit.flag)]);
         return this.findOne(id);
     }
 }

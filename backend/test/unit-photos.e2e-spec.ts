@@ -168,6 +168,48 @@ describe('Unit images (e2e)', () => {
         });
     });
 
+    describe('robustness', () => {
+        const freshUnit = async (name: string) =>
+            app.get(DataSource).getRepository(Unit).save({ name, location: { id: (await seedLocation(app, `Loc ${name}`)).id } });
+
+        it('never goes past 9 activity photos or 1 corner with concurrent uploads', async () => {
+            const unit = await freshUnit('Concurrent');
+            const results = await Promise.all(Array.from({ length: 12 }, () => upload(superToken, unit.id, 'activity')));
+            expect(results.filter((r) => r.status === 201)).toHaveLength(9);
+            await Promise.all([upload(superToken, unit.id, 'corner'), upload(superToken, unit.id, 'corner')]);
+            const res = await http().get(`/units/${unit.id}`).set('Authorization', `Bearer ${superToken}`).expect(200);
+            expect(res.body.photos.filter((p) => p.kind === 'activity')).toHaveLength(9);
+            expect(res.body.photos.filter((p) => p.kind === 'corner')).toHaveLength(1);
+        });
+
+        it('keeps an animated GIF animated', async () => {
+            const unit = await freshUnit('Animated');
+            const frame = (color: string) => sharp({ create: { width: 40, height: 40, channels: 3, background: color } }).png().toBuffer();
+            const gif = await sharp([await frame('#f00'), await frame('#00f')], { join: { animated: true } }).gif().toBuffer();
+            expect((await sharp(gif, { animated: true }).metadata()).pages).toBe(2);
+            const res = await http()
+                .post(`/units/${unit.id}/photos?kind=activity`)
+                .set('Authorization', `Bearer ${superToken}`)
+                .attach('file', gif, { filename: 'a.gif', contentType: 'image/gif' })
+                .expect(201);
+            const stored = storage.objects.get(res.body.path.replace('/uploads/', ''));
+            expect((await sharp(stored.body, { animated: true }).metadata()).pages).toBe(2);
+        });
+
+        it('still deletes the unit when the bucket is unreachable', async () => {
+            const unit = await freshUnit('Storage down');
+            await upload(superToken, unit.id, 'corner').expect(201);
+            const realDelete = storage.delete;
+            storage.delete = async () => { throw new Error('bucket unreachable'); };
+            try {
+                await http().delete(`/units/${unit.id}`).set('Authorization', `Bearer ${superToken}`).expect(200);
+            } finally {
+                storage.delete = realDelete;
+            }
+            await http().get(`/units/${unit.id}`).set('Authorization', `Bearer ${superToken}`).expect(404);
+        });
+    });
+
     describe('DELETE /units/:id/photos/:photoId', () => {
         it('removes the photo and its object', async () => {
             const unit = await http().get(`/units/${unitA.id}`).set('Authorization', `Bearer ${leaderToken}`).expect(200);
