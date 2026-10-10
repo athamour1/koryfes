@@ -164,7 +164,11 @@ export default defineConfig((/* ctx */) => {
       // useCredentialsForManifestTag: true,
       // injectPWAMetaTags: false,
       // extendPWACustomSWConf (rolldownConf) {},
-      // extendPWAGenerateSWOptions (cfg) {},
+      // config.js is written at container start (entrypoint.sh); precaching it
+      // would pin installed PWAs to the build-time placeholder
+      extendPWAGenerateSWOptions(cfg) {
+        cfg.globIgnores = [...(cfg.globIgnores || []), 'config.js']
+      },
       // extendPWAInjectManifestOptions (cfg) {}
     },
 
