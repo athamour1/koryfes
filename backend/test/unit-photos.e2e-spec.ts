@@ -3,6 +3,7 @@ import request from 'supertest';
 import sharp from 'sharp';
 import { DataSource } from 'typeorm';
 import { User, UnitRole, UserRole } from '../src/users/entities/user.entity';
+import { Unit } from '../src/units/entities/unit.entity';
 import { createTestApp, login, seedLocation, seedUnit, seedUser } from './helpers';
 import { InMemoryStorage } from './in-memory-storage';
 
@@ -138,6 +139,32 @@ describe('Unit images (e2e)', () => {
                 .attach('file', photoJpeg, { filename: 'f.jpg', contentType: 'image/jpeg' })
                 .expect(201);
             expect(storage.objects.has(victimKey)).toBe(true);
+        });
+    });
+
+    describe('input checks', () => {
+        it('rejects a non-numeric photo id with 400', () => {
+            return http().delete(`/units/${unitA.id}/photos/abc`).set('Authorization', `Bearer ${superToken}`).expect(400);
+        });
+
+        it('rejects a non-numeric unit id with 400', () => {
+            return http().get('/units/abc').set('Authorization', `Bearer ${superToken}`).expect(400);
+        });
+
+        it('rejects an image with too many pixels', async () => {
+            const huge = await sharp({ create: { width: 8000, height: 6000, channels: 3, background: '#fff' } }).png().toBuffer();
+            await http()
+                .post(`/units/${unitA.id}/photos?kind=corner`)
+                .set('Authorization', `Bearer ${superToken}`)
+                .attach('file', huge, { filename: 'huge.png', contentType: 'image/png' })
+                .expect(400);
+        });
+
+        it('does not let an admin without a location edit a unit without one', async () => {
+            const orphan = await app.get(DataSource).getRepository(Unit).save({ name: 'No location' });
+            await seedUser(app, 'adminNoLoc', UserRole.ADMIN);
+            const token = await login(app, 'adminNoLoc');
+            await http().patch(`/units/${orphan.id}`).set('Authorization', `Bearer ${token}`).send({ description: 'x' }).expect(401);
         });
     });
 

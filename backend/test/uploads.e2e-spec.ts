@@ -37,6 +37,10 @@ describe('GET /uploads/* (e2e)', () => {
         await http().get('/uploads/unit-flags/%2e%2e/abc.webp').expect(404);
     });
 
+    it('answers 404, not 500, for a malformed escape in the key', () => {
+        return http().get('/uploads/unit-flags/%25zz.webp').expect(404);
+    });
+
     it('is not rate limited', async () => {
         for (let i = 0; i < 120; i++) {
             await http().get('/uploads/unit-flags/abc.webp').expect(200);

@@ -14,7 +14,7 @@ export interface UnitEditor {
  */
 export function assertCanEditUnit(user: UnitEditor, unit: Unit): void {
     if (user.role === 'super_admin') return;
-    if (user.role === 'admin' && unit.location?.id === user.locationId) return;
+    if (user.role === 'admin' && user.locationId != null && unit.location?.id === user.locationId) return;
     if (user.role === 'user' && user.unitId === unit.id && user.unitRole === 'leader') return;
     throw new UnauthorizedException('You do not have permission to edit this unit');
 }

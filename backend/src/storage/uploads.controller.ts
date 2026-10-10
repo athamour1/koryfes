@@ -14,7 +14,9 @@ export class UploadsController {
     @Get('*key')
     async serve(@Req() req: Request, @Res() res: Response) {
         const raw = req.params.key as unknown as string | string[];
-        const key = decodeURIComponent(Array.isArray(raw) ? raw.join('/') : raw);
+        // Express has already decoded the segments; decoding again would turn a
+        // literal % in a key into a URIError
+        const key = Array.isArray(raw) ? raw.join('/') : raw;
         if (!isSafeKey(key)) {
             throw new NotFoundException();
         }

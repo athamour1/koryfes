@@ -32,7 +32,8 @@ export function imageUploadOptions(): MulterOptions {
  */
 export async function processImage(buffer: Buffer, maxSide: number): Promise<Buffer> {
     try {
-        return await sharp(buffer)
+        // a small file can still decode into a huge bitmap; refuse anything beyond 40MP
+        return await sharp(buffer, { limitInputPixels: 40_000_000 })
             .rotate()
             .resize({ width: maxSide, height: maxSide, fit: 'inside', withoutEnlargement: true })
             .webp({ quality: 80 })

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, UnauthorizedException, BadRequestException, UseInterceptors, UploadedFile, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, UnauthorizedException, BadRequestException, UseInterceptors, UploadedFile, Query, ParseIntPipe } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UnitsService } from './units.service';
@@ -59,8 +59,8 @@ export class UnitsController {
 
     @UseGuards(AuthGuard('jwt'))
     @Get(':id')
-    async findOne(@Param('id') id: string, @Request() req) {
-        const unit = await this.unitsService.findOne(+id);
+    async findOne(@Param('id', ParseIntPipe) id: number, @Request() req) {
+        const unit = await this.unitsService.findOne(id);
 
         // Access control: Admin/User must be in same location
         if (req.user.role !== 'super_admin') {
@@ -74,8 +74,8 @@ export class UnitsController {
 
     @UseGuards(AuthGuard('jwt'))
     @Patch(':id')
-    async update(@Param('id') id: string, @Body() updateUnitDto: any, @Request() req) {
-        const unitId = +id;
+    async update(@Param('id', ParseIntPipe) id: number, @Body() updateUnitDto: any, @Request() req) {
+        const unitId = id;
         const unit = await this.unitsService.findOne(unitId);
         assertCanEditUnit(req.user, unit);
 
@@ -103,12 +103,12 @@ export class UnitsController {
 
     @UseGuards(AuthGuard('jwt'))
     @Delete(':id')
-    async remove(@Param('id') id: string, @Request() req) {
+    async remove(@Param('id', ParseIntPipe) id: number, @Request() req) {
         if (req.user.role !== 'admin' && req.user.role !== 'super_admin') {
             throw new UnauthorizedException('Only admins can delete units');
         }
 
-        const unit = await this.unitsService.findOne(+id);
+        const unit = await this.unitsService.findOne(id);
 
         if (req.user.role === 'admin') {
             if (unit.location.id !== req.user.locationId) {
@@ -116,44 +116,44 @@ export class UnitsController {
             }
         }
 
-        return this.unitsService.remove(+id);
+        return this.unitsService.remove(id);
     }
 
     @UseGuards(AuthGuard('jwt'))
     @Post(':id/image')
     @UseInterceptors(FileInterceptor('file', imageUploadOptions()))
-    async uploadFlag(@Param('id') id: string, @UploadedFile() file: any, @Request() req) {
+    async uploadFlag(@Param('id', ParseIntPipe) id: number, @UploadedFile() file: any, @Request() req) {
         if (!file) {
             throw new BadRequestException('No file uploaded');
         }
 
-        const unit = await this.unitsService.findOne(+id);
+        const unit = await this.unitsService.findOne(id);
         assertCanEditUnit(req.user, unit);
 
-        return this.unitsService.updateFlag(+id, file.buffer);
+        return this.unitsService.updateFlag(id, file.buffer);
     }
 
     @UseGuards(AuthGuard('jwt'))
     @Post(':id/photos')
     @UseInterceptors(FileInterceptor('file', imageUploadOptions()))
-    async addPhoto(@Param('id') id: string, @Query('kind') kind: string, @UploadedFile() file: any, @Request() req) {
+    async addPhoto(@Param('id', ParseIntPipe) id: number, @Query('kind') kind: string, @UploadedFile() file: any, @Request() req) {
         if (!UNIT_PHOTO_KINDS.includes(kind as UnitPhotoKind)) {
             throw new BadRequestException('kind must be corner or activity');
         }
         if (!file) {
             throw new BadRequestException('No file uploaded');
         }
-        const unit = await this.unitsService.findOne(+id);
+        const unit = await this.unitsService.findOne(id);
         assertCanEditUnit(req.user, unit);
         return this.unitPhotos.add(unit, kind as UnitPhotoKind, file.buffer);
     }
 
     @UseGuards(AuthGuard('jwt'))
     @Delete(':id/photos/:photoId')
-    async removePhoto(@Param('id') id: string, @Param('photoId') photoId: string, @Request() req) {
-        const unit = await this.unitsService.findOne(+id);
+    async removePhoto(@Param('id', ParseIntPipe) id: number, @Param('photoId', ParseIntPipe) photoId: number, @Request() req) {
+        const unit = await this.unitsService.findOne(id);
         assertCanEditUnit(req.user, unit);
-        await this.unitPhotos.remove(unit.id, +photoId);
+        await this.unitPhotos.remove(unit.id, photoId);
         return { ok: true };
     }
 }
