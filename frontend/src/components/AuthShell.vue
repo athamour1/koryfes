@@ -7,7 +7,6 @@
         <img :src="logo" alt="" />
       </div>
       <div class="auth-shell__name">{{ $t('auth.brand.name') }}</div>
-      <div class="text-caption text-grey-7">{{ $t('auth.brand.caption') }}</div>
     </div>
 
     <q-card flat bordered class="auth-shell__card">

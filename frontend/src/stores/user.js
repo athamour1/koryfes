@@ -7,9 +7,9 @@ export const useUserStore = defineStore('user', {
         userProgress: null,
     }),
     actions: {
-        async fetchUsers() {
+        async fetchUsers(params = {}) {
             try {
-                const response = await api.get('/users');
+                const response = await api.get('/users', { params });
                 this.users = response.data;
                 return response.data;
             } catch (error) {

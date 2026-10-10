@@ -1,5 +1,5 @@
 <template>
-  <AuthShell :title="$t('auth.login.title')" :subtitle="$t('auth.login.subtitle')">
+  <AuthShell>
     <q-form @submit="handleLogin" class="q-gutter-y-sm">
       <q-input
         v-model="loginForm.username"
@@ -25,7 +25,7 @@
           <q-icon :name="isPwd ? 'visibility_off' : 'visibility'" class="cursor-pointer" @click="isPwd = !isPwd" />
         </template>
       </q-input>
-      <q-checkbox v-model="rememberMe" :label="$t('auth.login.rememberMe')" dense />
+      <q-checkbox v-model="rememberMe" :label="$t('auth.login.rememberMe')" dense class="round-checkbox" />
       <q-btn
         :label="$t('auth.login.button')"
         type="submit"
@@ -102,3 +102,9 @@ const handleLogin = async () => {
 
 
 </script>
+
+<style scoped>
+.round-checkbox :deep(.q-checkbox__bg) {
+  border-radius: 50%;
+}
+</style>

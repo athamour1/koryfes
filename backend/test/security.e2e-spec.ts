@@ -117,6 +117,18 @@ describe('Security regressions (e2e)', () => {
         });
     });
 
+    describe('GET /users', () => {
+        it('keeps a location admin to their own location', async () => {
+            const res = await http().get('/users').set('Authorization', `Bearer ${adminAToken}`).expect(200);
+            expect(res.body.map((u) => u.id)).not.toContain(userB.id);
+        });
+
+        it('lets a location admin see every location with scope=all', async () => {
+            const res = await http().get('/users?scope=all').set('Authorization', `Bearer ${adminAToken}`).expect(200);
+            expect(res.body.map((u) => u.id)).toEqual(expect.arrayContaining([userA.id, userB.id]));
+        });
+    });
+
     describe('GET /users/:id', () => {
         it('requires login', () => {
             return http().get(`/users/${userA.id}`).expect(401);

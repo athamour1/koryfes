@@ -19,7 +19,7 @@
       <div v-else class="row q-col-gutter-lg">
         <!-- Unit Details Card -->
         <div class="col-12 col-md-8">
-          <q-card flat bordered>
+          <q-card flat bordered class="full-height">
             <q-card-section>
               <div class="section-title q-mb-md">{{ $t('myUnit.infoTitle') }}</div>
               <q-form @submit="saveUnit" class="q-gutter-md">
@@ -55,18 +55,17 @@
 
         <!-- Flag Card -->
         <div class="col-12 col-md-4">
-          <q-card flat bordered class="text-center">
+          <q-card flat bordered class="text-center full-height">
             <q-card-section>
               <div class="section-title q-mb-md">{{ $t('myUnit.flagTitle') }}</div>
-              <div class="relative-position inline-block q-mb-md">
-                <q-avatar size="200px" square class="flag-box">
-                  <img 
-                    v-if="previewImage || unit.flag" 
-                    :src="previewImage || getFlagUrl(unit.flag)" 
-                    style="object-fit: cover" 
+              <div class="flag-frame relative-position q-mb-md">
+                <div class="flag-box">
+                  <img
+                    v-if="previewImage || unit.flag"
+                    :src="previewImage || getFlagUrl(unit.flag)"
                   />
-                  <q-icon v-else name="flag" size="100px" color="grey-4" />
-                </q-avatar>
+                  <q-icon v-else name="flag" size="80px" color="grey-4" />
+                </div>
                 
                 <q-btn
                     v-if="isLeader"
@@ -74,7 +73,7 @@
                     color="primary"
                     icon="edit"
                     class="absolute-bottom-right"
-                    style="bottom: -10px; right: -10px"
+                    style="bottom: -8px; right: -8px"
                     @click="$refs.fileInput.pickFiles()"
                   />
                 
@@ -123,7 +122,7 @@
                         <img :src="peakImage(member.progress.currentPeak)" :alt="member.progress.currentPeak.name" class="peak-mini" />
                         <span>{{ member.progress.currentPeak.name }}</span>
                       </template>
-                      <span v-else>{{ $t('myUnit.noPeak') || 'No peak assigned yet' }}</span>
+                      <span v-else>{{ $t('myUnit.noPeak') }}</span>
                     </q-item-label>
                   </q-item-section>
 
@@ -325,10 +324,26 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+/* Μέχρι 200px, αλλά μικραίνει μαζί με τη στήλη ώστε να μη βγαίνει από την κάρτα */
+.flag-frame {
+  width: 100%;
+  max-width: 200px;
+  margin-left: auto;
+  margin-right: auto;
+}
 .flag-box {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
   border-radius: var(--radius-card);
   border: 1px solid var(--border-soft);
   background: var(--surface-2);
+}
+.flag-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .peak-mini {
   width: 20px;

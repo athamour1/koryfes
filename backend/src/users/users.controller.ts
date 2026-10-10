@@ -24,11 +24,18 @@ export class UsersController {
 
     @UseGuards(AuthGuard('jwt'))
     @Get()
-    async findAll(@Query('locationId') locationId: string, @Query('name') name: string, @Request() req) {
+    async findAll(
+        @Query('locationId') locationId: string,
+        @Query('name') name: string,
+        @Query('scope') scope: string,
+        @Request() req,
+    ) {
         let locId = locationId ? +locationId : undefined;
 
-        // If the user is a captain (admin role), force location filter to their location
-        if (req.user.role === 'admin') {
+        // If the user is a captain (admin role), force location filter to their location.
+        // scope=all is the read-only community view of every Guide in Greece, which
+        // plain users already get, so a captain may see it too.
+        if (req.user.role === 'admin' && scope !== 'all') {
             if (!req.user.locationId) {
                 throw new UnauthorizedException('Admin has no location assigned');
             }

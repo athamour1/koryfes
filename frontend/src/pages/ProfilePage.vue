@@ -294,7 +294,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, onMounted, computed, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import { useUserStore } from '@/stores/user';
@@ -349,7 +349,11 @@ const gender = computed({
 });
 
 // Auto-select hair style when color changes if currently none
-watch(() => avatarConfig.value.hairColor, () => {
+let randomizing = false;
+
+watch(() => avatarConfig.value.hairColor, (_, oldColor) => {
+  // Μόνο όταν αλλάζει χειροκίνητα το χρώμα, όχι στη «Τυχαία Επιλογή».
+  if (oldColor === undefined || randomizing) return;
   if (avatarConfig.value.hair === 'none') {
     avatarConfig.value.hair = 'short';
   }
@@ -394,17 +398,19 @@ const getColorOptions = (category) => {
 const randomize = () => {
   const newConfig = { ...avatarConfig.value };
   for (const [key, values] of Object.entries(availableOptions)) {
-    if (key === 'body') continue;
     const randomIndex = Math.floor(Math.random() * values.length);
     newConfig[key] = values[randomIndex];
   }
+  newConfig['body'] = Math.random() < 0.5 ? 'chest' : 'breasts';
   newConfig['withLashes'] = Math.random() < 0.5;
   newConfig['faceMask'] = Math.random() < 0.3;
   newConfig['mask'] = false;
   newConfig['clothing'] = 'shirt';
   newConfig['clothingColor'] = 'white';
   
+  randomizing = true;
   avatarConfig.value = newConfig;
+  nextTick(() => { randomizing = false; });
 };
 
 const updateProfile = async () => {

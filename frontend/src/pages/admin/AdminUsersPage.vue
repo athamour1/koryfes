@@ -22,90 +22,80 @@
       :filter="filter"
     >
       <template v-slot:top>
-        <div class="full-width">
-          <div class="row q-col-gutter-sm items-center justify-between">
-            <!-- Left side: Filters -->
-            <div class="col-12 col-md-auto row q-col-gutter-sm items-center">
-              <div class="text-h6 q-mr-md gt-sm">{{ $t('adminUsers.tableTitle') }}</div>
-              
-              <!-- Search -->
-              <div class="col-12 col-sm-auto">
-                <q-input outlined dense debounce="300" v-model="filter" :placeholder="$t('adminUsers.searchPlaceholder')" class="search-input" data-cy="search-input">
-                  <template v-slot:append>
-                    <q-icon name="search" />
-                  </template>
-                </q-input>
-              </div>
+        <div class="users-toolbar full-width">
+          <div class="text-h6 gt-sm">{{ $t('adminUsers.tableTitle') }}</div>
 
-              <!-- Super Admin only filters -->
-              <div class="col-6 col-sm-auto" v-if="authStore.isSuperAdmin">
-                <q-select
-                  v-model="roleFilter"
-                  :options="roleFilterOptions"
-                  :label="$t('adminUsers.filters.role')"
-                  dense
-                  outlined
-                  clearable
-                  options-dense
-                  class="filter-select"
-                />
-              </div>
-              <div class="col-6 col-sm-auto" v-if="authStore.isSuperAdmin">
-                <q-select
-                  v-model="locationFilter"
-                  :options="locationOptions"
-                  option-label="name"
-                  option-value="name"
-                  emit-value
-                  map-options
-                  :label="$t('adminUsers.filters.location')"
-                  dense
-                  outlined
-                  clearable
-                  options-dense
-                  class="filter-select"
-                  data-cy="location-filter"
-                />
-              </div>
+          <q-input outlined dense debounce="300" v-model="filter" :placeholder="$t('adminUsers.searchPlaceholder')" class="search-input" data-cy="search-input">
+            <template v-slot:append>
+              <q-icon name="search" />
+            </template>
+          </q-input>
 
-              <!-- Unit filter for all admins -->
-              <div class="col-6 col-sm-auto">
-                <q-select
-                  v-model="unitFilter"
-                  :options="unitOptions"
-                  option-label="name"
-                  option-value="id"
-                  emit-value
-                  map-options
-                  :label="$t('adminUsers.filters.unit')"
-                  dense
-                  outlined
-                  clearable
-                  options-dense
-                  class="filter-select"
-                />
-              </div>
+          <!-- Όταν δεν χωράνε σε μία γραμμή, γίνονται κουμπί με μενού -->
+          <FilterBar :active-count="activeFilterCount">
+            <!-- Super Admin only filters -->
+            <q-select
+              v-if="authStore.isSuperAdmin"
+              v-model="roleFilter"
+              :options="roleFilterOptions"
+              emit-value
+              map-options
+              :label="$t('adminUsers.filters.role')"
+              dense
+              outlined
+              clearable
+              options-dense
+              class="filter-select"
+            />
+            <q-select
+              v-if="authStore.isSuperAdmin"
+              v-model="locationFilter"
+              :options="locationOptions"
+              option-label="name"
+              option-value="name"
+              emit-value
+              map-options
+              :label="$t('adminUsers.filters.location')"
+              dense
+              outlined
+              clearable
+              options-dense
+              class="filter-select"
+              data-cy="location-filter"
+            />
 
-              <!-- Unit role filter for all -->
-              <div class="col-6 col-sm-auto">
-                <q-select
-                  v-model="unitRoleFilter"
-                  :options="unitRoleFilterOptions"
-                  :label="$t('adminUsers.filters.unitRole')"
-                  dense
-                  outlined
-                  clearable
-                  options-dense
-                  class="filter-select"
-                />
-              </div>
-            </div>
+            <!-- Unit filter for all admins -->
+            <q-select
+              v-model="unitFilter"
+              :options="unitOptions"
+              option-label="name"
+              option-value="id"
+              emit-value
+              map-options
+              :label="$t('adminUsers.filters.unit')"
+              dense
+              outlined
+              clearable
+              options-dense
+              class="filter-select"
+            />
 
-            <!-- Right side: Actions -->
-            <div class="col-12 col-md-auto text-right q-mt-sm q-mt-md-none">
-              <q-btn color="primary" icon="add" :label="$t('adminUsers.actions.create')" @click="openCreateDialog" class="full-width-mobile" data-cy="create-user-btn" />
-            </div>
-          </div>
+            <!-- Unit role filter for all -->
+            <q-select
+              v-model="unitRoleFilter"
+              :options="unitRoleFilterOptions"
+              emit-value
+              map-options
+              :label="$t('adminUsers.filters.unitRole')"
+              dense
+              outlined
+              clearable
+              options-dense
+              class="filter-select"
+            />
+          </FilterBar>
+
+          <q-btn color="primary" icon="add" :label="$t('adminUsers.actions.create')" @click="openCreateDialog" class="users-toolbar__create" data-cy="create-user-btn" />
         </div>
       </template>
 
@@ -388,6 +378,7 @@ import { useQuasar } from 'quasar';
 import AvatarDisplay from '@/components/AvatarDisplay.vue';
 import PageHeader from '@/components/PageHeader.vue';
 import ProgressManager from '@/components/progress/ProgressManager.vue';
+import FilterBar from '@/components/FilterBar.vue';
 
 const userStore = useUserStore();
 const authStore = useAuthStore();
@@ -410,6 +401,8 @@ const roleFilter = ref(null);
 const locationFilter = ref(null);
 const unitFilter = ref(null);
 const unitRoleFilter = ref(null);
+const activeFilterCount = computed(() =>
+  [roleFilter, locationFilter, unitFilter, unitRoleFilter].filter((f) => f.value != null).length);
 
 const createDialog = ref(false);
 const editDialog = ref(false);
@@ -606,6 +599,21 @@ const formatUnitRole = (role) => {
 </script>
 
 <style scoped>
+.users-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+}
+.users-toolbar__create {
+  margin-left: auto;
+}
+@media (max-width: 599px) {
+  .users-toolbar .search-input {
+    flex: 1 1 100%;
+  }
+}
+
 /* On mobile, keep the PageHeader hidden (already handled by PageHeader component) */
 /* The search functionality is already visible in the table's top slot */
 @media (max-width: 768px) {

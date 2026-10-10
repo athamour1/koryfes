@@ -3,7 +3,7 @@
     <PageHeader
       icon="people"
       :title="$t('userListPage.title')"
-      :subtitle="$t('userListPage.subtitle')"
+      :subtitle="subtitle"
     >
       <template #extra>
         <q-input
@@ -13,12 +13,16 @@
           clearable
           :placeholder="$t('userListPage.searchPlaceholder')"
           class="search-input"
-          @update:model-value="fetchUsers"
         >
           <template #prepend><q-icon name="search" /></template>
         </q-input>
       </template>
     </PageHeader>
+
+    <!-- Το τοπικό μου / όλοι οι Οδηγοί της Ελλάδας -->
+    <div v-if="myLocation" class="scope-tabs">
+      <SegmentedToggle v-model="scope" :options="scopeOptions" />
+    </div>
 
     <div class="tf-card-grid" style="--tf-min: 300px">
       <q-card
@@ -89,19 +93,37 @@ import { useAuthStore } from '@/stores/auth';
 import { peakImage } from '@/utils/badges';
 import AvatarDisplay from '@/components/AvatarDisplay.vue';
 import PageHeader from '@/components/PageHeader.vue';
+import SegmentedToggle from '@/components/SegmentedToggle.vue';
 
 const userStore = useUserStore();
 const authStore = useAuthStore();
 const filterName = ref('');
 const { t } = useI18n();
 
-// Filter to show only regular users (guides) from the same location
+// Το τοπικό του χρήστη· ο super admin ανήκει στο Admin HQ, που δεν έχει Οδηγούς
+const myLocation = computed(() => (authStore.isSuperAdmin ? null : authStore.user?.location ?? null));
+
+// μέχρι να διαλέξει ο χρήστης: το τοπικό του, αν έχει (ο χρήστης μπορεί να φορτώσει αργότερα)
+const chosenScope = ref(null);
+const scope = computed({
+  get: () => chosenScope.value ?? (myLocation.value ? 'local' : 'all'),
+  set: (value) => { chosenScope.value = value; },
+});
+const scopeOptions = computed(() => [
+  { label: t('userListPage.scope.local'), value: 'local', icon: 'place' },
+  { label: t('userListPage.scope.all'), value: 'all', icon: 'public' },
+]);
+
+const subtitle = computed(() => (scope.value === 'local' && myLocation.value
+  ? t('userListPage.subtitleLocal', { location: myLocation.value.name })
+  : t('userListPage.subtitleAll')));
+
+// Only regular users (guides): from the user's location, or from all of Greece
 const filteredUsers = computed(() => {
   let users = userStore.users.filter(u => u.role === 'user');
 
-  // Filter by current user's location (unless super admin)
-  if (!authStore.isSuperAdmin && authStore.user?.location?.id) {
-    users = users.filter(u => u.location?.id === authStore.user.location.id);
+  if (scope.value === 'local' && myLocation.value) {
+    users = users.filter(u => u.location?.id === myLocation.value.id);
   }
 
   // Apply name filter
@@ -113,8 +135,9 @@ const filteredUsers = computed(() => {
   return users;
 });
 
+// όλοι οι Οδηγοί· το «Το τοπικό μου» φιλτράρει από αυτούς
 const fetchUsers = async () => {
-  await userStore.fetchUsers();
+  await userStore.fetchUsers({ scope: 'all' });
 };
 
 const formatUnitRole = (unitRole) => {
@@ -134,6 +157,9 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.scope-tabs {
+  margin-bottom: 16px;
+}
 .user-avatar {
   flex: 0 0 auto;
   width: 64px;

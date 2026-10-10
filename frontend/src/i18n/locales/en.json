@@ -5,7 +5,8 @@
         "award": "Award",
         "back": "Back",
         "create": "Create",
-        "close": "Close"
+        "close": "Close",
+        "filters": "Filters"
     },
     "navigation": {
         "title": "Korifes",
@@ -33,8 +34,8 @@
         "infoTitle": "Unit Information",
         "nameLabel": "Unit Name",
         "nameHint": "Contact admin to change unit name",
-        "descriptionLabel": "Description",
-        "descriptionRequired": "Description is required",
+        "descriptionLabel": "Yell",
+        "descriptionRequired": "Yell is required",
         "flagTitle": "Unit Flag",
         "flagHint": "Click the edit icon to upload a new flag",
         "updateSuccess": "Unit updated successfully",
@@ -42,7 +43,7 @@
         "updateError": "Failed to update unit",
         "membersTitle": "Unit Members",
         "noMembers": "No members in this unit yet",
-        "noPeak": "No peak assigned yet",
+        "noPeak": "On the way to the Promise",
         "viewProgress": "View Progress",
         "loadMembersError": "Failed to load unit members"
     },
@@ -170,7 +171,7 @@
         },
         "form": {
             "name": "Unit Name",
-            "description": "Description",
+            "description": "Yell",
             "location": "Location",
             "required": "Required",
             "locationRequired": "Location is required"
@@ -178,7 +179,7 @@
         "columns": {
             "flag": "Flag",
             "name": "Name",
-            "description": "Description",
+            "description": "Yell",
             "location": "Location",
             "members": "Members",
             "actions": "Actions"
@@ -260,6 +261,12 @@
     "userListPage": {
         "title": "Guides Community",
         "subtitle": "Discover fellow guides and their achievements",
+        "subtitleLocal": "Local group · {location}",
+        "subtitleAll": "Guides from every local group in Greece",
+        "scope": {
+            "local": "My local group",
+            "all": "All of Greece"
+        },
         "searchPlaceholder": "Search guides by name...",
         "noLocation": "No location",
         "unitLabel": "Unit",
@@ -275,7 +282,7 @@
     },
     "unitPage": {
         "aboutUnit": "About Unit",
-        "noDescription": "No description available.",
+        "noDescription": "No yell set yet.",
         "members": "Members",
         "roles": {
             "captain": "Captain",
@@ -290,8 +297,6 @@
     "auth": {
         "login": {
             "tab": "Login",
-            "title": "Welcome Back",
-            "subtitle": "Sign in to continue",
             "button": "Login",
             "rememberMe": "Stay logged in",
             "invalid": "Invalid username or password"
@@ -337,15 +342,14 @@
             "failed": "Failed to reset password"
         },
         "brand": {
-            "name": "Korifes",
-            "caption": "Guides' individual progress · SEO"
+            "name": "Korifes"
         }
     },
     "progress": {
         "admin": {
             "title": "Progress Management",
             "currentPeak": "Current Peak",
-            "noPeak": "No peak",
+            "noPeak": "On the way to the Promise",
             "paths": {
                 "title": "Paths"
             },
@@ -396,7 +400,7 @@
         "search": "Search",
         "requirements": "Requirements",
         "currentPeak": "Current Peak",
-        "noPromise": "No Promise given yet",
+        "noPromise": "On the way to the Promise",
         "givePromise": "Promise",
         "removePromise": "Remove Promise",
         "promiseFirst": "Peaks only count after the Promise.",
