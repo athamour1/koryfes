@@ -157,7 +157,7 @@ export default defineConfig((/* ctx */) => {
           name: 'Korifes',
           short_name: 'Korifes',
           description: 'Track your guides personal progress',
-          theme_color: '#4facfe',
+          theme_color: '#0094da',
           background_color: '#ffffff'
         }
       },
