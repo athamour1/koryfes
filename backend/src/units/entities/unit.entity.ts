@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, Index } from 'typeorm';
 import { Location } from '../../locations/entities/location.entity';
 import { User } from '../../users/entities/user.entity';
 import { UnitPhoto } from './unit-photo.entity';
@@ -17,6 +17,7 @@ export class Unit {
     @Column({ nullable: true })
     flag: string;
 
+    @Index('IDX_unit_locationId')
     @ManyToOne(() => Location, (location) => location.units, { onDelete: 'CASCADE' })
     location: Location;
 

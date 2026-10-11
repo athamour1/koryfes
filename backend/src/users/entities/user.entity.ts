@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToOne, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToOne, ManyToOne, Index } from 'typeorm';
 import { Exclude } from 'class-transformer';
 import { Location } from '../../locations/entities/location.entity';
 import { Unit } from '../../units/entities/unit.entity';
@@ -41,9 +41,12 @@ export class User {
     @Column({ default: false })
     isAdmin: boolean;
 
+    // lists filter by location and unit
+    @Index('IDX_user_locationId')
     @ManyToOne(() => Location, (location) => location.users, { nullable: true, onDelete: 'SET NULL' })
     location: Location;
 
+    @Index('IDX_user_unitId')
     @ManyToOne(() => Unit, (unit) => unit.users, { nullable: true, onDelete: 'SET NULL' })
     unit: Unit;
 
