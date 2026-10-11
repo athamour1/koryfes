@@ -59,17 +59,10 @@ export class UnitsController {
 
     @UseGuards(AuthGuard('jwt'))
     @Get(':id')
-    async findOne(@Param('id', ParseIntPipe) id: number, @Request() req) {
-        const unit = await this.unitsService.findOne(id);
-
-        // Access control: Admin/User must be in same location
-        if (req.user.role !== 'super_admin') {
-            if (req.user.locationId && unit.location.id !== req.user.locationId) {
-                throw new UnauthorizedException('You can only view units in your location');
-            }
-        }
-
-        return unit;
+    findOne(@Param('id', ParseIntPipe) id: number) {
+        // Any signed-in user may view any unit (the community shows Guides of
+        // every location); changing a unit is checked by assertCanEditUnit
+        return this.unitsService.findOne(id);
     }
 
     @UseGuards(AuthGuard('jwt'))

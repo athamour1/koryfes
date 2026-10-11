@@ -124,6 +124,16 @@ describe('Unit images (e2e)', () => {
         });
     });
 
+    describe('GET /units/:id across locations', () => {
+        it('lets any signed-in Guide view a unit of another location, but not edit it', async () => {
+            await seedUser(app, 'guideB', UserRole.USER, await seedLocation(app, 'Photos C'));
+            const token = await login(app, 'guideB');
+            const res = await http().get(`/units/${unitA.id}`).set('Authorization', `Bearer ${token}`).expect(200);
+            expect(res.body.name).toBe('Unit A');
+            await http().patch(`/units/${unitA.id}`).set('Authorization', `Bearer ${token}`).send({ description: 'x' }).expect(401);
+        });
+    });
+
     describe('flag path cannot point at another unit\'s objects', () => {
         it('ignores a flag set through PATCH, so a later upload deletes nothing of unit B', async () => {
             const victim = await upload(superToken, unitB.id, 'activity').expect(201);

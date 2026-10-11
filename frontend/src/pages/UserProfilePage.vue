@@ -16,7 +16,16 @@
             <q-chip dense square color="grey-2" text-color="grey-9" icon="place">
               {{ user.location?.name || $t('userProfilePage.noLocation') }}
             </q-chip>
-            <q-chip v-if="!isAdmin && user.unit" dense square color="grey-2" text-color="grey-9" icon="groups">
+            <q-chip
+              v-if="!isAdmin && user.unit"
+              dense
+              square
+              clickable
+              color="grey-2"
+              text-color="grey-9"
+              icon="groups"
+              @click="$router.push(`/units/${user.unit.id}`)"
+            >
               {{ user.unit.name }}
             </q-chip>
             <q-chip
@@ -45,7 +54,6 @@
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { useAuthStore } from '@/stores/auth';
 import { api } from '@/api';
 import { date } from 'quasar';
 import AvatarDisplay from '@/components/AvatarDisplay.vue';
@@ -54,7 +62,6 @@ import { useProgressStore } from '@/stores/progress';
 
 const route = useRoute();
 const router = useRouter();
-const authStore = useAuthStore();
 const progressStore = useProgressStore();
 const { t } = useI18n();
 const user = ref(null);
@@ -79,22 +86,9 @@ const fetchUserProfile = async () => {
       return;
     }
 
-    const fetchedUser = response.data;
-
-    // Access Control:
-    // 1. Super Admins can see everyone
-    // 2. Regular users/admins can only see users in their location
-    if (!authStore.isSuperAdmin) {
-      const myLocationId = authStore.user?.location?.id;
-      const userLocationId = fetchedUser.location?.id;
-
-      if (myLocationId !== userLocationId) {
-        router.push('/users');
-        return;
-      }
-    }
-
-    user.value = fetchedUser;
+    // Οι Οδηγοί όλων των τοπικών φαίνονται στην «Κοινότητα» (Όλη η Ελλάδα),
+    // οπότε και το προφίλ τους ανοίγει για όλους (μόνο για ανάγνωση)
+    user.value = response.data;
   } catch (error) {
     console.error('Failed to fetch user profile', error);
     router.push('/users');

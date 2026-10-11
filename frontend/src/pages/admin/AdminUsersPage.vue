@@ -151,7 +151,16 @@
 
       <template v-slot:body-cell-unit="props">
         <q-td :props="props">
-           <q-chip v-if="props.row.unit" dense square color="grey-2" text-color="grey-9" icon="groups">
+           <q-chip
+             v-if="props.row.unit"
+             dense
+             square
+             clickable
+             color="grey-2"
+             text-color="grey-9"
+             icon="groups"
+             @click="$router.push(`/units/${props.row.unit.id}`)"
+           >
              {{ props.row.unit.name }}
            </q-chip>
            <span v-else class="text-grey-5">-</span>

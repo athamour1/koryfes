@@ -43,7 +43,16 @@
               <q-icon name="place" size="14px" /> {{ user.location?.name || $t('userListPage.noLocation') }}
             </div>
             <div v-if="user.unit" class="row items-center q-gutter-xs q-mt-xs">
-              <q-chip dense square color="grey-2" text-color="grey-9" icon="groups">{{ user.unit.name }}</q-chip>
+              <!-- η ενωμοτία ανοίγει τη σελίδα της, όχι το προφίλ της κάρτας -->
+              <q-chip
+                dense
+                square
+                clickable
+                color="grey-2"
+                text-color="grey-9"
+                icon="groups"
+                @click.stop="$router.push(`/units/${user.unit.id}`)"
+              >{{ user.unit.name }}</q-chip>
               <q-chip
                 v-if="user.unitRole"
                 dense
