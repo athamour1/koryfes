@@ -15,6 +15,7 @@
       :title="$t('adminUnits.tableTitle')"
       :rows="units"
       :columns="columns"
+      :visible-columns="visibleColumns"
       row-key="id"
       flat
       bordered
@@ -28,7 +29,17 @@
             <q-icon name="search" />
           </template>
         </q-input>
-        <q-btn color="primary" icon="add" :label="$t('adminUnits.createButton')" class="q-ml-md" @click="openCreateDialog" data-cy="create-unit-btn" />
+        <!-- στο κινητό σκέτο στρογγυλό «+» -->
+        <q-btn
+          color="primary"
+          icon="add"
+          :round="$q.screen.xs"
+          :label="$q.screen.xs ? undefined : $t('adminUnits.createButton')"
+          :aria-label="$t('adminUnits.createButton')"
+          class="q-ml-md"
+          @click="openCreateDialog"
+          data-cy="create-unit-btn"
+        />
       </template>
 
       <template v-slot:body-cell-flag="props">
@@ -155,6 +166,10 @@ const columns = computed(() => [
   { name: 'members', label: t('adminUnits.columns.members'), field: row => row.users?.length || 0, sortable: true, align: 'center' },
   { name: 'actions', label: t('adminUnits.columns.actions'), field: 'actions', align: 'right' }
 ]);
+// στο κινητό μόνο το όνομα και οι ενέργειες
+const visibleColumns = computed(() => ($q.screen.xs
+  ? ['name', 'actions']
+  : columns.value.map((c) => c.name)));
 
 const filter = ref('');
 const unitDialog = ref(false);

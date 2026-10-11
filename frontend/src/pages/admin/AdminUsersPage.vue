@@ -15,6 +15,7 @@
       :title="$t('adminUsers.tableTitle')"
       :rows="filteredUsers"
       :columns="columns"
+      :visible-columns="visibleColumns"
       row-key="id"
       flat
       bordered
@@ -95,7 +96,17 @@
             />
           </FilterBar>
 
-          <q-btn color="primary" icon="add" :label="$t('adminUsers.actions.create')" @click="openCreateDialog" class="users-toolbar__create" data-cy="create-user-btn" />
+          <!-- στο κινητό σκέτο στρογγυλό «+» -->
+          <q-btn
+            color="primary"
+            icon="add"
+            :round="$q.screen.xs"
+            :label="$q.screen.xs ? undefined : $t('adminUsers.actions.create')"
+            :aria-label="$t('adminUsers.actions.create')"
+            @click="openCreateDialog"
+            class="users-toolbar__create"
+            data-cy="create-user-btn"
+          />
         </div>
       </template>
 
@@ -397,6 +408,10 @@ const columns = computed(() => [
 ]);
 
 const filter = ref('');
+// στο κινητό μόνο το username και οι ενέργειες
+const visibleColumns = computed(() => ($q.screen.xs
+  ? ['username', 'actions']
+  : columns.value.map((c) => c.name)));
 const roleFilter = ref(null);
 const locationFilter = ref(null);
 const unitFilter = ref(null);
