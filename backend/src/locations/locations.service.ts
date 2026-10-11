@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { Location, LocationType } from './entities/location.entity';
 import { CreateLocationDto } from './dto/create-location.dto';
 import { UpdateLocationDto } from './dto/update-location.dto';
-import { User } from '../users/entities/user.entity';
+import { User, UserRole } from '../users/entities/user.entity';
 
 import { Unit } from '../units/entities/unit.entity';
 import { StorageService } from '../storage/storage.service';
@@ -45,6 +45,32 @@ export class LocationsService {
             throw new NotFoundException(`Location with ID ${id} not found`);
         }
         return location;
+    }
+
+    /**
+     * Read-only view of a local group for any signed-in user: its units with
+     * how many members each has, and how many Guides the group has.
+     */
+    async overview(id: number) {
+        const location = await this.findOne(id);
+        const units = await this.locationsRepository.manager.find(Unit, {
+            where: { location: { id } },
+            relations: ['users'],
+            order: { name: 'ASC' },
+        });
+        const guideCount = await this.usersRepository.count({ where: { location: { id }, role: UserRole.USER } });
+        return {
+            id: location.id,
+            name: location.name,
+            type: location.type,
+            guideCount,
+            units: units.map((unit) => ({
+                id: unit.id,
+                name: unit.name,
+                flag: unit.flag,
+                memberCount: (unit.users || []).length,
+            })),
+        };
     }
 
     async findByName(name: string): Promise<Location> {

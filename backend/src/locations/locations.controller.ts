@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, ParseIntPipe } from '@nestjs/common';
 import { LocationsService } from './locations.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -21,6 +21,13 @@ export class LocationsController {
     @Get()
     findAll() {
         return this.locationsService.findAll();
+    }
+
+    // Every signed-in user may look at a local group and its units (read only)
+    @Get(':id/overview')
+    @Roles(UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.USER)
+    overview(@Param('id', ParseIntPipe) id: number) {
+        return this.locationsService.overview(id);
     }
 
     @Get(':id')

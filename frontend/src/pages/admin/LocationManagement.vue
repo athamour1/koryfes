@@ -61,6 +61,18 @@
               >
                 <q-tooltip>{{ $t('locationManagement.tooltips.edit') }}</q-tooltip>
               </q-btn>
+              <q-btn
+                flat
+                round
+                dense
+                color="info"
+                icon="visibility"
+                :to="`/locations/${props.row.id}`"
+                :aria-label="$t('locationManagement.tooltips.view')"
+                data-cy="view-btn"
+              >
+                <q-tooltip>{{ $t('locationManagement.tooltips.view') }}</q-tooltip>
+              </q-btn>
               <q-btn 
                 flat 
                 round 

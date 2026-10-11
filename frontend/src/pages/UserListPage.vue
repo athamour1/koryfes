@@ -40,7 +40,14 @@
           <div class="col">
             <div class="text-weight-bold ellipsis user-name">{{ user.username }}</div>
             <div class="text-caption text-grey-7 ellipsis">
-              <q-icon name="place" size="14px" /> {{ user.location?.name || $t('userListPage.noLocation') }}
+              <q-icon name="place" size="14px" />
+              <a
+                v-if="user.location"
+                class="location-link"
+                :href="`/locations/${user.location.id}`"
+                @click.stop.prevent="$router.push(`/locations/${user.location.id}`)"
+              >{{ user.location.name }}</a>
+              <template v-else>{{ $t('userListPage.noLocation') }}</template>
             </div>
             <div v-if="user.unit" class="row items-center q-gutter-xs q-mt-xs">
               <!-- η ενωμοτία ανοίγει τη σελίδα της, όχι το προφίλ της κάρτας -->
@@ -166,6 +173,15 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.location-link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 40%, transparent);
+  text-underline-offset: 2px;
+}
+.location-link:hover {
+  color: var(--klados-ink);
+}
 .scope-tabs {
   margin-bottom: 16px;
 }

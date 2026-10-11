@@ -142,7 +142,16 @@
       
       <template v-slot:body-cell-location="props">
         <q-td :props="props">
-           <q-chip v-if="props.row.location" dense square color="grey-2" text-color="grey-9" icon="place">
+           <q-chip
+             v-if="props.row.location"
+             dense
+             square
+             clickable
+             color="grey-2"
+             text-color="grey-9"
+             icon="place"
+             @click="$router.push(`/locations/${props.row.location.id}`)"
+           >
              {{ props.row.location.name }}
            </q-chip>
            <span v-else class="text-grey-5">-</span>

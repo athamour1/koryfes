@@ -134,6 +134,27 @@ describe('Unit images (e2e)', () => {
         });
     });
 
+    describe('GET /locations/:id/overview', () => {
+        it('shows any signed-in Guide a local group with its units and member counts', async () => {
+            await seedUser(app, 'guideOverview', UserRole.USER, await seedLocation(app, 'Photos D'));
+            const token = await login(app, 'guideOverview');
+            const res = await http()
+                .get(`/locations/${(unitA as any).location.id}/overview`)
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200);
+            expect(res.body.name).toBe('Photos A');
+            expect(res.body.guideCount).toBe(2);
+            const unit = res.body.units.find((u) => u.id === unitA.id);
+            expect(unit).toMatchObject({ name: 'Unit A', memberCount: 2 });
+            // the plain location endpoints stay for the super admin
+            await http().get(`/locations/${res.body.id}`).set('Authorization', `Bearer ${token}`).expect(403);
+        });
+
+        it('answers 404 for an unknown local group', async () => {
+            await http().get('/locations/999999/overview').set('Authorization', `Bearer ${superToken}`).expect(404);
+        });
+    });
+
     describe('flag path cannot point at another unit\'s objects', () => {
         it('ignores a flag set through PATCH, so a later upload deletes nothing of unit B', async () => {
             const victim = await upload(superToken, unitB.id, 'activity').expect(201);

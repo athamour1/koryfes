@@ -13,7 +13,15 @@
         <div class="col">
           <h1 class="page-title">{{ user.username }}</h1>
           <div class="row items-center q-gutter-xs q-mt-xs">
-            <q-chip dense square color="grey-2" text-color="grey-9" icon="place">
+            <q-chip
+              dense
+              square
+              :clickable="!!user.location"
+              color="grey-2"
+              text-color="grey-9"
+              icon="place"
+              @click="user.location && $router.push(`/locations/${user.location.id}`)"
+            >
               {{ user.location?.name || $t('userProfilePage.noLocation') }}
             </q-chip>
             <q-chip

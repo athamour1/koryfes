@@ -43,7 +43,17 @@
           </div>
           <div class="col">
             <h1 class="page-title">{{ unit.name }}</h1>
-            <q-chip v-if="unit.location" dense square color="grey-2" text-color="grey-9" icon="place" class="q-ml-none">
+            <q-chip
+              v-if="unit.location"
+              dense
+              square
+              clickable
+              color="grey-2"
+              text-color="grey-9"
+              icon="place"
+              class="q-ml-none"
+              @click="$router.push(`/locations/${unit.location.id}`)"
+            >
               {{ unit.location.name }}
             </q-chip>
           </div>

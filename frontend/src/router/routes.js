@@ -29,6 +29,11 @@ const routes = [
         meta: { requiresAuth: true, requiresAdmin: true, titleKey: 'navigation.units' }
       },
       {
+        path: 'locations/:id',
+        component: () => import('@/pages/LocationPage.vue'),
+        meta: { requiresAuth: true, titleKey: 'locationPage.title' }
+      },
+      {
         path: 'units/:id',
         component: () => import('@/pages/UnitPage.vue'),
         meta: { requiresAuth: true, titleKey: 'navigation.units' }
