@@ -169,6 +169,8 @@ import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt.vue';
 import { useSlidingThumb } from '@/composables/useSlidingThumb';
+import { useThemeColor } from '@/composables/useThemeColor';
+import { usePwaUpdatePrompt } from '@/composables/usePwaUpdatePrompt';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -228,6 +230,10 @@ onMounted(() => {
 const isAuthPage = computed(() => {
   return route.path === '/login' || route.path === '/';
 });
+
+// η μπάρα του συστήματος ακολουθεί ό,τι φαίνεται στην κορυφή (header ή φόντο)
+useThemeColor(computed(() => !isAuthPage.value), computed(() => $q.dark.isActive));
+usePwaUpdatePrompt();
 
 // Watch for authentication changes and open drawer on login
 watch(() => authStore.isAuthenticated, (isAuthenticated) => {
