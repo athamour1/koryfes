@@ -13,7 +13,7 @@
       <q-card flat bordered>
         <q-table
       :title="$t('adminUnits.tableTitle')"
-      :rows="units"
+      :rows="shownUnits"
       :columns="columns"
       :visible-columns="visibleColumns"
       row-key="id"
@@ -24,11 +24,44 @@
       :loading="loading"
     >
       <template v-slot:top-right>
-        <q-input outlined dense debounce="300" v-model="filter" :placeholder="$t('adminUnits.searchPlaceholder')" data-cy="search-input">
+        <div class="units-toolbar">
+        <q-input outlined dense debounce="300" v-model="filter" class="units-toolbar__search" :placeholder="$t('adminUnits.searchPlaceholder')" data-cy="search-input">
           <template v-slot:append>
             <q-icon name="search" />
           </template>
         </q-input>
+        <!-- φίλτρο τοπικού: στρογγυλό στο κινητό, με το όνομα του τοπικού σε υπολογιστή -->
+        <q-btn
+          v-if="locationOptions.length > 1"
+          color="primary"
+          icon="place"
+          no-caps
+          :outline="!locationFilter"
+          :unelevated="!!locationFilter"
+          :round="$q.screen.xs"
+          :label="$q.screen.xs ? undefined : (selectedLocation?.name || $t('adminUnits.filterLocation'))"
+          :aria-label="$t('adminUnits.filterLocation')"
+          data-cy="location-filter-btn"
+        >
+          <q-menu anchor="bottom right" self="top right" :offset="[0, 6]">
+            <q-list class="location-menu scroll">
+              <q-item clickable v-close-popup :active="!locationFilter" @click="locationFilter = null">
+                <q-item-section>{{ $t('adminUnits.allLocations') }}</q-item-section>
+              </q-item>
+              <q-separator />
+              <q-item
+                v-for="loc in locationOptions"
+                :key="loc.id"
+                clickable
+                v-close-popup
+                :active="locationFilter === loc.id"
+                @click="locationFilter = loc.id"
+              >
+                <q-item-section>{{ loc.name }}</q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </q-btn>
         <!-- στο κινητό σκέτο στρογγυλό «+» -->
         <q-btn
           color="primary"
@@ -36,10 +69,10 @@
           :round="$q.screen.xs"
           :label="$q.screen.xs ? undefined : $t('adminUnits.createButton')"
           :aria-label="$t('adminUnits.createButton')"
-          class="q-ml-md"
           @click="openCreateDialog"
           data-cy="create-unit-btn"
         />
+        </div>
       </template>
 
       <template v-slot:body-cell-flag="props">
@@ -199,6 +232,18 @@ const unitForm = ref({
 });
 
 const units = computed(() => unitStore.units);
+
+// φίλτρο ανά τοπικό, από τα τοπικά των ενωμοτιών που φορτώθηκαν
+const locationFilter = ref(null);
+const locationOptions = computed(() => {
+  const byId = new Map();
+  units.value.forEach((u) => { if (u.location) byId.set(u.location.id, u.location); });
+  return [...byId.values()].sort((a, b) => a.name.localeCompare(b.name, 'el'));
+});
+const selectedLocation = computed(() => locationOptions.value.find((l) => l.id === locationFilter.value) || null);
+const shownUnits = computed(() => (locationFilter.value
+  ? units.value.filter((u) => u.location?.id === locationFilter.value)
+  : units.value));
 const loading = computed(() => unitStore.loading);
 
 const fetchLocations = async () => {
@@ -305,4 +350,22 @@ const confirmDeleteUnit = (unit) => {
 </script>
 
 <style scoped>
+/* αναζήτηση, φίλτρο τοπικού και «+» σε μία γραμμή· η αναζήτηση στενεύει */
+.units-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+.units-toolbar__search {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.units-toolbar > .q-btn {
+  flex: 0 0 auto;
+}
+.location-menu {
+  min-width: 220px;
+  max-height: 60vh;
+}
 </style>

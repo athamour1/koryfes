@@ -162,6 +162,8 @@
         "searchPlaceholder": "Search",
         "createButton": "Create New Unit",
         "viewUnit": "View unit",
+        "filterLocation": "Local group",
+        "allLocations": "All local groups",
         "noData": {
             "search": "No units match your search",
             "empty": "No units created yet"
