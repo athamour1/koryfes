@@ -1,7 +1,7 @@
 <template>
-  <!-- Οθόνες χωρίς συνεδρία (σύνδεση, ξεχασμένος/επαναφορά κωδικού): ίδιο
-       λογότυπο, ίδια τυπογραφία, μία ήρεμη κάρτα στο κέντρο. -->
   <q-page class="auth-shell column items-center justify-center">
+    <!-- Οθόνες χωρίς συνεδρία (σύνδεση, ξεχασμένος/επαναφορά κωδικού): ίδιο
+         λογότυπο, ίδια τυπογραφία, μία ήρεμη κάρτα στο κέντρο. -->
     <div class="auth-shell__brand column items-center tf-rise">
       <div class="auth-shell__logo">
         <img :src="logo" alt="" />

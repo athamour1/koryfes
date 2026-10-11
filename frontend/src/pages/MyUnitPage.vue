@@ -1,6 +1,6 @@
 <template>
-  <!-- «Η Ενωμοτία μου»: η κοινή σελίδα ενωμοτίας για την ενωμοτία του χρήστη -->
   <q-page class="tf-page">
+    <!-- «Η Ενωμοτία μου»: η κοινή σελίδα ενωμοτίας για την ενωμοτία του χρήστη -->
     <PageHeader icon="groups" :title="$t('myUnit.title')" />
     <!-- μέχρι να φορτώσει ο χρήστης (και να γίνει η ανακατεύθυνση) -->
     <q-card v-if="!authStore.user || authStore.user.unit" flat bordered>
