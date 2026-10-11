@@ -39,10 +39,12 @@ const routes = [
         meta: { requiresAuth: true, requiresAdmin: true, titleKey: 'navigation.adminUsers' }
       },
       {
-        path: 'admin/progress',
-        component: () => import('@/pages/admin/AdminProgressPage.vue'),
-        meta: { requiresAuth: true, requiresAdmin: true, titleKey: 'navigation.progress' }
+        // ο κατάλογος του βιβλίου (μόνο ανάγνωση) για όλους τους χρήστες
+        path: 'catalog',
+        component: () => import('@/pages/ProgressCatalogPage.vue'),
+        meta: { requiresAuth: true, titleKey: 'navigation.progress' }
       },
+      { path: 'admin/progress', redirect: '/catalog' },
 
 
       // Super Admin Routes

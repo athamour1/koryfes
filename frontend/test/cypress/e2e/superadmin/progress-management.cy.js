@@ -1,7 +1,7 @@
 describe('Super Admin - Progress Catalog', () => {
     beforeEach(() => {
         cy.loginAs('superAdmin');
-        cy.visit('/admin/progress');
+        cy.visit('/catalog');
     });
 
     it('shows the fixed catalog from the book', () => {

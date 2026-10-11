@@ -50,7 +50,7 @@
                 </q-item-section>
               </q-item>
 
-              <q-item clickable v-ripple @click="$router.push('/admin/progress')" class="q-py-sm" data-cy="quick-action-manage-progress">
+              <q-item clickable v-ripple @click="$router.push('/catalog')" class="q-py-sm" data-cy="quick-action-manage-progress">
                 <q-item-section avatar>
                   <q-avatar size="44px" class="tf-tile tf-tile--pink">
                     <q-icon name="emoji_events" size="24px" />

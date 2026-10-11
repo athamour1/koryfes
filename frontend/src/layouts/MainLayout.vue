@@ -58,6 +58,13 @@
             <q-item-section>{{ $t('navigation.myProgress') }}</q-item-section>
           </q-item>
 
+          <q-item clickable v-ripple to="/catalog" active-class="klados-active" data-cy="nav-catalog">
+            <q-item-section avatar>
+              <q-icon name="menu_book" />
+            </q-item-section>
+            <q-item-section>{{ $t('navigation.progress') }}</q-item-section>
+          </q-item>
+
           <q-item clickable v-ripple to="/users" active-class="klados-active" :class="{ 'klados-active': detailOf === '/users' }" data-cy="nav-users">
             <q-item-section avatar>
               <q-icon name="people" />
@@ -105,13 +112,6 @@
                 <q-icon name="admin_panel_settings" />
               </q-item-section>
               <q-item-section>{{ $t('navigation.adminUsers') }}</q-item-section>
-            </q-item>
-
-            <q-item clickable v-ripple to="/admin/progress" active-class="klados-active" v-if="authStore.isAdmin" data-cy="nav-admin-progress">
-              <q-item-section avatar>
-                <q-icon name="trending_up" />
-              </q-item-section>
-              <q-item-section>{{ $t('navigation.progress') }}</q-item-section>
             </q-item>
 
             <q-item clickable v-ripple to="/admin/locations" active-class="klados-active" v-if="authStore.isSuperAdmin" data-cy="nav-admin-locations">

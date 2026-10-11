@@ -25,8 +25,8 @@ describe('Admin - Progress Assignment', () => {
     });
 
     it('can view the catalog but not edit it', () => {
-        cy.visit('/admin/progress');
-        cy.url().should('include', '/admin/progress');
+        cy.visit('/catalog');
+        cy.url().should('include', '/catalog');
         cy.get('[data-cy="create-path-btn"]').should('not.exist');
     });
 });
