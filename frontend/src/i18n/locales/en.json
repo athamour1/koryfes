@@ -161,6 +161,7 @@
         "tableTitle": "Units",
         "searchPlaceholder": "Search",
         "createButton": "Create New Unit",
+        "viewUnit": "View unit",
         "noData": {
             "search": "No units match your search",
             "empty": "No units created yet"

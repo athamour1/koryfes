@@ -54,6 +54,17 @@
       <template v-slot:body-cell-actions="props">
         <q-td :props="props">
           <q-btn flat dense color="primary" icon="edit" @click="openEditDialog(props.row)" data-cy="edit-btn" />
+          <q-btn
+            flat
+            dense
+            color="info"
+            icon="visibility"
+            :to="`/units/${props.row.id}`"
+            :aria-label="$t('adminUnits.viewUnit')"
+            data-cy="view-unit-btn"
+          >
+            <q-tooltip>{{ $t('adminUnits.viewUnit') }}</q-tooltip>
+          </q-btn>
           <q-btn 
             flat 
             dense 
