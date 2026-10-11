@@ -148,7 +148,9 @@
     </q-drawer>
 
     <q-page-container ref="pageContainer">
-      <!-- Μικρή μετάβαση ανάμεσα σε σελίδες: fade με ελαφρύ ανέβασμα, 160ms. -->
+      <!-- Μικρή μετάβαση ανάμεσα σε σελίδες: fade με ελαφρύ ανέβασμα, 160ms.
+           Every page needs a single root element: a comment above it makes it
+           a fragment in dev, the out-in leave never ends and the next page stays blank. -->
       <router-view v-slot="{ Component, route: viewRoute }">
         <transition name="tf-page" mode="out-in">
           <component :is="Component" :key="String(viewRoute.params.id ?? viewRoute.name ?? viewRoute.path)" />

@@ -68,7 +68,8 @@ export default defineConfig((/* ctx */) => {
         viteConf.server = viteConf.server || {}
         viteConf.server.proxy = {
           '/api': {
-            target: 'http://localhost:3000',
+            // Playwright points this at its own throwaway backend
+            target: process.env.API_PROXY_TARGET || 'http://localhost:3000',
             changeOrigin: true,
             rewrite: (path) => path.replace(/^\/api/, '')
           }
@@ -84,7 +85,7 @@ export default defineConfig((/* ctx */) => {
     // Full list of options: https://quasar.dev/quasar-cli-vite/quasar-config-file#devserver
     devServer: {
       // https: true,
-      open: true, // opens browser window automatically
+      open: !process.env.API_PROXY_TARGET, // opens browser window automatically (not under Playwright)
       port: 5173
     },
 
