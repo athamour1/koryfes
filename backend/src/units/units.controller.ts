@@ -6,6 +6,7 @@ import { imageUploadOptions } from '../common/image-upload';
 import { UnitPhotosService } from './unit-photos.service';
 import { UNIT_PHOTO_KINDS, UnitPhotoKind } from './entities/unit-photo.entity';
 import { assertCanEditUnit } from './unit-access';
+import { UnitsQueryDto } from './dto/units-query.dto';
 
 @Controller('units')
 export class UnitsController {
@@ -34,27 +35,13 @@ export class UnitsController {
 
     @UseGuards(AuthGuard('jwt'))
     @Get()
-    async findAll(@Query('locationId') locationId: string, @Request() req) {
-        let locId = locationId ? +locationId : undefined;
-
-        // If Admin, force location filter
-        if (req.user.role === 'admin') {
-            locId = req.user.locationId;
-        }
-        // If User, force location filter (users can only see units in their location)
-        else if (req.user.role === 'user') {
-            // We need to fetch user to get location if not in JWT, but let's assume it is or we fetch it.
-            // For now, let's rely on the fact that users should only see their location's units.
-            // Ideally, we should check the user's location.
-            // Let's assume the frontend sends the correct locationId, but we should enforce it.
-            // For simplicity, let's allow users to see all units for now, or filter by their location if we had it easily.
-            // Better: if user has locationId in JWT, use it.
-            if (req.user.locationId) {
-                locId = req.user.locationId;
-            }
+    async findAll(@Query() query: UnitsQueryDto, @Request() req) {
+        // Admins and plain users only see the units of their own location
+        if (req.user.role === 'admin' || (req.user.role === 'user' && req.user.locationId)) {
+            query.locationId = req.user.locationId;
         }
 
-        return this.unitsService.findAll(locId);
+        return this.unitsService.findAll(query);
     }
 
     @UseGuards(AuthGuard('jwt'))

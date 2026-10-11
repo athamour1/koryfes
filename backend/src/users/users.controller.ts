@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Request, 
 import { UsersService } from './users.service';
 import { AuthGuard } from '@nestjs/passport';
 import { UserRole } from './entities/user.entity';
-import { AdminUpdateUserDto, CreateUserDto, UpdateProfileDto } from './dto/user.dto';
+import { AdminUpdateUserDto, CreateUserDto, UpdateProfileDto, UsersQueryDto } from './dto/user.dto';
 
 @Controller('users')
 export class UsersController {
@@ -24,26 +24,19 @@ export class UsersController {
 
     @UseGuards(AuthGuard('jwt'))
     @Get()
-    async findAll(
-        @Query('locationId') locationId: string,
-        @Query('name') name: string,
-        @Query('scope') scope: string,
-        @Request() req,
-    ) {
-        let locId = locationId ? +locationId : undefined;
-
+    async findAll(@Query() query: UsersQueryDto, @Request() req) {
         // If the user is a captain (admin role), force location filter to their location.
         // scope=all is the read-only community view of every Guide in Greece, which
         // plain users already get, so a captain may see it too.
-        if (req.user.role === 'admin' && scope !== 'all') {
+        if (req.user.role === 'admin' && query.scope !== 'all') {
             if (!req.user.locationId) {
                 throw new UnauthorizedException('Admin has no location assigned');
             }
             // Override any locationId query param with admin's location
-            locId = req.user.locationId;
+            query.locationId = req.user.locationId;
         }
 
-        return this.usersService.findAll(locId, name);
+        return this.usersService.findAll(query);
     }
 
     @UseGuards(AuthGuard('jwt'))

@@ -8,6 +8,8 @@ import { newImageKey, toUploadPath, unitFlagKey } from '../storage/upload-paths'
 import { IMAGE_MAX_SIDE, processImage } from '../common/image-upload';
 import { UnitPhotosService } from './unit-photos.service';
 import { deleteQuietly } from '../storage/delete-quietly';
+import { likeTerm, Page, paginate } from '../common/pagination';
+import { UnitsQueryDto } from './dto/units-query.dto';
 
 @Injectable()
 export class UnitsService {
@@ -23,15 +25,21 @@ export class UnitsService {
         return this.unitsRepository.save(unit);
     }
 
-    async findAll(locationId?: number): Promise<Unit[]> {
-        const where: any = {};
-        if (locationId) {
-            where.location = { id: locationId };
+    /** Units with their location and how many members each has (memberCount) */
+    async findAll(query: UnitsQueryDto): Promise<Unit[] | Page<Unit>> {
+        const qb = this.unitsRepository
+            .createQueryBuilder('unit')
+            .leftJoinAndSelect('unit.location', 'location')
+            .loadRelationCountAndMap('unit.memberCount', 'unit.users');
+
+        if (query.locationId) {
+            qb.andWhere('location.id = :locationId', { locationId: query.locationId });
         }
-        return this.unitsRepository.find({
-            where,
-            relations: ['location', 'users']
-        });
+        if (query.search?.trim()) {
+            qb.andWhere(`LOWER(unit.name) LIKE :search ESCAPE '\\'`, { search: likeTerm(query.search) });
+        }
+
+        return paginate(qb, query, { name: 'unit.name', location: 'location.name' }, 'name');
     }
 
     async findOne(id: number): Promise<Unit> {

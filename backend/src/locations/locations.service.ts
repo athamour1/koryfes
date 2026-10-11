@@ -10,6 +10,7 @@ import { Unit } from '../units/entities/unit.entity';
 import { StorageService } from '../storage/storage.service';
 import { deleteQuietly } from '../storage/delete-quietly';
 import { keyFromUploadPath, unitFlagKey } from '../storage/upload-paths';
+import { likeTerm, Page, PageQueryDto, paginate } from '../common/pagination';
 @Injectable()
 export class LocationsService {
     constructor(
@@ -35,8 +36,12 @@ export class LocationsService {
         return this.locationsRepository.save(location);
     }
 
-    async findAll(): Promise<Location[]> {
-        return this.locationsRepository.find();
+    async findAll(query: PageQueryDto = {}): Promise<Location[] | Page<Location>> {
+        const qb = this.locationsRepository.createQueryBuilder('location');
+        if (query.search?.trim()) {
+            qb.andWhere(`LOWER(location.name) LIKE :search ESCAPE '\\'`, { search: likeTerm(query.search) });
+        }
+        return paginate(qb, query, { name: 'location.name', type: 'location.type' }, 'name');
     }
 
     async findOne(id: number): Promise<Location> {
@@ -53,11 +58,12 @@ export class LocationsService {
      */
     async overview(id: number) {
         const location = await this.findOne(id);
-        const units = await this.locationsRepository.manager.find(Unit, {
-            where: { location: { id } },
-            relations: ['users'],
-            order: { name: 'ASC' },
-        });
+        const units: (Unit & { memberCount?: number })[] = await this.locationsRepository.manager
+            .createQueryBuilder(Unit, 'unit')
+            .loadRelationCountAndMap('unit.memberCount', 'unit.users')
+            .where('unit.locationId = :id', { id })
+            .orderBy('unit.name', 'ASC')
+            .getMany();
         const guideCount = await this.usersRepository.count({ where: { location: { id }, role: UserRole.USER } });
         return {
             id: location.id,
@@ -68,7 +74,7 @@ export class LocationsService {
                 id: unit.id,
                 name: unit.name,
                 flag: unit.flag,
-                memberCount: (unit.users || []).length,
+                memberCount: unit.memberCount ?? 0,
             })),
         };
     }
