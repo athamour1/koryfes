@@ -14,7 +14,14 @@
         "test:e2e": "cross-env NODE_ENV=test start-test \"quasar dev\" http-get://127.0.0.1:5173 \"cypress open --e2e\"",
         "test:e2e:ci": "cross-env NODE_ENV=test start-test \"quasar dev\" http-get://127.0.0.1:5173 \"cypress run --e2e\"",
         "test:component": "cross-env NODE_ENV=test cypress open --component",
-        "test:component:ci": "cross-env NODE_ENV=test cypress run --component"
+        "test:component:ci": "cross-env NODE_ENV=test cypress run --component",
+        "test:pw": "playwright test",
+        "test:pw:ui": "playwright test --ui",
+        "test:pw:showcase": "cross-env SHOWCASE=1 playwright test showcase && playwright show-report test/playwright/.report",
+        "test:pw:report": "playwright show-report test/playwright/.report",
+        "test:pw:codegen": "playwright codegen http://localhost:5173",
+        "demo": "node test/playwright/demo.js",
+        "demo:docker": "node test/playwright/demo.js --docker"
     },
     "dependencies": {
         "@fontsource/inter": "^5.3.0",
@@ -30,6 +37,7 @@
     },
     "devDependencies": {
         "@cypress/code-coverage": "^4.0.3",
+        "@playwright/test": "^1.64.0",
         "@quasar/app-vite": "^3.10.2",
         "@quasar/quasar-app-extension-testing-e2e-cypress": "^7.0.0",
         "autoprefixer": "^10.4.2",
