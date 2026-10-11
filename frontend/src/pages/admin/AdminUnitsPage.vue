@@ -13,16 +13,20 @@
       <q-card flat bordered>
         <q-table
       :title="$t('adminUnits.tableTitle')"
-      :rows="shownUnits"
+      v-model:pagination="pagination"
+      :rows="rows"
       :columns="columns"
       :visible-columns="visibleColumns"
+      :rows-per-page-options="[10, 20, 50]"
       row-key="id"
       flat
       bordered
-      :pagination="{ rowsPerPage: 10 }"
-      :filter="filter"
-      :loading="loading"
+      @request="onRequest"
     >
+      <template v-if="tableLoading" #body="props">
+        <SkeletonTableRow :cols="props.cols" :index="props.rowIndex" />
+      </template>
+
       <template v-slot:top-right>
         <div class="units-toolbar">
         <q-input outlined dense debounce="300" v-model="filter" class="units-toolbar__search" :placeholder="$t('adminUnits.searchPlaceholder')" data-cy="search-input">
@@ -197,18 +201,21 @@ import { useQuasar } from 'quasar';
 import { config } from '@/config';
 import { api } from '@/api';
 import PageHeader from '@/components/PageHeader.vue';
+import SkeletonTableRow from '@/components/skeletons/SkeletonTableRow.vue';
+import { useServerTable } from '@/composables/useServerTable';
 
 const unitStore = useUnitStore();
 const authStore = useAuthStore();
 const $q = useQuasar();
 const { t } = useI18n();
 
+// η ταξινόμηση γίνεται στον server (όνομα, τοπικό)
 const columns = computed(() => [
-  { name: 'flag', label: t('adminUnits.columns.flag'), field: 'flag', align: 'center' },
+  { name: 'flag', label: t('adminUnits.columns.flag'), field: 'flag', align: 'center', skeleton: 'avatar' },
   { name: 'name', label: t('adminUnits.columns.name'), field: 'name', sortable: true, align: 'left' },
   { name: 'location', label: t('adminUnits.columns.location'), field: row => row.location?.name || 'N/A', sortable: true, align: 'left' },
-  { name: 'members', label: t('adminUnits.columns.members'), field: row => row.users?.length || 0, sortable: true, align: 'center' },
-  { name: 'actions', label: t('adminUnits.columns.actions'), field: 'actions', align: 'right' }
+  { name: 'members', label: t('adminUnits.columns.members'), field: row => row.memberCount ?? 0, align: 'center' },
+  { name: 'actions', label: t('adminUnits.columns.actions'), field: 'actions', align: 'right', skeleton: 'actions' }
 ]);
 // στο κινητό μόνο το όνομα και οι ενέργειες
 const visibleColumns = computed(() => ($q.screen.xs
@@ -231,20 +238,19 @@ const unitForm = ref({
   locationId: null
 });
 
-const units = computed(() => unitStore.units);
-
-// φίλτρο ανά τοπικό, από τα τοπικά των ενωμοτιών που φορτώθηκαν
+// φίλτρο ανά τοπικό: μόνο ο super admin βλέπει πολλά τοπικά
 const locationFilter = ref(null);
-const locationOptions = computed(() => {
-  const byId = new Map();
-  units.value.forEach((u) => { if (u.location) byId.set(u.location.id, u.location); });
-  return [...byId.values()].sort((a, b) => a.name.localeCompare(b.name, 'el'));
-});
+const locationOptions = computed(() => [...locations.value].sort((a, b) => a.name.localeCompare(b.name, 'el')));
 const selectedLocation = computed(() => locationOptions.value.find((l) => l.id === locationFilter.value) || null);
-const shownUnits = computed(() => (locationFilter.value
-  ? units.value.filter((u) => u.location?.id === locationFilter.value)
-  : units.value));
 const loading = computed(() => unitStore.loading);
+
+const { pagination, rows, loading: tableLoading, onRequest, refresh } = useServerTable('/units', {
+  sortBy: 'name',
+  params: () => ({
+    search: filter.value || undefined,
+    locationId: locationFilter.value || undefined,
+  }),
+});
 
 const fetchLocations = async () => {
   try {
@@ -255,10 +261,10 @@ const fetchLocations = async () => {
   }
 };
 
-onMounted(async () => {
-  await unitStore.fetchUnits();
+onMounted(() => {
+  refresh();
   if (authStore.isSuperAdmin) {
-    await fetchLocations();
+    fetchLocations();
   }
 });
 
@@ -326,7 +332,7 @@ const saveUnit = async () => {
     
     $q.notify({ color: 'positive', message: isEditing.value ? t('adminUnits.notifications.updateSuccess') : t('adminUnits.notifications.createSuccess'), icon: 'check' });
     unitDialog.value = false;
-    await unitStore.fetchUnits();
+    refresh();
   } else {
     $q.notify({ color: 'negative', message: unitStore.error || t('adminUnits.notifications.operationFailed'), icon: 'report_problem' });
   }
@@ -342,6 +348,7 @@ const confirmDeleteUnit = (unit) => {
     const success = await unitStore.deleteUnit(unit.id);
     if (success) {
       $q.notify({ color: 'positive', message: t('adminUnits.notifications.deleteSuccess'), icon: 'check' });
+      refresh();
     } else {
       $q.notify({ color: 'negative', message: unitStore.error || t('adminUnits.notifications.deleteError'), icon: 'report_problem' });
     }

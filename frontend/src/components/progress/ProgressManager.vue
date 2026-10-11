@@ -2,9 +2,7 @@
   <div>
     <div class="tf-card-head"><q-icon name="trending_up" />{{ $t('progress.title') }}</div>
 
-    <div v-if="!progress" class="flex flex-center q-pa-xl">
-      <q-spinner size="40px" color="primary" />
-    </div>
+    <ProgressOverviewSkeleton v-if="!progress" />
     <ProgressOverview
       v-else
       :progress="progress"
@@ -73,6 +71,7 @@ import { api } from '@/api';
 import { useProgressStore } from '@/stores/progress';
 import { diplomaImage } from '@/utils/badges';
 import ProgressOverview from './ProgressOverview.vue';
+import ProgressOverviewSkeleton from '@/components/skeletons/ProgressOverviewSkeleton.vue';
 
 const props = defineProps({
   userId: { type: Number, required: true },

@@ -3,20 +3,9 @@ import { api } from '@/api';
 
 export const useUserStore = defineStore('user', {
     state: () => ({
-        users: [],
         userProgress: null,
     }),
     actions: {
-        async fetchUsers(params = {}) {
-            try {
-                const response = await api.get('/users', { params });
-                this.users = response.data;
-                return response.data;
-            } catch (error) {
-                console.error('Fetch users failed', error);
-                return [];
-            }
-        },
         async updateProfile(data) {
             try {
                 await api.patch('/users/profile', data);
@@ -65,9 +54,8 @@ export const useUserStore = defineStore('user', {
 
         async createUser(userData) {
             try {
+                // the page reloads its own (paged) list
                 const response = await api.post('/users', userData);
-                // Refresh users list after creation
-                await this.fetchUsers();
                 return response.data;
             } catch (error) {
                 console.error('Create user failed', error);
@@ -80,8 +68,6 @@ export const useUserStore = defineStore('user', {
         async deleteUser(userId) {
             try {
                 await api.delete(`/users/${userId}`);
-                // Refresh users list after deletion
-                await this.fetchUsers();
                 return true;
             } catch (error) {
                 console.error('Delete user failed', error);

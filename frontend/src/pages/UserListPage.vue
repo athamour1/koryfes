@@ -11,6 +11,7 @@
           outlined
           dense
           clearable
+          debounce="300"
           :placeholder="$t('userListPage.searchPlaceholder')"
           class="search-input"
         >
@@ -24,76 +25,92 @@
       <SegmentedToggle v-model="scope" :options="scopeOptions" />
     </div>
 
-    <div class="tf-card-grid" style="--tf-min: 300px">
-      <q-card
-        v-for="user in filteredUsers"
-        :key="user.id"
-        flat
-        bordered
-        class="cursor-pointer user-card"
-        @click="$router.push(`/user/${user.id}`)"
-      >
-        <q-card-section class="row items-center no-wrap q-gutter-md">
-          <div class="user-avatar">
-            <AvatarDisplay :config="user.avatarConfig" size="64px" :key="`avatar-${user.id}`" />
-          </div>
-          <div class="col">
-            <div class="text-weight-bold ellipsis user-name">{{ user.username }}</div>
-            <div class="text-caption text-grey-7 ellipsis">
-              <q-icon name="place" size="14px" />
-              <a
-                v-if="user.location"
-                class="location-link"
-                :href="`/locations/${user.location.id}`"
-                @click.stop.prevent="$router.push(`/locations/${user.location.id}`)"
-              >{{ user.location.name }}</a>
-              <template v-else>{{ $t('userListPage.noLocation') }}</template>
+    <!-- οι Οδηγοί έρχονται λίγοι-λίγοι από τον server όσο κατεβαίνει η σελίδα -->
+    <q-infinite-scroll ref="scroller" :offset="400" @load="onLoad">
+      <div class="tf-card-grid" style="--tf-min: 300px">
+        <q-card
+          v-for="user in users"
+          :key="user.id"
+          flat
+          bordered
+          class="cursor-pointer user-card"
+          @click="$router.push(`/user/${user.id}`)"
+        >
+          <q-card-section class="row items-center no-wrap q-gutter-md">
+            <div class="user-avatar">
+              <AvatarDisplay :config="user.avatarConfig" size="64px" :key="`avatar-${user.id}`" />
             </div>
-            <div v-if="user.unit" class="row items-center q-gutter-xs q-mt-xs">
-              <!-- η ενωμοτία ανοίγει τη σελίδα της, όχι το προφίλ της κάρτας -->
-              <q-chip
-                dense
-                square
-                clickable
-                color="grey-2"
-                text-color="grey-9"
-                icon="groups"
-                @click.stop="$router.push(`/units/${user.unit.id}`)"
-              >{{ user.unit.name }}</q-chip>
-              <q-chip
-                v-if="user.unitRole"
-                dense
-                square
-                :color="user.unitRole === 'member' ? 'grey-2' : 'primary'"
-                :text-color="user.unitRole === 'member' ? 'grey-9' : 'white'"
-              >{{ formatUnitRole(user.unitRole) }}</q-chip>
+            <div class="col">
+              <div class="text-weight-bold ellipsis user-name">{{ user.username }}</div>
+              <div class="text-caption text-grey-7 ellipsis">
+                <q-icon name="place" size="14px" />
+                <a
+                  v-if="user.location"
+                  class="location-link"
+                  :href="`/locations/${user.location.id}`"
+                  @click.stop.prevent="$router.push(`/locations/${user.location.id}`)"
+                >{{ user.location.name }}</a>
+                <template v-else>{{ $t('userListPage.noLocation') }}</template>
+              </div>
+              <div v-if="user.unit" class="row items-center q-gutter-xs q-mt-xs">
+                <!-- η ενωμοτία ανοίγει τη σελίδα της, όχι το προφίλ της κάρτας -->
+                <q-chip
+                  dense
+                  square
+                  clickable
+                  color="grey-2"
+                  text-color="grey-9"
+                  icon="groups"
+                  @click.stop="$router.push(`/units/${user.unit.id}`)"
+                >{{ user.unit.name }}</q-chip>
+                <q-chip
+                  v-if="user.unitRole"
+                  dense
+                  square
+                  :color="user.unitRole === 'member' ? 'grey-2' : 'primary'"
+                  :text-color="user.unitRole === 'member' ? 'grey-9' : 'white'"
+                >{{ formatUnitRole(user.unitRole) }}</q-chip>
+              </div>
             </div>
-          </div>
-        </q-card-section>
+          </q-card-section>
 
-        <q-separator />
+          <q-separator />
 
-        <q-card-section class="row items-center no-wrap q-gutter-sm">
-          <img
-            v-if="user.progress?.currentPeak"
-            :src="peakImage(user.progress.currentPeak)"
-            :alt="user.progress.currentPeak.name"
-            class="peak-thumb"
-          />
-          <div v-else class="tf-tile" style="--tile-size: 44px"><q-icon name="landscape" size="22px" /></div>
-          <div class="col">
-            <div class="text-weight-medium ellipsis">{{ user.progress?.currentPeak?.name || $t('progress.admin.noPeak') }}</div>
-            <div class="text-caption text-grey-7">
-              {{ user.progress?.completedPaths?.length || 0 }} {{ $t('progress.paths') }}
-              · {{ (user.progress?.guideDiplomas?.length || 0) + (user.progress?.electiveDiplomas?.length || 0) }} {{ $t('progress.diplomasShort') }}
+          <q-card-section class="row items-center no-wrap q-gutter-sm">
+            <img
+              v-if="user.progress?.currentPeak"
+              :src="peakImage(user.progress.currentPeak)"
+              :alt="user.progress.currentPeak.name"
+              class="peak-thumb"
+            />
+            <div v-else class="tf-tile" style="--tile-size: 44px"><q-icon name="landscape" size="22px" /></div>
+            <div class="col">
+              <div class="text-weight-medium ellipsis">{{ user.progress?.currentPeak?.name || $t('progress.admin.noPeak') }}</div>
+              <div class="text-caption text-grey-7">
+                {{ user.progress?.pathCount || 0 }} {{ $t('progress.paths') }}
+                · {{ (user.progress?.guideDiplomaCount || 0) + (user.progress?.electiveDiplomaCount || 0) }} {{ $t('progress.diplomasShort') }}
+              </div>
             </div>
-          </div>
-          <q-icon name="chevron_right" color="grey-6" size="22px" class="chevron" />
-        </q-card-section>
-      </q-card>
+            <q-icon name="chevron_right" color="grey-6" size="22px" class="chevron" />
+          </q-card-section>
+        </q-card>
+      </div>
+
+      <template #loading>
+        <!-- το Quasar κρατά το slot στη σελίδα (αόρατο) και όταν δεν φορτώνει·
+             χωρίς v-if οι σκελετοί σπρώχνουν το sentinel εκτός οθόνης -->
+        <div v-if="fetching" class="tf-card-grid" :class="{ 'skeleton-grid': users.length }" style="--tf-min: 300px">
+          <UserCardSkeleton v-for="n in (users.length ? 3 : 9)" :key="n" />
+        </div>
+      </template>
+    </q-infinite-scroll>
+
+    <div v-if="loadError" class="empty-state">
+      <div class="text-caption text-grey-7">{{ $t('userListPage.loadError') }}</div>
+      <q-btn flat no-caps color="primary" icon="refresh" :label="$t('general.retry')" class="q-mt-sm" @click="restart" />
     </div>
 
-    <div v-if="filteredUsers.length === 0" class="empty-state">
+    <div v-else-if="finished && users.length === 0" class="empty-state">
       <div class="tf-tile q-mx-auto" style="--tile-size: 64px"><q-icon name="people_outline" size="32px" /></div>
       <div class="section-title q-mt-md">{{ $t('userListPage.emptyState.title') }}</div>
       <div class="text-caption text-grey-7">{{ $t('userListPage.emptyState.subtitle') }}</div>
@@ -102,16 +119,18 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useUserStore } from '@/stores/user';
+import { api } from '@/api';
 import { useAuthStore } from '@/stores/auth';
 import { peakImage } from '@/utils/badges';
 import AvatarDisplay from '@/components/AvatarDisplay.vue';
 import PageHeader from '@/components/PageHeader.vue';
 import SegmentedToggle from '@/components/SegmentedToggle.vue';
+import UserCardSkeleton from '@/components/skeletons/UserCardSkeleton.vue';
 
-const userStore = useUserStore();
+const PAGE_SIZE = 24;
+
 const authStore = useAuthStore();
 const filterName = ref('');
 const { t } = useI18n();
@@ -134,27 +153,56 @@ const subtitle = computed(() => (scope.value === 'local' && myLocation.value
   ? t('userListPage.subtitleLocal', { location: myLocation.value.name })
   : t('userListPage.subtitleAll')));
 
-// Only regular users (guides): from the user's location, or from all of Greece
-const filteredUsers = computed(() => {
-  let users = userStore.users.filter(u => u.role === 'user');
+// Μόνο Οδηγοί (role user): του τοπικού του χρήστη ή όλης της Ελλάδας
+const params = computed(() => ({
+  role: 'user',
+  scope: 'all',
+  locationId: scope.value === 'local' ? myLocation.value?.id : undefined,
+  search: filterName.value || undefined,
+}));
 
-  if (scope.value === 'local' && myLocation.value) {
-    users = users.filter(u => u.location?.id === myLocation.value.id);
+const scroller = ref(null);
+const users = ref([]);
+const finished = ref(false);
+const loadError = ref(false);
+const fetching = ref(false);
+// κάθε αλλαγή φίλτρου ξεκινά νέα «γενιά»· απαντήσεις παλιότερων αγνοούνται
+let generation = 0;
+
+const onLoad = async (index, onDone) => {
+  const gen = generation;
+  fetching.value = true;
+  const done = (stop) => {
+    fetching.value = false;
+    onDone(stop);
+  };
+  try {
+    const { data } = await api.get('/users', {
+      params: { ...params.value, page: index, limit: PAGE_SIZE, sortBy: 'username' },
+    });
+    if (gen !== generation) return done();
+    users.value.push(...data.items);
+    finished.value = users.value.length >= data.total;
+    done(finished.value);
+  } catch (error) {
+    console.error('Fetch users failed', error);
+    if (gen !== generation) return done();
+    loadError.value = true;
+    done(true);
   }
-
-  // Apply name filter
-  if (filterName.value) {
-    const search = filterName.value.toLowerCase();
-    users = users.filter(u => u.username.toLowerCase().includes(search));
-  }
-
-  return users;
-});
-
-// όλοι οι Οδηγοί· το «Το τοπικό μου» φιλτράρει από αυτούς
-const fetchUsers = async () => {
-  await userStore.fetchUsers({ scope: 'all' });
 };
+
+const restart = () => {
+  generation++;
+  users.value = [];
+  finished.value = false;
+  loadError.value = false;
+  scroller.value?.reset();
+  scroller.value?.resume();
+  scroller.value?.trigger();
+};
+
+watch(params, restart, { deep: true });
 
 const formatUnitRole = (unitRole) => {
   if (!unitRole) return '-';
@@ -165,11 +213,6 @@ const formatUnitRole = (unitRole) => {
     default: return unitRole;
   }
 };
-
-onMounted(async () => {
-  await fetchUsers();
-});
-
 </script>
 
 <style scoped>
@@ -209,6 +252,9 @@ onMounted(async () => {
 }
 .user-card:hover .chevron {
   transform: translateX(3px);
+}
+.skeleton-grid {
+  margin-top: 16px;
 }
 .empty-state {
   text-align: center;

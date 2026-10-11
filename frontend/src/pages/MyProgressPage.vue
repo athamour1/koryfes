@@ -6,9 +6,7 @@
       :subtitle="[user?.username, user?.location?.name].filter(Boolean).join(' · ')"
     />
 
-    <div v-if="!userStore.userProgress" class="flex flex-center q-pa-xl">
-      <q-spinner size="40px" color="primary" />
-    </div>
+    <ProgressOverviewSkeleton v-if="!userStore.userProgress" />
     <ProgressOverview v-else :progress="userStore.userProgress" :peaks="progressStore.peaks" />
   </q-page>
 </template>
@@ -19,6 +17,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useUserStore } from '@/stores/user';
 import { useProgressStore } from '@/stores/progress';
 import ProgressOverview from '@/components/progress/ProgressOverview.vue';
+import ProgressOverviewSkeleton from '@/components/skeletons/ProgressOverviewSkeleton.vue';
 import PageHeader from '@/components/PageHeader.vue';
 
 const authStore = useAuthStore();

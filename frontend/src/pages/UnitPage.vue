@@ -1,8 +1,48 @@
 <template>
   <q-page class="tf-page">
-    <div v-if="loading" class="row justify-center q-pa-lg">
-      <q-spinner color="primary" size="3em" />
-    </div>
+    <!-- σκελετός με το σχήμα της σελίδας όσο φορτώνει -->
+    <template v-if="loading">
+      <div class="q-pt-md q-pb-sm">
+        <q-skeleton type="QBtn" width="88px" height="32px" />
+      </div>
+      <q-card flat bordered class="q-mb-lg">
+        <q-card-section class="row items-center no-wrap q-gutter-md">
+          <q-skeleton type="rect" width="88px" height="88px" />
+          <div class="col">
+            <q-skeleton type="text" width="45%" height="36px" />
+            <q-skeleton type="QChip" width="110px" height="24px" />
+          </div>
+        </q-card-section>
+        <q-separator />
+        <q-card-section>
+          <q-skeleton type="text" width="100px" class="q-mb-sm" />
+          <q-skeleton type="text" width="80%" />
+          <q-skeleton type="text" width="60%" />
+        </q-card-section>
+      </q-card>
+      <section class="q-mb-lg">
+        <q-skeleton type="text" width="120px" class="q-mb-sm" />
+        <q-skeleton class="corner-tile" type="rect" style="aspect-ratio: 16 / 9" height="auto" />
+      </section>
+      <section class="q-mb-lg">
+        <q-skeleton type="text" width="100px" class="q-mb-sm" />
+        <div class="activity-grid">
+          <q-skeleton v-for="n in 3" :key="n" type="rect" style="aspect-ratio: 1" height="auto" />
+        </div>
+      </section>
+      <q-skeleton type="text" width="90px" class="q-mb-sm" />
+      <div class="tf-card-grid" style="--tf-min: 240px">
+        <q-card v-for="n in 4" :key="n" flat bordered>
+          <q-card-section class="row items-center no-wrap q-gutter-sm">
+            <q-skeleton type="QAvatar" size="48px" />
+            <div class="col">
+              <q-skeleton type="text" width="60%" />
+              <q-skeleton type="text" width="35%" />
+            </div>
+          </q-card-section>
+        </q-card>
+      </div>
+    </template>
 
     <template v-else-if="unit">
       <div class="row items-center q-pt-md q-pb-sm">

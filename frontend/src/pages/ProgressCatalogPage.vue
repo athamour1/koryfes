@@ -21,9 +21,28 @@
       </div>
     </div>
 
-    <div v-if="!store.loaded" class="flex flex-center q-pa-xl">
-      <q-spinner size="40px" color="primary" />
-    </div>
+    <!-- σκελετός της καρτέλας που είναι ανοιχτή -->
+    <template v-if="!store.loaded">
+      <div v-if="tab === 'peaks'" class="tf-card-grid" style="--tf-min: 240px">
+        <q-card v-for="n in 6" :key="n" flat bordered>
+          <q-card-section class="column items-center">
+            <q-skeleton type="circle" size="128px" />
+            <q-skeleton type="text" width="50%" class="q-mt-sm" />
+            <q-skeleton type="text" width="85%" />
+            <q-skeleton type="text" width="70%" />
+          </q-card-section>
+        </q-card>
+      </div>
+      <q-list v-else bordered separator>
+        <q-item v-for="n in 6" :key="n">
+          <q-item-section avatar><q-skeleton type="rect" width="40px" height="40px" /></q-item-section>
+          <q-item-section>
+            <q-skeleton type="text" width="45%" />
+            <q-skeleton type="text" width="25%" />
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </template>
 
     <transition v-else name="tf-page" mode="out-in">
       <!-- Κορυφές -->

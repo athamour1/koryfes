@@ -12,15 +12,18 @@
       <q-card flat bordered>
         <q-table
           :title="$t('locationManagement.tableTitle')"
-          :rows="locations"
+          v-model:pagination="pagination"
+          :rows="rows"
           :columns="columns"
+          :rows-per-page-options="[10, 20, 50]"
           row-key="id"
           flat
           bordered
-          :loading="loading"
-          :pagination="{ rowsPerPage: 10 }"
-          :filter="filter"
+          @request="onRequest"
         >
+          <template v-if="loading" #body="props">
+            <SkeletonTableRow :cols="props.cols" :index="props.rowIndex" />
+          </template>
           <template v-slot:top-right>
             <div class="row q-gutter-sm items-center">
               <q-input outlined dense debounce="300" v-model="filter" :placeholder="$t('locationManagement.searchPlaceholder')" data-cy="search-input">
@@ -165,11 +168,11 @@ import { api } from '@/api';
 import { useQuasar } from 'quasar';
 import PageHeader from '@/components/PageHeader.vue';
 import LocationMapPicker from '@/components/LocationMapPicker.vue';
+import SkeletonTableRow from '@/components/skeletons/SkeletonTableRow.vue';
+import { useServerTable } from '@/composables/useServerTable';
 
 const $q = useQuasar();
 const { t } = useI18n();
-const locations = ref([]);
-const loading = ref(false);
 const showAddDialog = ref(false);
 const isEditing = ref(false);
 const locationForm = reactive({ id: null, name: '', type: 'guides', latitude: null, longitude: null });
@@ -194,23 +197,17 @@ const mapCoordinates = computed({
 const columns = computed(() => [
   { name: 'name', label: t('locationManagement.columns.name'), field: 'name', sortable: true, align: 'left' },
   { name: 'type', label: t('locationManagement.columns.type'), field: row => t(`locationManagement.types.${row.type === 'naval-guides' ? 'navalGuides' : 'guides'}`), sortable: true, align: 'left' },
-  { name: 'actions', label: t('locationManagement.columns.actions'), field: 'actions', align: 'right' },
+  { name: 'actions', label: t('locationManagement.columns.actions'), field: 'actions', align: 'right', skeleton: 'actions' },
 ]);
 
 const filter = ref('');
 
-const fetchLocations = async () => {
-  loading.value = true;
-  try {
-    const response = await api.get('/locations');
-    locations.value = response.data;
-  } catch (error) {
-    console.error('Failed to fetch locations', error);
-    $q.notify({ type: 'negative', message: t('locationManagement.notifications.fetchError') });
-  } finally {
-    loading.value = false;
-  }
-};
+// σελιδοποίηση, ταξινόμηση και αναζήτηση στον server
+const { pagination, rows, loading, onRequest, refresh: fetchLocations } = useServerTable('/locations', {
+  sortBy: 'name',
+  params: () => ({ search: filter.value || undefined }),
+  onError: () => $q.notify({ type: 'negative', message: t('locationManagement.notifications.fetchError') }),
+});
 
 const saveLocation = async () => {
   if (!locationForm.name) {

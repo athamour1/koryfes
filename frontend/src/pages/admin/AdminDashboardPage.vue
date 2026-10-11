@@ -13,7 +13,8 @@
           <q-card-section>
             <q-icon :name="stat.icon" class="stat-icon" />
             <div class="stat-label" :data-cy="'stat-label-' + index">{{ stat.label }}</div>
-            <div class="stat-value q-mt-xs" :data-cy="'stat-value-' + index">{{ stat.value }}</div>
+            <q-skeleton v-if="loading" type="text" width="56px" height="40px" class="q-mt-xs" />
+            <div v-else class="stat-value q-mt-xs" :data-cy="'stat-value-' + index">{{ stat.value }}</div>
             <q-badge
               :color="stat.trend === 'up' ? 'positive' : 'grey-6'"
               class="q-mt-sm"
@@ -91,7 +92,18 @@
               <q-badge class="tf-card-head__end" color="primary">{{ $t('dashboard.topGuides.thisMonth') }}</q-badge>
             </div>
 
-            <q-list separator>
+            <q-list v-if="loading" separator>
+              <q-item v-for="n in 5" :key="n" class="q-pa-sm">
+                <q-item-section avatar><q-skeleton type="QAvatar" size="40px" /></q-item-section>
+                <q-item-section avatar><q-skeleton type="QAvatar" size="40px" /></q-item-section>
+                <q-item-section>
+                  <q-skeleton type="text" width="55%" />
+                  <q-skeleton type="text" width="35%" />
+                </q-item-section>
+                <q-item-section side><q-skeleton type="QChip" width="48px" height="24px" /></q-item-section>
+              </q-item>
+            </q-list>
+            <q-list v-else separator>
               <q-item v-for="(guide, index) in topGuides" :key="guide.id" class="q-pa-sm">
                 <q-item-section avatar>
                   <q-avatar size="40px">
@@ -214,7 +226,21 @@
       <q-card-section>
         <div class="tf-card-head"><q-icon name="public" />{{ $t('dashboard.locations.title') }}</div>
 
-        <div class="row q-col-gutter-md">
+        <div v-if="loading" class="row q-col-gutter-md">
+          <div class="col-12 col-sm-6 col-md-3" v-for="n in 4" :key="n">
+            <q-card flat bordered class="full-height">
+              <q-card-section>
+                <div class="row items-center no-wrap q-gutter-sm q-mb-sm">
+                  <q-skeleton type="rect" width="40px" height="40px" />
+                  <q-skeleton type="text" width="60%" />
+                </div>
+                <q-skeleton type="text" width="70%" />
+                <q-skeleton type="text" width="50%" />
+              </q-card-section>
+            </q-card>
+          </div>
+        </div>
+        <div v-else class="row q-col-gutter-md">
           <div class="col-12 col-sm-6 col-md-3" v-for="location in locationStats" :key="location.id">
             <q-card flat bordered class="full-height">
               <q-card-section>
@@ -325,9 +351,7 @@ const achievementPercentage = computed(() => {
 
 const getTotalDiplomas = (user) => {
   if (!user.progress) return 0;
-  const guideCount = user.progress.guideDiplomas?.length || 0;
-  const electiveCount = user.progress.electiveDiplomas?.length || 0;
-  return guideCount + electiveCount;
+  return (user.progress.guideDiplomaCount || 0) + (user.progress.electiveDiplomaCount || 0);
 };
 
 const getActivityColor = (icon) => {
@@ -340,6 +364,8 @@ const getActivityColor = (icon) => {
   return colorMap[icon] || 'primary';
 };
 
+const loading = ref(true);
+
 const fetchDashboardData = async () => {
   try {
     // Fetch users
@@ -350,13 +376,13 @@ const fetchDashboardData = async () => {
     // Calculate progress stats
     stats.value.totalDiplomas = users.reduce((sum, user) => {
       if (!user.progress) return sum;
-      const guideCount = user.progress.guideDiplomas?.length || 0;
-      const electiveCount = user.progress.electiveDiplomas?.length || 0;
+      const guideCount = user.progress.guideDiplomaCount || 0;
+      const electiveCount = user.progress.electiveDiplomaCount || 0;
       return sum + guideCount + electiveCount;
     }, 0);
     
     stats.value.pathsCompleted = users.reduce((sum, user) => {
-      return sum + (user.progress?.completedPaths?.length || 0);
+      return sum + (user.progress?.pathCount || 0);
     }, 0);
     
     stats.value.peaksReached = users.filter(u => u.progress?.currentPeak).length;
@@ -386,6 +412,8 @@ const fetchDashboardData = async () => {
     });
   } catch (error) {
     console.error('Failed to fetch dashboard data', error);
+  } finally {
+    loading.value = false;
   }
 };
 

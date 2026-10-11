@@ -1,9 +1,35 @@
 <template>
   <!-- Σελίδα τοπικού: οι ενωμοτίες του, για κάθε συνδεδεμένο χρήστη (μόνο ανάγνωση) -->
   <q-page class="tf-page">
-    <div v-if="loading" class="row justify-center q-pa-lg">
-      <q-spinner color="primary" size="3em" />
-    </div>
+    <!-- σκελετός με το σχήμα της σελίδας όσο φορτώνει -->
+    <template v-if="loading">
+      <div class="q-pt-md q-pb-sm">
+        <q-skeleton type="QBtn" width="88px" height="32px" />
+      </div>
+      <q-card flat bordered class="q-mb-lg">
+        <q-card-section class="row items-center no-wrap q-gutter-md">
+          <q-skeleton type="rect" width="88px" height="88px" />
+          <div class="col">
+            <q-skeleton type="text" width="45%" height="36px" />
+            <div class="row q-gutter-xs">
+              <q-skeleton v-for="n in 3" :key="n" type="QChip" width="96px" height="24px" />
+            </div>
+          </div>
+        </q-card-section>
+      </q-card>
+      <q-skeleton type="text" width="120px" class="q-mb-sm" />
+      <div class="tf-card-grid" style="--tf-min: 240px">
+        <q-card v-for="n in 6" :key="n" flat bordered>
+          <q-card-section class="row items-center no-wrap q-gutter-sm">
+            <q-skeleton type="rect" width="48px" height="48px" />
+            <div class="col">
+              <q-skeleton type="text" width="60%" />
+              <q-skeleton type="text" width="35%" />
+            </div>
+          </q-card-section>
+        </q-card>
+      </div>
+    </template>
 
     <template v-else-if="location">
       <div class="q-pt-md q-pb-sm">
