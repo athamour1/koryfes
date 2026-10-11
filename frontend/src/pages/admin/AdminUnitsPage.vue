@@ -151,7 +151,6 @@ const { t } = useI18n();
 const columns = computed(() => [
   { name: 'flag', label: t('adminUnits.columns.flag'), field: 'flag', align: 'center' },
   { name: 'name', label: t('adminUnits.columns.name'), field: 'name', sortable: true, align: 'left' },
-  { name: 'description', label: t('adminUnits.columns.description'), field: 'description', align: 'left', format: val => val && val.length > 50 ? val.substring(0, 50) + '...' : val },
   { name: 'location', label: t('adminUnits.columns.location'), field: row => row.location?.name || 'N/A', sortable: true, align: 'left' },
   { name: 'members', label: t('adminUnits.columns.members'), field: row => row.users?.length || 0, sortable: true, align: 'center' },
   { name: 'actions', label: t('adminUnits.columns.actions'), field: 'actions', align: 'right' }

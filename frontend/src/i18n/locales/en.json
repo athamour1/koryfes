@@ -179,7 +179,6 @@
         "columns": {
             "flag": "Flag",
             "name": "Name",
-            "description": "Yell",
             "location": "Location",
             "members": "Members",
             "actions": "Actions"

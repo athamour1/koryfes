@@ -179,7 +179,6 @@
         "columns": {
             "flag": "Σημαία",
             "name": "Όνομα",
-            "description": "Κραυγή",
             "location": "Τοπικό",
             "members": "Μέλη",
             "actions": "Ενέργειες"
