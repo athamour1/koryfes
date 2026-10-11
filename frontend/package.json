@@ -20,6 +20,7 @@
         "@fontsource/inter": "^5.3.0",
         "@quasar/extras": "^2.1.0",
         "axios": "^1.13.2",
+        "canvas-confetti": "^1.9.4",
         "leaflet": "^1.9.4",
         "pinia": "^3.0.4",
         "quasar": "^2.35.0",

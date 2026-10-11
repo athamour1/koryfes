@@ -143,6 +143,15 @@ export class UserProgressService {
         return this.saveAndRecompute(progress);
     }
 
+    /** The Guide has seen the celebration for everything they hold now. */
+    async markCelebrated(userId: number) {
+        const progress = await this.getUserProgress(userId);
+        progress.celebratedPeakOrder = progress.currentPeak?.order ?? 0;
+        progress.celebratedElectiveIds = progress.electiveDiplomas.map((d) => d.id).sort((a, b) => a - b);
+        await this.userProgressRepository.save(progress);
+        return this.getProgressWithEvaluation(userId);
+    }
+
     private evaluate(progress: UserProgress): ProgressEvaluation {
         return evaluateProgress({
             hasPromise: progress.currentPeak !== null,
@@ -156,6 +165,10 @@ export class UserProgressService {
         const { peak } = this.evaluate(progress);
         progress.currentPeak = peak ? await this.peakRepository.findOneByOrFail({ type: peak }) : null;
         progress.currentPeakId = progress.currentPeak?.id ?? null;
+        // a milestone taken back can be celebrated again when it is earned again
+        progress.celebratedPeakOrder = Math.min(progress.celebratedPeakOrder ?? 0, progress.currentPeak?.order ?? 0);
+        const held = new Set(progress.electiveDiplomas.map((d) => d.id));
+        progress.celebratedElectiveIds = (progress.celebratedElectiveIds ?? []).filter((id) => held.has(id));
         await this.userProgressRepository.save(progress);
         return this.getProgressWithEvaluation(progress.userId);
     }

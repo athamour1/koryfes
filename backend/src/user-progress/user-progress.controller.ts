@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, UseGuards, Request } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UserProgressService } from './user-progress.service';
 
@@ -13,5 +13,13 @@ export class UserProgressController {
     @Get('me')
     getMyProgress(@Request() req) {
         return this.userProgressService.getProgressWithEvaluation(req.user.userId);
+    }
+
+    /**
+     * The current user has seen the celebration for their latest milestones
+     */
+    @Post('me/celebrated')
+    markCelebrated(@Request() req) {
+        return this.userProgressService.markCelebrated(req.user.userId);
     }
 }

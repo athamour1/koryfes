@@ -33,6 +33,15 @@ export class UserProgress {
     @Column({ type: 'int', nullable: true })
     currentPeakId: number | null;
 
+    // What the Guide has already been congratulated on (the app shows a
+    // celebration for anything newer): the highest peak, by order (0 = none),
+    // and the elective diplomas held at that moment
+    @Column({ type: 'int', default: 0 })
+    celebratedPeakOrder: number;
+
+    @Column({ type: 'simple-json', nullable: true })
+    celebratedElectiveIds: number[] | null;
+
     @ManyToMany(() => Path)
     @JoinTable({
         name: 'user_completed_paths',

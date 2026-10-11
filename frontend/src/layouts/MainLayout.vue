@@ -158,16 +158,21 @@
 
     <!-- PWA Install Prompt -->
     <PWAInstallPrompt />
+
+    <!-- γιορτή για νέο ορόσημο (Υπόσχεση, Κορυφή, πτυχίο μετά τη Γ') -->
+    <CelebrationDialog :celebration="celebrations.current.value" @done="celebrations.next" />
   </q-layout>
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useRouter, useRoute } from 'vue-router';
 import { useQuasar } from 'quasar';
 import { useI18n } from 'vue-i18n';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt.vue';
+import CelebrationDialog from '@/components/CelebrationDialog.vue';
+import { useCelebrations } from '@/composables/useCelebrations';
 import { useSlidingThumb } from '@/composables/useSlidingThumb';
 import { useThemeColor } from '@/composables/useThemeColor';
 import { usePwaUpdatePrompt } from '@/composables/usePwaUpdatePrompt';
@@ -234,6 +239,16 @@ const isAuthPage = computed(() => {
 // η μπάρα του συστήματος ακολουθεί ό,τι φαίνεται στην κορυφή (header ή φόντο)
 useThemeColor(computed(() => !isAuthPage.value), computed(() => $q.dark.isActive));
 usePwaUpdatePrompt();
+
+// Οι Οδηγοί βλέπουν γιορτή για ό,τι νέο τους απονεμήθηκε, με το άνοιγμα της
+// εφαρμογής και όταν αυτή επιστρέφει στο προσκήνιο
+const celebrations = useCelebrations();
+const checkCelebrations = () => {
+  if (authStore.user?.role === 'user' && document.visibilityState === 'visible') celebrations.check();
+};
+watch(() => authStore.user?.id, checkCelebrations, { immediate: true });
+document.addEventListener('visibilitychange', checkCelebrations);
+onBeforeUnmount(() => document.removeEventListener('visibilitychange', checkCelebrations));
 
 // Watch for authentication changes and open drawer on login
 watch(() => authStore.isAuthenticated, (isAuthenticated) => {

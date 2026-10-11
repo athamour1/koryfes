@@ -589,6 +589,29 @@
         "returnHome": "Return to Base",
         "goBack": "Go Back"
     },
+    "celebrations": {
+        "continue": "Continue",
+        "promise": {
+            "title": "You made your Promise!",
+            "message": "From today the Trefoil is yours too. Your patrol is proud of you. A great start on the path of the Peaks!"
+        },
+        "bronze": {
+            "title": "You reached the first Peak!",
+            "message": "Your first Peak! Every path you walked brought you here. Take a moment to look back at the way you came, then look higher."
+        },
+        "silver": {
+            "title": "You reached the second Peak!",
+            "message": "Two Peaks! With every step you gain knowledge, experiences and friends for life. The next Peak is waiting for you."
+        },
+        "gold": {
+            "title": "You reached the third Peak!",
+            "message": "You made it to the highest Peak! All you learned and all you gave to your patrol brought you here. We are all so proud of you!"
+        },
+        "diploma": {
+            "title": "New: {name}!",
+            "message": "Even after the third Peak you keep exploring and learning. Well done, keep climbing!"
+        }
+    },
     "pwa": {
         "updateAvailable": "A new version of the app is available.",
         "reload": "Reload",
