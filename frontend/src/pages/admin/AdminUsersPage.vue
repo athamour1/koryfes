@@ -13,15 +13,20 @@
       <q-card flat bordered>
         <q-table
       :title="$t('adminUsers.tableTitle')"
-      :rows="filteredUsers"
+      v-model:pagination="pagination"
+      :rows="rows"
       :columns="columns"
       :visible-columns="visibleColumns"
+      :rows-per-page-options="[10, 20, 50]"
       row-key="id"
       flat
       bordered
-      :pagination="{ rowsPerPage: 10 }"
-      :filter="filter"
+      @request="onRequest"
     >
+      <template v-if="loading" #body="props">
+        <SkeletonTableRow :cols="props.cols" :index="props.rowIndex" />
+      </template>
+
       <template v-slot:top>
         <div class="users-toolbar full-width">
           <div class="text-h6 gt-sm">{{ $t('adminUsers.tableTitle') }}</div>
@@ -53,7 +58,7 @@
               v-model="locationFilter"
               :options="locationOptions"
               option-label="name"
-              option-value="name"
+              option-value="id"
               emit-value
               map-options
               :label="$t('adminUsers.filters.location')"
@@ -408,6 +413,8 @@ import AvatarDisplay from '@/components/AvatarDisplay.vue';
 import PageHeader from '@/components/PageHeader.vue';
 import ProgressManager from '@/components/progress/ProgressManager.vue';
 import FilterBar from '@/components/FilterBar.vue';
+import SkeletonTableRow from '@/components/skeletons/SkeletonTableRow.vue';
+import { useServerTable } from '@/composables/useServerTable';
 
 const userStore = useUserStore();
 const authStore = useAuthStore();
@@ -415,14 +422,15 @@ const unitStore = useUnitStore();
 const $q = useQuasar();
 const { t } = useI18n();
 
+// η ταξινόμηση γίνεται στον server, με τα ονόματα των στηλών
 const columns = computed(() => [
-  { name: 'profileImage', label: '', field: 'profileImage', align: 'center', style: 'width: 60px; min-width: 60px; max-width: 60px;' },
+  { name: 'profileImage', label: '', field: 'profileImage', align: 'center', skeleton: 'avatar', style: 'width: 60px; min-width: 60px; max-width: 60px;' },
   { name: 'username', label: t('adminUsers.columns.username'), field: 'username', sortable: true, align: 'left', style: 'width: 40%;' },
-  { name: 'role', label: t('adminUsers.columns.role'), field: 'role', sortable: true, align: 'center' },
-  { name: 'location', label: t('adminUsers.columns.location'), field: row => row.location?.name || '-', sortable: true, align: 'left' },
-  { name: 'unit', label: t('adminUsers.columns.unit'), field: row => row.unit?.name || '-', sortable: true, align: 'left' },
-  { name: 'unitRole', label: t('adminUsers.columns.unitRole'), field: 'unitRole', sortable: true, align: 'center' },
-  { name: 'actions', label: t('adminUsers.columns.actions'), field: 'actions', align: 'right' }
+  { name: 'role', label: t('adminUsers.columns.role'), field: 'role', sortable: true, align: 'center', skeleton: 'chip' },
+  { name: 'location', label: t('adminUsers.columns.location'), field: row => row.location?.name || '-', sortable: true, align: 'left', skeleton: 'chip' },
+  { name: 'unit', label: t('adminUsers.columns.unit'), field: row => row.unit?.name || '-', sortable: true, align: 'left', skeleton: 'chip' },
+  { name: 'unitRole', label: t('adminUsers.columns.unitRole'), field: 'unitRole', sortable: true, align: 'center', skeleton: 'chip' },
+  { name: 'actions', label: t('adminUsers.columns.actions'), field: 'actions', align: 'right', skeleton: 'actions' }
 ]);
 
 const filter = ref('');
@@ -491,26 +499,16 @@ const editUnitOptions = computed(() => {
   return unitStore.units.filter(u => u.location?.name === editingUserData.value.locationName).map(u => ({ id: u.id, name: u.name }));
 });
 
-const filteredUsers = computed(() => {
-  let users = userStore.users;
-
-  if (roleFilter.value) {
-    users = users.filter(u => u.role === roleFilter.value);
-  }
-
-  if (locationFilter.value) {
-    users = users.filter(u => u.location?.name === locationFilter.value);
-  }
-
-  if (unitFilter.value) {
-    users = users.filter(u => u.unit?.id === unitFilter.value);
-  }
-
-  if (unitRoleFilter.value) {
-    users = users.filter(u => u.unitRole === unitRoleFilter.value);
-  }
-
-  return users;
+// τα φίλτρα πάνε στον server· μια αλλαγή φορτώνει ξανά από την 1η σελίδα
+const { pagination, rows, loading, onRequest, refresh } = useServerTable('/users', {
+  sortBy: 'username',
+  params: () => ({
+    search: filter.value || undefined,
+    role: roleFilter.value || undefined,
+    locationId: locationFilter.value || undefined,
+    unitId: unitFilter.value || undefined,
+    unitRole: unitRoleFilter.value || undefined,
+  }),
 });
 
 const fetchLocations = async () => {
@@ -522,10 +520,10 @@ const fetchLocations = async () => {
   }
 };
 
-onMounted(async () => {
-  await userStore.fetchUsers();
-  await unitStore.fetchUnits();
-  await fetchLocations();
+onMounted(() => {
+  refresh();
+  unitStore.fetchUnits();
+  fetchLocations();
 });
 
 const openCreateDialog = () => {
@@ -561,7 +559,7 @@ const createUser = async () => {
   if (success) {
     $q.notify({ color: 'positive', message: t('adminUsers.notifications.createSuccess'), icon: 'check' });
     createDialog.value = false;
-    await userStore.fetchUsers();
+    refresh();
   } else {
     $q.notify({ color: 'negative', message: userStore.error || t('adminUsers.notifications.createError'), icon: 'report_problem' });
   }
@@ -586,7 +584,7 @@ const saveUserChanges = async () => {
     if (success) {
       $q.notify({ color: 'positive', message: t('adminUsers.notifications.updateSuccess') || 'User updated successfully', icon: 'check' });
       editDialog.value = false;
-      await userStore.fetchUsers();
+      refresh();
     } else {
       $q.notify({ color: 'negative', message: userStore.error || t('adminUsers.notifications.updateError') || 'Error updating user', icon: 'report_problem' });
     }
@@ -607,6 +605,7 @@ const confirmDeleteUser = (user) => {
     const success = await userStore.deleteUser(user.id);
     if (success) {
       $q.notify({ color: 'positive', message: t('adminUsers.notifications.deleteSuccess'), icon: 'check' });
+      refresh();
     } else {
       $q.notify({ color: 'negative', message: userStore.error || t('adminUsers.notifications.deleteError'), icon: 'report_problem' });
     }

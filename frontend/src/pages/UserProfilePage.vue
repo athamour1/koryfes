@@ -50,6 +50,23 @@
       </q-card-section>
     </q-card>
 
+    <!-- σκελετός όσο φορτώνει το προφίλ -->
+    <template v-else>
+      <q-card flat bordered class="q-mb-lg">
+        <q-card-section class="row items-center no-wrap q-gutter-md">
+          <q-skeleton type="QAvatar" size="96px" />
+          <div class="col">
+            <q-skeleton type="text" width="40%" height="36px" />
+            <div class="row q-gutter-xs q-mt-xs">
+              <q-skeleton v-for="n in 3" :key="n" type="QChip" width="96px" height="24px" />
+            </div>
+          </div>
+        </q-card-section>
+      </q-card>
+      <q-skeleton type="text" width="140px" class="q-mb-sm" />
+      <ProgressOverviewSkeleton />
+    </template>
+
     <!-- Ατομική πρόοδος -->
     <template v-if="user && !isAdmin">
       <div class="tf-card-head"><q-icon name="trending_up" />{{ $t('progress.title') }}</div>
@@ -66,6 +83,7 @@ import { api } from '@/api';
 import { date } from 'quasar';
 import AvatarDisplay from '@/components/AvatarDisplay.vue';
 import ProgressOverview from '@/components/progress/ProgressOverview.vue';
+import ProgressOverviewSkeleton from '@/components/skeletons/ProgressOverviewSkeleton.vue';
 import { useProgressStore } from '@/stores/progress';
 
 const route = useRoute();

@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer';
 import {
     IsEnum,
+    IsIn,
     IsInt,
     IsNotEmpty,
     IsObject,
@@ -10,6 +11,7 @@ import {
     ValidateNested,
 } from 'class-validator';
 import { UnitRole, UserRole } from '../entities/user.entity';
+import { PageQueryDto } from '../../common/pagination';
 
 export class EntityRefDto {
     @IsInt()
@@ -100,4 +102,32 @@ export class UpdateProfileDto {
     @IsOptional()
     @IsObject()
     avatarConfig?: Record<string, any>;
+}
+
+/**
+ * GET /users: filters on top of paging. A location admin is kept to their
+ * own location unless scope=all (the read-only community view).
+ */
+export class UsersQueryDto extends PageQueryDto {
+    @IsOptional()
+    @Type(() => Number)
+    @IsInt()
+    locationId?: number;
+
+    @IsOptional()
+    @Type(() => Number)
+    @IsInt()
+    unitId?: number;
+
+    @IsOptional()
+    @IsEnum(UserRole)
+    role?: UserRole;
+
+    @IsOptional()
+    @IsEnum(UnitRole)
+    unitRole?: UnitRole;
+
+    @IsOptional()
+    @IsIn(['all'])
+    scope?: 'all';
 }

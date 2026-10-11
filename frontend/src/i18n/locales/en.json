@@ -6,7 +6,8 @@
         "back": "Back",
         "create": "Create",
         "close": "Close",
-        "filters": "Filters"
+        "filters": "Filters",
+        "retry": "Try again"
     },
     "navigation": {
         "title": "Korifes",
@@ -278,7 +279,8 @@
         "emptyState": {
             "title": "No guides found",
             "subtitle": "Try adjusting your filters"
-        }
+        },
+        "loadError": "Couldn't load the guides"
     },
     "userProfilePage": {
         "noLocation": "No Location"

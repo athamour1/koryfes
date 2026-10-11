@@ -1,10 +1,12 @@
 import { Injectable, ConflictException, InternalServerErrorException, OnModuleInit } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like } from 'typeorm';
+import { Repository } from 'typeorm';
 import { User, UserRole, UnitRole } from './entities/user.entity';
 import { Unit } from '../units/entities/unit.entity';
 import { LocationsService } from '../locations/locations.service';
 import { assertPasswordPolicy } from '../common/password-policy';
+import { likeTerm, Page, paginate } from '../common/pagination';
+import { UsersQueryDto } from './dto/user.dto';
 import * as bcrypt from 'bcrypt';
 
 import { generateRandomAvatarConfig } from './avatar.utils';
@@ -149,27 +151,45 @@ export class UsersService implements OnModuleInit {
         return user;
     }
 
-    async findAll(locationId?: number, name?: string): Promise<User[]> {
-        const where: any = {};
-        if (locationId) {
-            where.location = { id: locationId };
+    /**
+     * Users for lists: progress comes as counts (pathCount, guideDiplomaCount,
+     * electiveDiplomaCount), not as the awarded rows, so the query doesn't
+     * multiply every user by paths × diplomas.
+     */
+    async findAll(query: UsersQueryDto): Promise<User[] | Page<User>> {
+        const qb = this.usersRepository
+            .createQueryBuilder('u')
+            .leftJoinAndSelect('u.location', 'location')
+            .leftJoinAndSelect('u.unit', 'unit')
+            .leftJoinAndSelect('u.progress', 'progress')
+            .leftJoinAndSelect('progress.currentPeak', 'currentPeak')
+            .loadRelationCountAndMap('progress.pathCount', 'progress.completedPaths')
+            .loadRelationCountAndMap('progress.guideDiplomaCount', 'progress.guideDiplomas')
+            .loadRelationCountAndMap('progress.electiveDiplomaCount', 'progress.electiveDiplomas');
+
+        if (query.locationId) {
+            qb.andWhere('location.id = :locationId', { locationId: query.locationId });
         }
-        if (name) {
-            where.username = Like(`%${name}%`);
+        if (query.unitId) {
+            qb.andWhere('unit.id = :unitId', { unitId: query.unitId });
         }
-        const users = await this.usersRepository.find({
-            where,
-            relations: [
-                'location',
-                'unit',
-                'progress',
-                'progress.currentPeak',
-                'progress.completedPaths',
-                'progress.guideDiplomas',
-                'progress.electiveDiplomas'
-            ]
-        });
-        return users;
+        if (query.role) {
+            qb.andWhere('u.role = :role', { role: query.role });
+        }
+        if (query.unitRole) {
+            qb.andWhere('u.unitRole = :unitRole', { unitRole: query.unitRole });
+        }
+        if (query.search?.trim()) {
+            qb.andWhere(`LOWER(u.username) LIKE :search ESCAPE '\\'`, { search: likeTerm(query.search) });
+        }
+
+        return paginate(qb, query, {
+            username: 'u.username',
+            role: 'u.role',
+            location: 'location.name',
+            unit: 'unit.name',
+            unitRole: 'u.unitRole',
+        }, 'username');
     }
 
     async getAllIncludingAdmins(): Promise<User[]> {
